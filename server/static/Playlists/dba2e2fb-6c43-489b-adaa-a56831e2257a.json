@@ -1,0 +1,26 @@
+{
+  "id": "dba2e2fb-6c43-489b-adaa-a56831e2257a",
+  "title": "A test playlist",
+  "actionList": [
+    {
+      "type": 0,
+      "data": "0daefe5b-d229-429f-b56f-99ecfa2d4a70"
+    },
+    {
+      "type": 1,
+      "data": "3"
+    },
+    {
+      "type": 0,
+      "data": "94920e25-52d3-42bb-b35c-1ea3527aef9d"
+    },
+    {
+      "type": 0,
+      "data": "c870cef0-2408-4f84-9c8b-647751213591"
+    },
+    {
+      "type": 2,
+      "data": ""
+    }
+  ]
+}
