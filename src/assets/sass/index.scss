@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.audio-button {
+  @apply m-2;
+  .lucide {
+    @apply transition-transform;
+  }
+  &:hover .lucide {
+    @apply scale-90;
+  }
+}
