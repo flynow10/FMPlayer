@@ -23,9 +23,8 @@ const authMiddleware = (
   res: express.Response,
   next: express.NextFunction
 ) => {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
-  if (token == null) return res.sendStatus(401);
+  const token = req.query["p"];
+  if (typeof token !== "string" || token === "") return res.sendStatus(401);
 
   jwt.verify(token, secretKey, (err: any, decoded) => {
     if (err || decoded !== body) return res.sendStatus(403);
@@ -45,9 +44,8 @@ app.post("/login", (req, res) => {
   }
 });
 app.get("/isValid", (req, res) => {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
-  if (token == null) return res.json(false);
+  const token = req.query["p"];
+  if (typeof token !== "string" || token === "") return res.json(false);
 
   jwt.verify(token, secretKey, (err: any, decoded) => {
     if (err || decoded !== body) return res.json(false);
