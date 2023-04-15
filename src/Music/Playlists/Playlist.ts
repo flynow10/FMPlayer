@@ -48,4 +48,12 @@ export class Playlist {
     }
     this.regenerateSongList();
   }
+
+  public isBlank() {
+    return this._actionList.length === 0;
+  }
+
+  public static Blank() {
+    return new Playlist();
+  }
 }

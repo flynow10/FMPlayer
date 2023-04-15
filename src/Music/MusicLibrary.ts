@@ -265,9 +265,7 @@ class FileBasedLibrary extends MusicLibrary {
       this.jwt = token;
     }
     const isValid = await (
-      await fetch("http://localhost:3000/isValid", {
-        headers: this.getAuthorizationHeaders(),
-      })
+      await fetch(this.getAuthorizedUrl("http://localhost:3000/isValid"))
     ).json();
     return isValid;
   }
@@ -288,30 +286,36 @@ class FileBasedLibrary extends MusicLibrary {
     localStorage.setItem("jwt", json.token);
     return true;
   }
-
-  public getAuthorizationHeaders() {
-    return {
-      Authorization: `Bearer ${this.jwt}`,
-    };
+  public getAuthorizedUrl(unauthURL: string): string {
+    const authString = "p=" + this.jwt;
+    if (unauthURL.indexOf("?") === -1) {
+      return unauthURL + "?" + authString;
+    } else {
+      return unauthURL + "&" + authString;
+    }
   }
 
   public async loadLibraryData(): Promise<any> {
     return await (
-      await fetch("http://localhost:3000/static/library.json", {
-        headers: this.getAuthorizationHeaders(),
-      })
+      await fetch(
+        this.getAuthorizedUrl("http://localhost:3000/static/library.json")
+      )
     ).json();
   }
   public async loadPlaylistData(playlistId: string): Promise<any> {
     return await (
-      await fetch(`http://localhost:3000/static/Playlists/${playlistId}.json`, {
-        headers: this.getAuthorizationHeaders(),
-      })
+      await fetch(
+        this.getAuthorizedUrl(
+          `http://localhost:3000/static/Playlists/${playlistId}.json`
+        )
+      )
     ).json();
   }
   public getSongUrl(id: ID): string | null {
     if (id in this._songs) {
-      return `http://localhost:3000/static/Songs/${id}.${this._songs[id].fileType}`;
+      return this.getAuthorizedUrl(
+        `http://localhost:3000/static/Songs/${id}.${this._songs[id].fileType}`
+      );
     }
     return null;
   }
