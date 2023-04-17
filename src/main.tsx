@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
-import "./assets/sass/index.scss";
-import { Login } from "./Login";
-import { MyMusicLibrary } from "./Music/MusicLibrary";
+import "@/assets/sass/index.scss";
+import { Login } from "@/components/Login";
+import { MyMusicLibrary } from "@/Music/MusicLibrary";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>

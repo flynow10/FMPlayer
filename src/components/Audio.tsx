@@ -8,9 +8,9 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { Song } from "./Music/Song";
-import { ID } from "./Music/Types";
-import { MyMusicLibrary } from "./Music/MusicLibrary";
+import { Song } from "@/Music/Song";
+import { ID } from "@/Music/Types";
+import { MyMusicLibrary } from "@/Music/MusicLibrary";
 
 export type RepeatMode = "none" | "one" | "all";
 export type AudioEvent = () => void;
@@ -88,8 +88,8 @@ export function Audio(props: AudioProps) {
   return (
     <div className="flex flex-col">
       <div className="flex flex-col mx-auto text-center">
-        <h3>{song?.title}</h3>
-        <h3>{song?.id}</h3>
+        <h3 id="song-title">{song?.title}</h3>
+        <h3 id="song-id">{song?.id}</h3>
       </div>
       <div className="controls flex justify-center">
         {props.loaded ? (

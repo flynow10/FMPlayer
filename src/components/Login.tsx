@@ -1,7 +1,7 @@
 import classNames from "classnames";
 import { Lock, Music4, X } from "lucide-react";
-import { FormEvent, ReactNode, useState } from "react";
-import { MyMusicLibrary } from "./Music/MusicLibrary";
+import { FormEvent, ReactNode, useEffect, useState } from "react";
+import { MyMusicLibrary } from "@/Music/MusicLibrary";
 
 export function Login() {
   const [password, setPassword] = useState("");
@@ -57,11 +57,13 @@ export function Login() {
 function Error() {
   const [closed, setClosed] = useState(false);
   const [closing, setClosing] = useState(false);
+  const [open, setOpen] = useState(false);
   const classes = classNames(
-    "opacity-100 transition-[transform,_opacity] scale-y-100 m-1 rounded border-2 border-red-600 bg-red-500 text-white p-2 w-80",
+    "opacity-100 translate-x-full transition-[transform,_opacity] scale-y-100 m-1 rounded border-2 border-red-600 bg-red-500 text-white p-2 w-80",
     {
       "opacity-0 scale-y-0": closing,
       hidden: closed,
+      "translate-x-0": open,
     }
   );
   const onClose = () => {
@@ -70,6 +72,11 @@ function Error() {
       setClosed(true);
     }, 200);
   };
+  useEffect(() => {
+    setTimeout(() => {
+      setOpen(true);
+    }, 10);
+  }, []);
   return (
     <div className={classes}>
       Wrong Password{" "}

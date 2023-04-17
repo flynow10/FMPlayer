@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Audio, RepeatMode } from "./Audio";
-import { MyMusicLibrary } from "./Music/MusicLibrary";
-import { Playlist } from "./Music/Playlists/Playlist";
-import AudioControlPlaceholder from "./AudioControlPlaceholder";
-import { useAudioPlayer } from "./Music/useAudioPlayer";
+import { Audio, RepeatMode } from "@/components/Audio";
+import { MyMusicLibrary } from "@/Music/MusicLibrary";
+import { Playlist } from "@/Music/Playlists/Playlist";
+import AudioControlPlaceholder from "@/components/AudioControlPlaceholder";
+import { useAudioPlayer } from "@/Music/useAudioPlayer";
+import { Queue } from "@/components/Queue";
 
 function App() {
   const [queue, setQueue] = useState<Playlist>(new Playlist());
@@ -17,7 +18,9 @@ function App() {
   });
 
   const playPlaylist = () => {
-    const playlist = MyMusicLibrary.getAllPlaylists()[0];
+    const playlist = MyMusicLibrary.getPlaylistFromAlbum(
+      MyMusicLibrary.getAllAlbums()[0]
+    );
     setQueue(playlist);
     audioPlayer.startPlayback();
   };
@@ -29,6 +32,7 @@ function App() {
     }
   };
   const previousSong = () => {
+    // REMOVE MAGIC NUMBER (eventually :) )
     if (audioPlayer.currentTime > 3 || repeatMode === "one") {
       audioPlayer.resetPlayback();
       audioPlayer.startPlayback();
@@ -60,6 +64,9 @@ function App() {
   };
   return (
     <div className="flex flex-col justify-between">
+      <div className="mx-auto">
+        <Queue currentSongIndex={currentSongIndex} playlist={queue} />
+      </div>
       <div className="bottom-bar w-4/6 mx-auto my-28">
         {queue.isBlank() ? (
           <AudioControlPlaceholder onPlay={playPlaylist} />
