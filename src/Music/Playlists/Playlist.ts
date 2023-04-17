@@ -23,8 +23,7 @@ export class Playlist {
 
   public regenerateSongList() {
     const parser = new PlaylistParser();
-    const ast = parser.parse(this._actionList);
-    this.songList = parser.createSongList(ast);
+    this.songList = parser.parse(this._actionList);
   }
 
   public addAction(...action: Action[]) {

@@ -82,7 +82,6 @@ export function useAudioPlayer(id: string | null, onSongEnded?: () => void) {
 
   useEffect(() => {
     const canPlayThroughCallback = () => {
-      console.log("Can play through");
       setLoaded(true);
       if (playing && !seeking) {
         audioTag.current.play();

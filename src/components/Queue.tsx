@@ -1,8 +1,8 @@
 import classNames from "classnames";
-import { EndLoopAction, LoopAction } from "./Music/Actions/LoopAction";
-import { PlaySongAction } from "./Music/Actions/PlaySongAction";
-import { MyMusicLibrary } from "./Music/MusicLibrary";
-import { Playlist } from "./Music/Playlists/Playlist";
+import { EndLoopAction, LoopAction } from "@/Music/Actions/LoopAction";
+import { PlaySongAction } from "@/Music/Actions/PlaySongAction";
+import { MyMusicLibrary } from "@/Music/MusicLibrary";
+import { Playlist } from "@/Music/Playlists/Playlist";
 
 export type QueueProps = {
   playlist: Playlist;

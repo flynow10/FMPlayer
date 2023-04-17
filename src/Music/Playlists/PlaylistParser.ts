@@ -10,13 +10,17 @@ export class PlaylistParser {
   public currentAction: number = 0;
   private readonly TOKEN_MISMATCH = new Error("Token mismatch!");
 
-  createSongList(ast: Block): ActionSongPair[] {
+  parse(actionList: Action[]): ActionSongPair[] {
+    return this.parseToSongList(this.parseToAST(actionList));
+  }
+
+  parseToSongList(ast: Block): ActionSongPair[] {
     const scope = new Scope();
     ast.walk(scope);
     return scope.songs;
   }
 
-  parse(actionList: Action[]): Block {
+  parseToAST(actionList: Action[]): Block {
     this.actionList = actionList;
     this.currentAction = 0;
     return this.block();
