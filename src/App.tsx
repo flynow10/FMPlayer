@@ -101,7 +101,7 @@ function App() {
     </div>
   );
   return (
-    <div className="app-container grid grid-cols-6 grid-rows-[minmax(0,4fr)_minmax(0,1fr)] h-full max-h-full">
+    <div className="app-container grid grid-cols-6 grid-rows-[minmax(0,6fr)_minmax(0,1fr)] h-full max-h-full">
       <Sidebar
         location={location}
         isSearching={isSearching}
