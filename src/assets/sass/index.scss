@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-.audio-button {
+.audio-button:not(:disabled) {
   @apply m-2;
   .lucide {
     @apply transition-transform;

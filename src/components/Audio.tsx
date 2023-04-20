@@ -86,14 +86,10 @@ export function Audio(props: AudioProps) {
   };
 
   return (
-    <div className="flex flex-col">
-      <div className="flex flex-col mx-auto text-center">
-        <h3 id="song-title">{song?.title}</h3>
-        <h3 id="song-id">{song?.id}</h3>
-      </div>
+    <div className="flex flex-row">
       <div className="controls flex justify-center">
         {props.loaded ? (
-          <div className="grid grid-cols-5 gap-24">
+          <div className="grid grid-cols-5">
             <button
               className={
                 "audio-button" +
@@ -128,21 +124,25 @@ export function Audio(props: AudioProps) {
           <Loader2 size={40} className="animate-spin audio-button" />
         )}
       </div>
-      <div
-        className="w-full h-3 bg-slate-200 relative rounded-md overflow-hidden cursor-ew-resize"
-        onMouseDown={startSeek}
-        ref={seekBar}
-      >
+      <div className="flex flex-col grow text-center">
+        <h3 id="song-title">{song?.title}</h3>
+        <h3 id="song-id">{song?.id}</h3>
         <div
-          className="z-20 h-full bg-slate-600 absolute top-0 left-0 pointer-events-none"
-          style={{
-            width: percentPlayed + "%",
-          }}
-        ></div>
-        <div
-          className="z-10 h-full bg-slate-300 absolute top-0 left-0 pointer-events-none"
-          style={{ width: props.percentLoaded + "%" }}
-        ></div>
+          className="w-full h-3 bg-slate-200 relative rounded-md overflow-hidden cursor-ew-resize"
+          onMouseDown={startSeek}
+          ref={seekBar}
+        >
+          <div
+            className="z-20 h-full bg-slate-600 absolute top-0 left-0 pointer-events-none"
+            style={{
+              width: percentPlayed + "%",
+            }}
+          ></div>
+          <div
+            className="z-10 h-full bg-slate-300 absolute top-0 left-0 pointer-events-none"
+            style={{ width: props.percentLoaded + "%" }}
+          ></div>
+        </div>
       </div>
     </div>
   );
