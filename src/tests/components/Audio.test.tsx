@@ -1,4 +1,5 @@
 import { Song } from "@/Music/Song";
+import { MediaType } from "@/Music/Types";
 import { Audio } from "@/components/Audio";
 import { render } from "@testing-library/react";
 import { v4 } from "uuid";
@@ -12,6 +13,7 @@ jest.mock("@/Music/MusicLibrary", () => ({
         title: "Test song",
         fileType: "mp3",
         album: v4(),
+        getMediaType: () => MediaType.Song,
       })
     ),
   },

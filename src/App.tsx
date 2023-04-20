@@ -4,12 +4,19 @@ import { MyMusicLibrary } from "@/Music/MusicLibrary";
 import { Playlist } from "@/Music/Playlists/Playlist";
 import AudioControlPlaceholder from "@/components/AudioControlPlaceholder";
 import { useAudioPlayer } from "@/Music/useAudioPlayer";
-import { Queue } from "@/components/Queue";
+import Main, { Location } from "./components/Main";
+import Sidebar from "./components/Sidebar";
+import { PlaySongAction } from "./Music/Actions/PlaySongAction";
+import { MediaType } from "./Music/Types";
 
 function App() {
   const [queue, setQueue] = useState<Playlist>(new Playlist());
   const [currentSongIndex, setCurrentSongIndex] = useState(0);
   const [repeatMode, setRepeatMode] = useState<RepeatMode>("none");
+  const [location, setLocation] = useState<Location>(Location.Album);
+  const [searchString, setSearchString] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
+
   const songId = queue.isBlank()
     ? null
     : queue.songList[currentSongIndex].songId;
@@ -18,9 +25,7 @@ function App() {
   });
 
   const playPlaylist = () => {
-    const playlist = MyMusicLibrary.getPlaylistFromAlbum(
-      MyMusicLibrary.getAllAlbums()[0]
-    );
+    const playlist = MyMusicLibrary.getAllPlaylists()[1];
     setQueue(playlist);
     audioPlayer.startPlayback();
   };
@@ -60,43 +65,92 @@ function App() {
       if (repeatMode === "none") {
         audioPlayer.pausePlayback();
       }
+      audioPlayer.resetPlayback();
     }
   };
+  const audioComponent = (
+    <div className="audio-controls px-20 py-4 border-t-2">
+      {queue.isBlank() ? (
+        <AudioControlPlaceholder onPlay={playPlaylist} />
+      ) : (
+        <Audio
+          id={songId}
+          loaded={audioPlayer.loaded}
+          percentLoaded={audioPlayer.percentLoaded}
+          currentTime={audioPlayer.currentTime}
+          duration={audioPlayer.duration}
+          playing={audioPlayer.playing}
+          onTogglePlay={togglePlayback}
+          repeatMode={repeatMode}
+          onRepeatModeChange={() => {
+            const modes: RepeatMode[] = ["none", "all", "one"];
+            setRepeatMode(
+              modes[(modes.indexOf(repeatMode) + 1) % modes.length]
+            );
+          }}
+          onNext={() => {
+            nextSong(true);
+          }}
+          onPrevious={previousSong}
+          onSeekChange={audioPlayer.seekToTime}
+          onStopSeek={(time) => {
+            audioPlayer.seekToTime(time, true);
+          }}
+        />
+      )}
+    </div>
+  );
   return (
-    <div className="flex flex-col justify-between">
-      <div className="mx-auto">
-        <Queue currentSongIndex={currentSongIndex} playlist={queue} />
-      </div>
-      <div className="bottom-bar w-4/6 mx-auto my-28">
-        {queue.isBlank() ? (
-          <AudioControlPlaceholder onPlay={playPlaylist} />
-        ) : (
-          <Audio
-            id={songId}
-            loaded={audioPlayer.loaded}
-            percentLoaded={audioPlayer.percentLoaded}
-            currentTime={audioPlayer.currentTime}
-            duration={audioPlayer.duration}
-            playing={audioPlayer.playing}
-            onTogglePlay={togglePlayback}
-            repeatMode={repeatMode}
-            onRepeatModeChange={() => {
-              const modes: RepeatMode[] = ["none", "all", "one"];
-              setRepeatMode(
-                modes[(modes.indexOf(repeatMode) + 1) % modes.length]
-              );
-            }}
-            onNext={() => {
-              nextSong(true);
-            }}
-            onPrevious={previousSong}
-            onSeekChange={audioPlayer.seekToTime}
-            onStopSeek={(time) => {
-              audioPlayer.seekToTime(time, true);
-            }}
-          />
-        )}
-      </div>
+    <div className="app-container grid grid-cols-6 grid-rows-[minmax(0,4fr)_minmax(0,1fr)] h-full max-h-full">
+      <Sidebar
+        location={location}
+        isSearching={isSearching}
+        onNavigate={(toLocation) => {
+          setLocation(toLocation);
+          setIsSearching(false);
+        }}
+        onSearch={(newSearch) => {
+          if (newSearch === "") {
+            setIsSearching(false);
+          } else {
+            setIsSearching(true);
+          }
+          setSearchString(newSearch);
+        }}
+      />
+      <Main
+        location={location}
+        searchString={searchString}
+        isSearching={isSearching}
+        onPlayMedia={(id, type) => {
+          var playlist;
+          switch (type) {
+            case MediaType.Album:
+              const album = MyMusicLibrary.getAlbum(id);
+              if (album) {
+                playlist = MyMusicLibrary.getPlaylistFromAlbum(album);
+              }
+              break;
+            case MediaType.Song:
+              const song = MyMusicLibrary.getSong(id);
+              if (song) {
+                playlist = new Playlist().addAction(
+                  new PlaySongAction(song.id)
+                );
+              }
+              break;
+            case MediaType.Playlist:
+              playlist = MyMusicLibrary.getPlaylist(id);
+              break;
+          }
+          if (playlist) {
+            setQueue(playlist);
+            setCurrentSongIndex(0);
+            audioPlayer.startPlayback();
+          }
+        }}
+      />
+      {audioComponent}
     </div>
   );
 }

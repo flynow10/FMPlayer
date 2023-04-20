@@ -1,11 +1,13 @@
 import { Action } from "./Action";
 import { EndLoopAction, LoopAction } from "./LoopAction";
+import { NumberAction } from "./NumberAction";
 import { PlaySongAction } from "./PlaySongAction";
 
 export enum ActionType {
   PlaySong,
-  Repeat,
-  EndRepeat,
+  Number,
+  Loop,
+  EndLoop,
   Condition,
   EndCondition,
 }
@@ -20,10 +22,13 @@ export function createFromStub(stub: ActionStub): Action {
     case ActionType.PlaySong: {
       return new PlaySongAction(stub.data);
     }
-    case ActionType.Repeat: {
-      return new LoopAction(parseInt(stub.data));
+    case ActionType.Number: {
+      return new NumberAction(parseInt(stub.data));
     }
-    case ActionType.EndRepeat: {
+    case ActionType.Loop: {
+      return new LoopAction();
+    }
+    case ActionType.EndLoop: {
       return new EndLoopAction();
     }
     default: {

@@ -2,34 +2,31 @@ import { Action } from "./Action";
 import { ActionStub, ActionType } from "./ActionTypes";
 
 export class LoopAction extends Action {
-  public count: number;
-
-  constructor(count: number) {
+  constructor() {
     super();
-    this.count = count;
   }
 
   public toStub(): ActionStub {
     return {
-      type: ActionType.Repeat,
-      data: this.count.toString(),
+      type: ActionType.Loop,
+      data: "",
     };
   }
 
   public type(): ActionType {
-    return ActionType.Repeat;
+    return ActionType.Loop;
   }
 }
 
 export class EndLoopAction extends Action {
   public toStub(): ActionStub {
     return {
-      type: ActionType.EndRepeat,
+      type: ActionType.EndLoop,
       data: "",
     };
   }
 
   public type(): ActionType {
-    return ActionType.EndRepeat;
+    return ActionType.EndLoop;
   }
 }

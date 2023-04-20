@@ -1,5 +1,12 @@
 import { v4 as uuid } from "uuid";
-import { AuthoredWork, FileType, ID } from "./Types";
+import {
+  IAuthoredWork,
+  FileType,
+  ID,
+  ICoverImage,
+  IMedia,
+  MediaType,
+} from "./Types";
 
 export interface SongJson {
   id: ID;
@@ -13,7 +20,7 @@ export interface SongJson {
   trackNumber?: number;
 }
 
-export class Song implements AuthoredWork {
+export class Song implements IAuthoredWork, ICoverImage, IMedia {
   public id: ID;
   public title: string;
   public artists?: string[];
@@ -33,6 +40,10 @@ export class Song implements AuthoredWork {
     this.duration = 0;
     this.fileType = "mp3";
     this.trackNumber = 1;
+  }
+
+  public getMediaType(): MediaType {
+    return MediaType.Song;
   }
 
   public static fromData(data: SongJson): Song {

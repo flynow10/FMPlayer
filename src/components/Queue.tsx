@@ -3,6 +3,7 @@ import { EndLoopAction, LoopAction } from "@/Music/Actions/LoopAction";
 import { PlaySongAction } from "@/Music/Actions/PlaySongAction";
 import { MyMusicLibrary } from "@/Music/MusicLibrary";
 import { Playlist } from "@/Music/Playlists/Playlist";
+import { NumberAction } from "@/Music/Actions/NumberAction";
 
 export type QueueProps = {
   playlist: Playlist;
@@ -35,7 +36,7 @@ export function Queue(props: QueueProps) {
     );
   };
 
-  const actions = props.playlist.actionList.map((action) => {
+  const actions = props.playlist.actionList.map((action, i) => {
     if (action instanceof PlaySongAction) {
       return createPlaySongDisplay(action);
     }
@@ -43,7 +44,7 @@ export function Queue(props: QueueProps) {
       indent++;
       return (
         <div key={action.id} className={indentClass(true)}>
-          Loop {action.count} times:
+          Loop {(props.playlist.actionList[i + 1] as NumberAction).value} times:
         </div>
       );
     }

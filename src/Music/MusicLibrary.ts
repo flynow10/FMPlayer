@@ -90,7 +90,7 @@ const MusicLibrarySchema: JSONSchemaType<MusicLibraryJson> = {
           },
           fileType: {
             type: "string",
-            enum: ["mp3", "webm"],
+            enum: ["mp3", "webm", "m4a"],
           },
           id: {
             type: "string",
@@ -127,6 +127,10 @@ const PlaylistSchema: JSONSchemaType<PlaylistJson> = {
     title: {
       type: "string",
     },
+    coverUrl: {
+      type: "string",
+      nullable: true,
+    },
     actionList: {
       type: "array",
       items: {
@@ -154,7 +158,7 @@ abstract class MusicLibrary {
   public onLoaded: (() => void)[] = [];
   protected _songs: { [key: ID]: Song } = {};
   protected _albums: { [key: ID]: Album } = {};
-  protected _playlists: { [key: ID]: Playlist } = {};
+  protected _playlists: { [key: ID]: NamedPlaylist } = {};
 
   public getSong(id: ID): Song | null {
     if (id in this._songs) {
@@ -172,6 +176,14 @@ abstract class MusicLibrary {
       return this._albums[id];
     }
     return null;
+  }
+
+  public getAlbumSongs(album: Album): Song[] {
+    return album.songs
+      .map((id) => MyMusicLibrary.getSong(id))
+      .filter<Song>((song): song is Song => {
+        return song !== null;
+      });
   }
 
   public getPlaylistFromAlbum(album: Album): Playlist {
@@ -194,7 +206,7 @@ abstract class MusicLibrary {
     return null;
   }
 
-  public getAllPlaylists(): Playlist[] {
+  public getAllPlaylists(): NamedPlaylist[] {
     return Object.values(this._playlists);
   }
 

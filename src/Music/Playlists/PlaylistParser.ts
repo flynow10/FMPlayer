@@ -1,6 +1,7 @@
 import { Action } from "../Actions/Action";
 import { ActionType } from "../Actions/ActionTypes";
 import { LoopAction } from "../Actions/LoopAction";
+import { NumberAction } from "../Actions/NumberAction";
 import { PlaySongAction } from "../Actions/PlaySongAction";
 import { ID } from "../Types";
 import { ActionSongPair } from "./Playlist";
@@ -52,16 +53,19 @@ export class PlaylistParser {
     if (nextToken === null) {
       return block;
     }
-    const endBlockTokens = [ActionType.EndCondition, ActionType.EndRepeat];
+    const endBlockTokens = [ActionType.EndCondition, ActionType.EndLoop];
     while (!endBlockTokens.includes(nextToken.type())) {
       switch (nextToken.type()) {
         case ActionType.PlaySong: {
           block.nodes.push(this.playSong());
           break;
         }
-        case ActionType.Repeat: {
+        case ActionType.Loop: {
           block.nodes.push(this.loop());
           break;
+        }
+        default: {
+          throw this.TOKEN_MISMATCH;
         }
       }
       nextToken = this.getCurrentToken();
@@ -75,10 +79,19 @@ export class PlaylistParser {
 
   loop(): Loop {
     const loopToken = this.stepNextToken()!;
-    if (!this.isTokenType<LoopAction>(loopToken, ActionType.Repeat)) {
+    if (!this.isTokenType<LoopAction>(loopToken, ActionType.Loop)) {
       throw this.TOKEN_MISMATCH;
     }
-    return new Loop(loopToken.count, this.block());
+    const number = this.number();
+    return new Loop(number, this.block());
+  }
+
+  number(): NumberNode {
+    const numberToken = this.stepNextToken()!;
+    if (!this.isTokenType<NumberAction>(numberToken, ActionType.Number)) {
+      throw this.TOKEN_MISMATCH;
+    }
+    return new NumberNode(numberToken.value);
   }
 
   playSong(): PlaySong {
@@ -129,18 +142,30 @@ class PlaySong implements ASTNode {
 }
 
 class Loop implements ASTNode {
-  public count: number;
+  public count: ASTNode;
   public block: Block;
 
-  constructor(count: number, block: Block) {
+  constructor(count: ASTNode, block: Block) {
     this.count = count;
     this.block = block;
   }
 
   public walk(scope: Scope) {
-    for (let i = 0; i < this.count; i++) {
+    for (let i = 0; i < this.count.walk(scope); i++) {
       this.block.walk(scope);
     }
+  }
+}
+
+class NumberNode implements ASTNode {
+  public value: number;
+
+  constructor(value: number) {
+    this.value = value;
+  }
+
+  public walk(scope: Scope) {
+    return this.value;
   }
 }
 
