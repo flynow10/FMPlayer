@@ -1,7 +1,10 @@
+import { Action } from "@/Music/Actions/Action";
 import { EndLoopAction, LoopAction } from "@/Music/Actions/LoopAction";
+import { NumberAction } from "@/Music/Actions/NumberAction";
 import { PlaySongAction } from "@/Music/Actions/PlaySongAction";
 import { ActionSongPair } from "@/Music/Playlists/Playlist";
 import { PlaylistParser } from "@/Music/Playlists/PlaylistParser";
+import { parse } from "path";
 
 describe("PlaylistParser", () => {
   const parser = new PlaylistParser();
@@ -29,7 +32,8 @@ describe("PlaylistParser", () => {
   it("parses a song loop", () => {
     const actionList = [];
 
-    actionList.push(new LoopAction(3));
+    actionList.push(new LoopAction());
+    actionList.push(new NumberAction(3));
 
     const songAction = new PlaySongAction("test-song-id");
     songAction.id = "test-action-id";
@@ -43,5 +47,13 @@ describe("PlaylistParser", () => {
         songId: songAction.songId,
       }))
     );
+  });
+  it("fails to parse a free number", () => {
+    const actionList: Action[] = [];
+    actionList.push(new NumberAction(3));
+
+    expect(() => {
+      parser.parse(actionList);
+    }).toThrow();
   });
 });

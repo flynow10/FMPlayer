@@ -129,18 +129,18 @@ export function Audio(props: AudioProps) {
         )}
       </div>
       <div
-        className="w-full h-3 bg-slate-200 relative rounded-md overflow-hidden"
+        className="w-full h-3 bg-slate-200 relative rounded-md overflow-hidden cursor-ew-resize"
         onMouseDown={startSeek}
         ref={seekBar}
       >
         <div
-          className="h-full bg-slate-600 absolute top-0 left-0 pointer-events-none"
+          className="z-20 h-full bg-slate-600 absolute top-0 left-0 pointer-events-none"
           style={{
             width: percentPlayed + "%",
           }}
         ></div>
         <div
-          className="h-full bg-slate-300 absolute top-0 left-0 pointer-events-none"
+          className="z-10 h-full bg-slate-300 absolute top-0 left-0 pointer-events-none"
           style={{ width: props.percentLoaded + "%" }}
         ></div>
       </div>

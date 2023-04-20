@@ -87,11 +87,11 @@ export function useAudioPlayer(id: string | null, onSongEnded?: () => void) {
         audioTag.current.play();
       }
     };
-    const progressCallback = (e: ProgressEvent<EventTarget>) => {
-      if (e.total && e.loaded) {
-        console.log("Progress: ", e);
-        const percentLoaded = (e.total / e.loaded) * 100;
-        setPercentLoaded(percentLoaded);
+    const progressCallback = () => {
+      const buffered = audioTag.current.buffered;
+
+      if (buffered.length) {
+        setPercentLoaded((100 * buffered.end(0)) / audioTag.current.duration);
       }
     };
     const timeUpdateCallback = () => {

@@ -1,7 +1,7 @@
 import { v4 as uuid } from "uuid";
-import { AuthoredWork, ID } from "./Types";
+import { IAuthoredWork, ICoverImage, ID, IMedia, MediaType } from "./Types";
 
-export class Album implements AuthoredWork {
+export class Album implements IAuthoredWork, ICoverImage, IMedia {
   public id: ID;
   public title: string;
   public artists?: string[];
@@ -20,6 +20,10 @@ export class Album implements AuthoredWork {
 
   public static fromData(data: AlbumJson): Album {
     return Object.assign(new Album(), data);
+  }
+
+  public getMediaType(): MediaType {
+    return MediaType.Album;
   }
 }
 
