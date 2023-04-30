@@ -13,7 +13,7 @@ function App() {
   const [queue, setQueue] = useState<Playlist>(new Playlist());
   const [currentSongIndex, setCurrentSongIndex] = useState(0);
   const [repeatMode, setRepeatMode] = useState<RepeatMode>("none");
-  const [location, setLocation] = useState<Location>(Location.Album);
+  const [location, setLocation] = useState<Location>(Location.Import);
   const [searchString, setSearchString] = useState("");
   const [isSearching, setIsSearching] = useState(false);
 

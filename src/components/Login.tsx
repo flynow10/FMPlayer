@@ -59,10 +59,12 @@ function Error() {
   const [closing, setClosing] = useState(false);
   const [open, setOpen] = useState(false);
   const classes = classNames(
-    "opacity-100 translate-x-full transition-[transform,_opacity] scale-y-100 m-1 rounded border-2 border-red-600 bg-red-500 text-white p-2 w-80",
+    "transition-[transform,_opacity] m-1 rounded border-2 border-red-600 bg-red-500 text-white p-2 w-80",
     {
+      "opacity-100 scale-y-100": !closing,
       "opacity-0 scale-y-0": closing,
       hidden: closed,
+      "translate-x-full": !open,
       "translate-x-0": open,
     }
   );
