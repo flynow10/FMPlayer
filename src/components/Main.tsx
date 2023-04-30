@@ -2,6 +2,8 @@ import { ID, MediaType } from "@/Music/Types";
 import { UUID } from "./UUID";
 import { ReactNode, useState } from "react";
 import Page, { PageType } from "./Page";
+import { ChevronLeft } from "lucide-react";
+import classNames from "classnames";
 
 export type MainProps = {
   onPlayMedia?: PlayByID;
@@ -17,7 +19,7 @@ export enum Location {
   Song = "Songs",
   Playlist = "Playlists",
   Genre = "Genres",
-  Upload = "Upload Media",
+  Import = "Import Media",
   EditPlaylist = "Edit Playlists",
 }
 
@@ -31,6 +33,7 @@ export default function Main(props: MainProps) {
     pagesObject[Location.Playlist] = [
       { type: PageType.PlaylistList, data: "" },
     ];
+    pagesObject[Location.Import] = [{ type: PageType.UploadMedia, data: "" }];
     return pagesObject;
   });
 
@@ -87,11 +90,31 @@ export default function Main(props: MainProps) {
       );
     });
   });
-
   return (
     <div className="main overflow-clip flex flex-col">
-      <div className="p-3 border-b-2">
-        <h3 className="text-2xl">{pageTitle}</h3>
+      <div className="py-3 border-b-2 px-4">
+        <div className="flex items-center">
+          <button
+            className={classNames(
+              "p-1",
+              "mr-1",
+              "align-middle",
+              "hover:bg-gray-100",
+              "rounded-lg",
+              {
+                "text-gray-500 hover:bg-inherit":
+                  pages[props.location].length === 1,
+              }
+            )}
+            disabled={pages[props.location].length === 1}
+            onClick={() => {
+              onNavigate("back");
+            }}
+          >
+            <ChevronLeft />
+          </button>
+          <h3 className="text-2xl inline-block">{pageTitle}</h3>
+        </div>
         <UUID />
       </div>
       {pageElements}

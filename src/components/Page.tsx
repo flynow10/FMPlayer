@@ -3,6 +3,7 @@ import { NavigationMethod, PlayByID } from "./Main";
 import { MyMusicLibrary } from "@/Music/MusicLibrary";
 import { ICoverImage, IMedia, MediaType } from "@/Music/Types";
 import { Song } from "@/Music/Song";
+import Upload from "./Upload";
 
 type PageProps = {
   location: string;
@@ -21,6 +22,7 @@ export enum PageType {
   SongList,
   PlaylistList,
   AlbumDisplay,
+  UploadMedia,
 }
 
 export default function Page(props: PageProps) {
@@ -28,25 +30,24 @@ export default function Page(props: PageProps) {
       props.location !== props.currentLocation ||
       props.locationPageCount !== props.index + 1,
     isHiddenClass = isHidden ? "hidden " : "";
-
-  return (
-    <div className={isHiddenClass + "relative max-h-full min-h-0"}>
-      <div className="absolute top-0 left-0 z-10 w-full bg-transparent backdrop-blur-md">
-        <button
-          className="p-3"
-          onClick={() => {
-            props.onNavigate("back");
-          }}
-        >
-          <ChevronLeft />
-        </button>
+  const pageClass = isHiddenClass + "relative max-h-full min-h-0 grow";
+  if (props.type === PageType.UploadMedia) {
+    return (
+      <div className={pageClass}>
+        <div className="h-full px-4">
+          <Upload />
+        </div>
       </div>
-      <div className="h-full overflow-auto">
+    );
+  }
+  return (
+    <div className={pageClass}>
+      <div className="h-full overflow-auto px-6">
         {(() => {
           switch (props.type) {
             case PageType.PlaylistList: {
               return (
-                <div className="grid grid-cols-5 gap-x-8 px-12 pt-14 overflow-auto">
+                <div className="grid grid-cols-5 gap-x-8 overflow-auto">
                   {MyMusicLibrary.getAllPlaylists().map((playlist) =>
                     createCoverCard(
                       playlist,
@@ -59,7 +60,7 @@ export default function Page(props: PageProps) {
             }
             case PageType.AlbumList: {
               return (
-                <div className="grid grid-cols-5 gap-x-8 px-12 pt-14 overflow-auto">
+                <div className="grid grid-cols-5 gap-x-8 overflow-auto">
                   {MyMusicLibrary.getAllAlbums().map((album) =>
                     createCoverCard(album, props.onPlayMedia, props.onNavigate)
                   )}
@@ -76,38 +77,34 @@ export default function Page(props: PageProps) {
                 songList = MyMusicLibrary.getAllSongs();
               }
               return (
-                <div className="pt-14 px-12">
-                  <table className="text-left">
-                    <thead className="border-b-2">
-                      <tr>
-                        <th className="p-1"></th>
-                        <th className="p-1">Title</th>
+                <table className="text-left">
+                  <thead className="border-b-2">
+                    <tr>
+                      <th className="p-1"></th>
+                      <th className="p-1">Title</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {songList.map((song) => (
+                      <tr key={song.id}>
+                        <td
+                          role="button"
+                          className="p-2"
+                          onClick={() => {
+                            props.onPlayMedia(song.id, MediaType.Song);
+                          }}
+                        >
+                          <Play />
+                        </td>
+                        <td className="p-1">{song.title}</td>
                       </tr>
-                    </thead>
-                    <tbody>
-                      {songList.map((song) => (
-                        <tr key={song.id}>
-                          <td
-                            role="button"
-                            className="p-2"
-                            onClick={() => {
-                              props.onPlayMedia(song.id, MediaType.Song);
-                            }}
-                          >
-                            <Play />
-                          </td>
-                          <td className="p-1">{song.title}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                    ))}
+                  </tbody>
+                </table>
               );
             }
             default: {
-              return (
-                <div className="pt-14">Page Missing! Type: {props.type}</div>
-              );
+              return `Page Missing! Type: ${props.type}`;
             }
           }
         })()}

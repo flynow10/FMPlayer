@@ -7,10 +7,12 @@
     "dev": "vite",
     "build": "jest && tsc && vite build",
     "clean": "rm -rf ./dist",
+    "proxy": "lcp --proxyUrl https://suggestqueries.google.com",
     "preview": "vite preview",
     "test": "jest"
   },
   "dependencies": {
+    "@types/gapi": "^0.0.44",
     "@types/uuid": "^9.0.0",
     "ajv": "^8.12.0",
     "ajv-formats": "^2.1.1",
@@ -35,6 +37,7 @@
     "jest-chain": "^1.1.6",
     "jest-environment-jsdom": "^29.5.0",
     "jest-extended": "^3.2.4",
+    "jest-fetch-mock": "^3.0.3",
     "postcss": "^8.4.21",
     "tailwindcss": "^3.2.4",
     "ts-jest": "^29.1.0",
