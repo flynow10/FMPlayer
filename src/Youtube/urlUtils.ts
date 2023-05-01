@@ -19,7 +19,9 @@ export async function isYoutubeUrl(
   const videoExists = (
     await fetch(
       `https://www.youtube.com/oembed?url=http://www.youtube.com/watch?v=${videoId}&format=json`
-    )
+    ).catch(() => {
+      return { ok: false };
+    })
   ).ok;
   if (videoExists) {
     return videoId;
