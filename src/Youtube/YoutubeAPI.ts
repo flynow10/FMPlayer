@@ -96,7 +96,7 @@ class YoutubeAPISingleton {
     }
     const urlBase = IS_LOCAL
       ? "http://localhost:8010/proxy"
-      : "http://suggestqueries.google.com";
+      : "https://suggestqueries.google.com";
 
     const response = await fetch(
       `${urlBase}/complete/search?client=firefox&ds=yt&q=${incompleteSearch}`

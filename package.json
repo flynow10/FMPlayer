@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "vercel-dev": "vercel dev",
+    "vercel-dev": "vercel dev --listen 5173",
     "dev": "vite",
     "build": "jest && tsc && vite build",
     "clean": "rm -rf ./dist",

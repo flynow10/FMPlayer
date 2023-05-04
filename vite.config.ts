@@ -6,7 +6,9 @@ import path from "path";
 export default defineConfig({
   plugins: [react()],
   define: {
-    __APP_ENV__: JSON.stringify(process.env.VITE_VERCEL_ENV),
+    __APP_ENV__: JSON.stringify(
+      process.env.VITE_VERCEL_ENV ?? process.env.VERCEL_ENV
+    ),
   },
   resolve: {
     alias: [
