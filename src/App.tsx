@@ -24,10 +24,12 @@ function App() {
     nextSong(false);
   });
 
-  const playPlaylist = () => {
-    const playlist = MyMusicLibrary.getAllPlaylists()[1];
-    setQueue(playlist);
-    audioPlayer.startPlayback();
+  const beginPlayback = () => {
+    const playlist = MyMusicLibrary.getAllPlaylists()?.[1];
+    if (playlist) {
+      setQueue(playlist);
+      audioPlayer.startPlayback();
+    }
   };
   const togglePlayback = () => {
     if (!audioPlayer.playing) {
@@ -71,7 +73,7 @@ function App() {
   const audioComponent = (
     <div className="audio-controls px-20 py-4 border-t-2">
       {queue.isBlank() ? (
-        <AudioControlPlaceholder onPlay={playPlaylist} />
+        <AudioControlPlaceholder onPlay={beginPlayback} />
       ) : (
         <Audio
           id={songId}

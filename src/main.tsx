@@ -3,7 +3,11 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 import "@/assets/sass/index.scss";
 import { Login } from "@/components/Login";
-import { MyMusicLibrary } from "@/Music/MusicLibrary";
+import {
+  Authenticatable,
+  MyMusicLibrary,
+  isAuthenticatable,
+} from "@/Music/MusicLibrary";
 import { YoutubeAPI } from "./Youtube/YoutubeAPI";
 (async () => {
   const root = document.getElementById("root");
@@ -45,14 +49,18 @@ import { YoutubeAPI } from "./Youtube/YoutubeAPI";
 function Main() {
   const [userLoggedIn, setLoggedIn] = useState(false);
   useEffect(() => {
-    MyMusicLibrary.tryLoadToken().then((isValid) => {
-      if (isValid) {
-        MyMusicLibrary.loadLibrary();
-      }
-    });
     MyMusicLibrary.onLoaded.push(() => {
       setLoggedIn(true);
     });
+    if (isAuthenticatable(MyMusicLibrary)) {
+      MyMusicLibrary.tryLoadAuth().then((isValid) => {
+        if (isValid) {
+          MyMusicLibrary.loadLibrary();
+        }
+      });
+    } else {
+      MyMusicLibrary.loadLibrary();
+    }
   }, []);
 
   return userLoggedIn ? <App /> : <Login />;
