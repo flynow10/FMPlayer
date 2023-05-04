@@ -1,0 +1,5 @@
+- Look into AWS Elastic Beanstock
+- Use AWS s3 for storage:
+  - $0.023 per gb
+  - $0.005 per PUT, COPY, POST, LIST
+  - $0.0004 per GET, SELECT and all other requests

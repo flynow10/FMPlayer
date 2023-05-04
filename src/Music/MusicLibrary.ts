@@ -6,6 +6,7 @@ import { NamedPlaylist, PlaylistJson } from "./Playlists/NamedPlaylist";
 import { Playlist } from "./Playlists/Playlist";
 import { Song, SongJson } from "./Song";
 import { ID } from "./Types";
+import { IS_LOCAL } from "@/utils/dev";
 
 interface MusicLibraryJson {
   songs: SongJson[];
@@ -210,40 +211,40 @@ abstract class MusicLibrary {
     return Object.values(this._playlists);
   }
 
-  public abstract loadLibraryData(): Promise<any>;
-  public abstract loadPlaylistData(playlistId: ID): Promise<any>;
+  public abstract loadLibraryData(): Promise<MusicLibraryJson>;
+  public abstract loadPlaylistData(playlistId: ID): Promise<PlaylistJson>;
 
   public loadLibrary() {
     new Promise<void>(async (resolve, reject) => {
-      const libraryData = await this.loadLibraryData();
-      const ajv = addFormats(new Ajv());
-      const validateLibrary = ajv.compile(MusicLibrarySchema);
-      const validatePlaylist = ajv.compile(PlaylistSchema);
-
-      if (validateLibrary(libraryData)) {
-        for (let i = 0; i < libraryData.songs.length; i++) {
-          const songData = libraryData.songs[i];
-          const song = Song.fromData(songData);
-          this._songs[song.id] = song;
-        }
-
-        for (let i = 0; i < libraryData.albums.length; i++) {
-          const albumData = libraryData.albums[i];
-          const album = Album.fromData(albumData);
-          this._albums[album.id] = album;
-        }
-        for (let i = 0; i < libraryData.playlists.length; i++) {
-          const playlistId = libraryData.playlists[i];
-          const playlistData = await this.loadPlaylistData(playlistId);
-          if (validatePlaylist(playlistData)) {
-            this._playlists[playlistData.id] =
-              NamedPlaylist.fromData(playlistData);
-          }
-        }
-        resolve();
-      } else {
-        reject();
+      var libraryData;
+      try {
+        libraryData = await this.loadLibraryData();
+      } catch (e) {
+        return reject(e);
       }
+
+      for (let i = 0; i < libraryData.songs.length; i++) {
+        const songData = libraryData.songs[i];
+        const song = Song.fromData(songData);
+        this._songs[song.id] = song;
+      }
+
+      for (let i = 0; i < libraryData.albums.length; i++) {
+        const albumData = libraryData.albums[i];
+        const album = Album.fromData(albumData);
+        this._albums[album.id] = album;
+      }
+      for (let i = 0; i < libraryData.playlists.length; i++) {
+        const playlistId = libraryData.playlists[i];
+        try {
+          const playlistData = await this.loadPlaylistData(playlistId);
+          this._playlists[playlistData.id] =
+            NamedPlaylist.fromData(playlistData);
+        } catch (e) {
+          console.warn(e);
+        }
+      }
+      resolve();
     })
       .then(() => {
         this._loaded = true;
@@ -259,19 +260,42 @@ abstract class MusicLibrary {
       });
   }
 
+  public abstract getSongUrl(songId: ID): string | null;
+
   public exportJson(): string {
     return JSON.stringify(this);
   }
 }
 
-class FileBasedLibrary extends MusicLibrary {
+export interface Authenticatable {
+  isAuthenticated(): boolean;
+  tryLoadAuth(): Promise<boolean>;
+  authenticate(key: string): Promise<boolean>;
+  getAuthorizedRequest(url: string, options?: RequestInit): RequestInfo;
+}
+
+export function isAuthenticatable(object: any): object is Authenticatable {
+  const props = [
+    "isAuthenticated",
+    "tryLoadAuth",
+    "authenticate",
+    "getAuthorizedRequest",
+  ];
+  return props.every((prop) => prop in object);
+}
+
+class LocalTestingLibrary extends MusicLibrary implements Authenticatable {
   public jwt: string | null = null;
 
   constructor() {
     super();
   }
 
-  public async tryLoadToken(): Promise<boolean> {
+  isAuthenticated(): boolean {
+    return this.jwt !== null;
+  }
+
+  public async tryLoadAuth(): Promise<boolean> {
     const token = localStorage.getItem("jwt");
     if (token) {
       this.jwt = token;
@@ -279,10 +303,13 @@ class FileBasedLibrary extends MusicLibrary {
     const isValid = await (
       await fetch(this.getAuthorizedUrl("http://localhost:3000/isValid"))
     ).json();
+    if (!isValid) {
+      this.jwt = null;
+    }
     return isValid;
   }
 
-  public async authenticateUser(password: string): Promise<boolean> {
+  public async authenticate(password: string): Promise<boolean> {
     const response = await fetch("http://localhost:3000/login", {
       method: "POST",
       headers: {
@@ -298,31 +325,46 @@ class FileBasedLibrary extends MusicLibrary {
     localStorage.setItem("jwt", json.token);
     return true;
   }
-  public getAuthorizedUrl(unauthURL: string): string {
+
+  public getAuthorizedUrl(url: string): string {
     const authString = "p=" + this.jwt;
-    if (unauthURL.indexOf("?") === -1) {
-      return unauthURL + "?" + authString;
-    } else {
-      return unauthURL + "&" + authString;
-    }
+    return url + (url.indexOf("?") === -1 ? "?" : "&") + authString;
   }
 
-  public async loadLibraryData(): Promise<any> {
-    return await (
+  public getAuthorizedRequest(url: string, options?: RequestInit): RequestInfo {
+    return new Request(this.getAuthorizedUrl(url), options);
+  }
+
+  public async loadLibraryData(): Promise<MusicLibraryJson> {
+    const ajv = addFormats(new Ajv());
+    const validateLibrary = ajv.compile(MusicLibrarySchema);
+    const data = await (
       await fetch(
-        this.getAuthorizedUrl("http://localhost:3000/static/library.json")
+        this.getAuthorizedRequest("http://localhost:3000/static/library.json")
       )
     ).json();
+    if (validateLibrary(data)) {
+      return data;
+    }
+    throw new Error("Loaded library data was not formatted correctly!");
   }
-  public async loadPlaylistData(playlistId: string): Promise<any> {
-    return await (
+
+  public async loadPlaylistData(playlistId: string): Promise<PlaylistJson> {
+    const ajv = addFormats(new Ajv());
+    const validatePlaylist = ajv.compile(PlaylistSchema);
+    const data = await (
       await fetch(
-        this.getAuthorizedUrl(
+        this.getAuthorizedRequest(
           `http://localhost:3000/static/Playlists/${playlistId}.json`
         )
       )
     ).json();
+    if (validatePlaylist(data)) {
+      return data;
+    }
+    throw new Error("Loaded playlist data was not formatted correctly!");
   }
+
   public getSongUrl(id: ID): string | null {
     if (id in this._songs) {
       return this.getAuthorizedUrl(
@@ -333,4 +375,28 @@ class FileBasedLibrary extends MusicLibrary {
   }
 }
 
-export const MyMusicLibrary = new FileBasedLibrary();
+class DummyLibrary extends MusicLibrary {
+  public async loadLibraryData(): Promise<MusicLibraryJson> {
+    return {
+      albums: [],
+      playlists: [],
+      songs: [],
+    };
+  }
+
+  public async loadPlaylistData(playlistId: string): Promise<PlaylistJson> {
+    return {
+      id: "",
+      title: "",
+      actionList: [],
+    };
+  }
+
+  public getSongUrl(songId: string): string | null {
+    return "";
+  }
+}
+
+export const MyMusicLibrary: MusicLibrary = IS_LOCAL
+  ? new LocalTestingLibrary()
+  : new DummyLibrary();
