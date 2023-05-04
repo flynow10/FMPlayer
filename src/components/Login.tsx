@@ -1,19 +1,21 @@
 import classNames from "classnames";
 import { Lock, Music4, X } from "lucide-react";
 import { FormEvent, ReactNode, useEffect, useState } from "react";
-import { MyMusicLibrary } from "@/Music/MusicLibrary";
+import { MyMusicLibrary, isAuthenticatable } from "@/Music/MusicLibrary";
 
 export function Login() {
   const [password, setPassword] = useState("");
   const onLogin = (e: FormEvent) => {
     e.preventDefault();
-    MyMusicLibrary.authenticateUser(password).then((isCorrect) => {
-      if (isCorrect) {
-        MyMusicLibrary.loadLibrary();
-      } else {
-        addError();
-      }
-    });
+    if (isAuthenticatable(MyMusicLibrary)) {
+      MyMusicLibrary.authenticate(password).then((isCorrect) => {
+        if (isCorrect) {
+          MyMusicLibrary.loadLibrary();
+        } else {
+          addError();
+        }
+      });
+    }
   };
   const [errors, setErrors] = useState<ReactNode[]>([]);
   const addError = () => {
