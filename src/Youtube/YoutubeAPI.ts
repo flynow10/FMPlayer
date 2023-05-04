@@ -1,3 +1,5 @@
+import { IS_LOCAL } from "@/utils/dev";
+
 type Cache = {
   search: { [key: string]: SearchResultList };
   video: { [key: string]: VideoResultList };
@@ -92,8 +94,7 @@ class YoutubeAPISingleton {
         search: incompleteSearch,
       };
     }
-    const local = location.hostname === "localhost";
-    const urlBase = local
+    const urlBase = IS_LOCAL
       ? "http://localhost:8010/proxy"
       : "http://suggestqueries.google.com";
 
