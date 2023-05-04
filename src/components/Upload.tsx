@@ -1,6 +1,7 @@
 import { useState } from "react";
 import YoutubeSearch from "./YoutubeSearch";
 import { isUrl, isYoutubeUrl } from "@/Youtube/urlUtils";
+import FileDrop from "./FileDrop";
 
 type UploadProps = {};
 
@@ -11,14 +12,19 @@ export default function Upload(props: UploadProps) {
     <div className="flex flex-row h-full">
       <div className="youtube-search w-2/3 border-r-2 h-full pr-3 flex flex-col">
         <h1 className="text-xl pt-4 pb-2">From Youtube</h1>
-        <YoutubeSearch />
+        <YoutubeSearch
+          onClickDownload={(videoId) => {
+            alert("Downloading " + videoId);
+          }}
+        />
       </div>
       <div className="file-upload grow pl-3 flex flex-col">
-        <div className="grow">
-          <h1 className="text-xl pt-4 pb-2">From Computer</h1>
+        <div className="grow flex flex-col">
+          <h1 className="text-xl pt-4 pb-2 border-b-2">From Computer</h1>
+          <FileDrop />
         </div>
         <div>
-          <h1 className="text-xl pt-4 pb-2">From File URL</h1>
+          <h1 className="text-xl pt-4 pb-2">From URL</h1>
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -48,7 +54,7 @@ export default function Upload(props: UploadProps) {
               className="border-y-2 border-r-2 p-2 disabled:border-gray-500 border-emerald-500 disabled:bg-gray-500 bg-green-500 text-white rounded-r-lg active:bg-green-600"
               disabled={!isTextUrl || isTextYoutubeUrl}
             >
-              Search
+              Upload
             </button>
           </form>
         </div>

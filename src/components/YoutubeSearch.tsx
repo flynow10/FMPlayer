@@ -9,7 +9,11 @@ import { DownloadCloud, ExternalLink } from "lucide-react";
 import { ReactNode, useState } from "react";
 import YoutubeSearchForm from "./YoutubeSearchForm";
 
-export default function YoutubeSearch() {
+type YoutubeSearchProps = {
+  onClickDownload: (videoId: string) => void;
+};
+
+export default function YoutubeSearch(props: YoutubeSearchProps) {
   const [resultList, setResultList] = useState<
     { snippet: VideoSnippet; id: string }[]
   >([]);
@@ -56,6 +60,7 @@ export default function YoutubeSearch() {
               key={index}
               videoSnippet={result.snippet}
               videoId={result.id}
+              onClickDownLoad={props.onClickDownload}
             />
           );
         })}
@@ -67,6 +72,7 @@ export default function YoutubeSearch() {
 type YoutubeSearchResultProps = {
   videoSnippet: VideoSnippet;
   videoId: string;
+  onClickDownLoad: (videoId: string) => void;
 };
 
 function YoutubeResult(props: YoutubeSearchResultProps) {
@@ -134,7 +140,12 @@ function YoutubeResult(props: YoutubeSearchResultProps) {
             {props.videoSnippet.title}
           </a>
           <div className="buttons whitespace-nowrap">
-            <button className="hover:bg-gray-300 rounded-md p-1">
+            <button
+              onClick={() => {
+                props.onClickDownLoad(props.videoId);
+              }}
+              className="hover:bg-gray-300 rounded-md p-1"
+            >
               <DownloadCloud />
             </button>
           </div>
