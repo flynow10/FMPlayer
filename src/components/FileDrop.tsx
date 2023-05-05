@@ -1,3 +1,4 @@
+import { AWSAPI } from "@/utils/AWSAPI";
 import { Download } from "lucide-react";
 import { DragEvent as ReactDragEvent, useEffect, useState } from "react";
 
@@ -28,7 +29,8 @@ export default function FileDrop() {
   };
 
   const isValidFile = (file: File): boolean => {
-    return file.type.startsWith("audio/");
+    return true;
+    // return file.type.startsWith("audio/");
   };
 
   const onDrop = (event: ReactDragEvent<HTMLDivElement>) => {
@@ -71,7 +73,7 @@ export default function FileDrop() {
     const input = document.createElement("input");
     input.type = "file";
     input.multiple = false;
-    input.accept = "audio/*";
+    // input.accept = "audio/*";
     input.addEventListener("change", () => {
       if (input.files && input.files.length > 0) {
         const file = input.files[0];
@@ -84,17 +86,7 @@ export default function FileDrop() {
     input.click();
   };
   const onRecieveFile = (file: File) => {
-    const formData = new FormData();
-    formData.append("file", file);
-    fetch("localhost:3000/upload/file", {
-      body: formData,
-      method: "POST",
-    })
-      .then((response) => {
-        if (response.ok) {
-        }
-      })
-      .catch(() => {});
+    AWSAPI.saveFile(file);
   };
 
   return (
