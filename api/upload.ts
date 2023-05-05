@@ -1,11 +1,34 @@
 import { VercelRequest, VercelResponse } from "@vercel/node";
+import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
+import { S3Client } from "@aws-sdk/client-s3";
 
-export default function handler(req: VercelRequest, res: VercelResponse) {
-  let jsonBody;
-  try {
-    jsonBody = JSON.parse(req.body);
-  } catch (e) {
-    return res.status(403).json("Bad JSON!");
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  const { S3_BUCKET_NAME, AWS_KEY, AWS_SECRET } = process.env;
+  if (!S3_BUCKET_NAME || !AWS_KEY || !AWS_SECRET) {
+    return res.status(403).json("Missing an environment variable!");
   }
-  return res.status(200).json(JSON.stringify(jsonBody));
+  const fileName = req.query.file,
+    fileType = req.query.fileType;
+  if (!fileName || typeof fileName !== "string") {
+    return res.status(403).json("Missing file name!");
+  }
+  if (!fileType || typeof fileType !== "string") {
+    return res.status(403).json("Missing file type!");
+  }
+  const client = new S3Client({
+    credentials: {
+      accessKeyId: AWS_KEY,
+      secretAccessKey: AWS_SECRET,
+    },
+    region: "us-east-2",
+  });
+  const post = await createPresignedPost(client, {
+    Bucket: S3_BUCKET_NAME,
+    Key: fileName,
+    Fields: {
+      acl: "public-read",
+      "Content-Type": fileType,
+    },
+  });
+  return res.status(200).json(post);
 }
