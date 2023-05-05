@@ -1,2 +1,2 @@
-export const IS_DEV_MODE = true;
-export const IS_LOCAL = window.location.hostname === "localhost";
+export const IS_DEV_MODE = __APP_ENV__ !== "production";
+export const IS_LOCAL = __APP_ENV__ === "development";

@@ -96,7 +96,7 @@ class YoutubeAPISingleton {
     }
 
     const response = await fetch(
-      `/api/complete/search?client=firefox&ds=yt&q=${incompleteSearch}`
+      `/proxy/complete/search?client=firefox&ds=yt&q=${incompleteSearch}`
     );
     return {
       suggestions: (await response.json())[1],
