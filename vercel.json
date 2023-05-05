@@ -1,3 +1,8 @@
 {
-  "rewrites": [{ "source": "/api/(.*)", "destination": "/api" }]
+  "rewrites": [
+    {
+      "source": "/proxy/:path*",
+      "destination": "https://suggestqueries.google.com/:path*"
+    }
+  ]
 }
