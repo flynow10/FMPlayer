@@ -216,12 +216,13 @@ abstract class MusicLibrary {
   public abstract loadPlaylistData(playlistId: ID): Promise<PlaylistJson>;
 
   public loadLibrary() {
-    new Promise<void>(async (resolve, reject) => {
+    return new Promise<void>(async (resolve, reject) => {
       var libraryData;
       try {
         libraryData = await this.loadLibraryData();
       } catch (e) {
-        return reject(e);
+        reject(e);
+        return;
       }
 
       for (let i = 0; i < libraryData.songs.length; i++) {
