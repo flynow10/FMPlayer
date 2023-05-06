@@ -1,6 +1,6 @@
 import { VercelRequest, VercelResponse } from "@vercel/node";
-import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
-import { S3Client } from "@aws-sdk/client-s3";
+import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { checkAuthorization } from "./_checkAuth.mjs";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -14,13 +14,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     console.log(AWS_SECRET);
     return res.status(403).json("Missing an environment variable!");
   }
-  const fileName = req.query.file,
-    fileType = req.query.fileType;
-  if (!fileName || typeof fileName !== "string") {
+  const fileKey = req.query.file;
+  if (!fileKey || typeof fileKey !== "string") {
     return res.status(403).json("Missing file name!");
-  }
-  if (!fileType || typeof fileType !== "string") {
-    return res.status(403).json("Missing file type!");
   }
   const client = new S3Client({
     credentials: {
@@ -29,12 +25,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     },
     region: "us-east-2",
   });
-  const post = await createPresignedPost(client, {
+
+  const command = new GetObjectCommand({
     Bucket: S3_BUCKET_NAME,
-    Key: fileName,
-    Fields: {
-      "Content-Type": fileType,
-    },
+    Key: fileKey,
   });
-  return res.status(200).json(post);
+  const url = await getSignedUrl(client, command);
+  console.log(url);
+  return res.status(200).json({ url });
 }

@@ -25,23 +25,24 @@ export function runLibraryServer() {
     res: express.Response,
     next: express.NextFunction
   ) => {
-    const token = req.query["p"];
-    if (typeof token !== "string" || token === "") {
-      console.log(libraryPrefix + fileRequest + chalk.red("Missing Token"));
-      return res.sendStatus(401);
-    }
+    next();
+    // const token = req.query["p"];
+    // if (typeof token !== "string" || token === "") {
+    //   console.log(libraryPrefix + fileRequest + chalk.red("Missing Token"));
+    //   return res.sendStatus(401);
+    // }
 
-    jwt.verify(token, secretKey, (err: any, decoded) => {
-      if (err || decoded !== body) {
-        console.log(
-          libraryPrefix +
-            fileRequest +
-            chalk.red("Invalid Token, Access Denied")
-        );
-        return res.sendStatus(403);
-      }
-      next();
-    });
+    // jwt.verify(token, secretKey, (err: any, decoded) => {
+    //   if (err || decoded !== body) {
+    //     console.log(
+    //       libraryPrefix +
+    //         fileRequest +
+    //         chalk.red("Invalid Token, Access Denied")
+    //     );
+    //     return res.sendStatus(403);
+    //   }
+    //   next();
+    // });
   };
 
   app.post("/login", (req, res) => {
