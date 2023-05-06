@@ -37,10 +37,10 @@ import { YoutubeAPI } from "./Youtube/YoutubeAPI";
   if (isAuthenticatable(MyMusicLibrary)) {
     const isValid = await MyMusicLibrary.tryLoadAuth();
     if (isValid) {
-      MyMusicLibrary.loadLibrary();
+      await MyMusicLibrary.loadLibrary();
     }
   } else {
-    MyMusicLibrary.loadLibrary();
+    await MyMusicLibrary.loadLibrary();
   }
   root.innerHTML = "";
   ReactDOM.createRoot(root as HTMLElement).render(
