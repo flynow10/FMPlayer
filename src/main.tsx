@@ -34,6 +34,14 @@ import { YoutubeAPI } from "./Youtube/YoutubeAPI";
   </div>
   `;
   await YoutubeAPI.load();
+  if (isAuthenticatable(MyMusicLibrary)) {
+    const isValid = await MyMusicLibrary.tryLoadAuth();
+    if (isValid) {
+      MyMusicLibrary.loadLibrary();
+    }
+  } else {
+    MyMusicLibrary.loadLibrary();
+  }
   root.innerHTML = "";
   ReactDOM.createRoot(root as HTMLElement).render(
     <React.StrictMode>
@@ -45,17 +53,12 @@ import { YoutubeAPI } from "./Youtube/YoutubeAPI";
 function Main() {
   const [userLoggedIn, setLoggedIn] = useState(false);
   useEffect(() => {
-    MyMusicLibrary.onLoaded.push(() => {
+    if (MyMusicLibrary.loaded) {
       setLoggedIn(true);
-    });
-    if (isAuthenticatable(MyMusicLibrary)) {
-      MyMusicLibrary.tryLoadAuth().then((isValid) => {
-        if (isValid) {
-          MyMusicLibrary.loadLibrary();
-        }
-      });
     } else {
-      MyMusicLibrary.loadLibrary();
+      MyMusicLibrary.onLoaded.push(() => {
+        setLoggedIn(true);
+      });
     }
   }, []);
 
