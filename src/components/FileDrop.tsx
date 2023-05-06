@@ -86,7 +86,7 @@ export default function FileDrop() {
     input.click();
   };
   const onRecieveFile = (file: File) => {
-    AWSAPI.saveFile(file);
+    console.log(file);
   };
 
   return (

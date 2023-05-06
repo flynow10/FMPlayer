@@ -6,7 +6,6 @@ import { Login } from "@/components/Login";
 import { MyMusicLibrary, isAuthenticatable } from "@/Music/MusicLibrary";
 import { YoutubeAPI } from "./Youtube/YoutubeAPI";
 (async () => {
-  console.log(__APP_ENV__);
   const root = document.getElementById("root");
   if (!root) {
     console.error("Catastrophic Failure! Failed to load application!");
