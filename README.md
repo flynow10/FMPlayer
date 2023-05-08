@@ -4,13 +4,12 @@
 
 This is a music player that is based on the concept of functional programming. It allows the creation of playlist that follow complex rules when played
 
-## How to Use
+## Getting started
 
 1.  Install [Node.js](https://nodejs.org/en/).
 2.  Install [Yarn](https://yarnpkg.com/en/).
 3.  Run `yarn install` to install dependencies.
-4.  Run `yarn start` to start the app.
-5.  Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+4.  Follow one of the directions below.
 
 ## How to Develop
 
