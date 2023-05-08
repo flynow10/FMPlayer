@@ -120,7 +120,7 @@ function YoutubeResult(props: YoutubeSearchResultProps) {
             src={thumbnail.url}
             width={240}
             height={135}
-            className="object-cover min-h-[135px] min-w-[240px]"
+            className="object-cover min-h-[135px] max-h-[135px] min-w-[240px]"
           />
           <div className="absolute left-0 top-0 w-full h-full bg-black bg-opacity-20 group-hover:block hidden">
             <ExternalLink

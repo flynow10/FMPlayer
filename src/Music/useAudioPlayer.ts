@@ -53,14 +53,18 @@ export function useAudioPlayer(id: string | null, onSongEnded?: () => void) {
   }, [audioTag]);
 
   useEffect(() => {
+    var active = true;
     if (id !== null) {
-      const url = MyMusicLibrary.getSongUrl(id);
-      if (url !== null) {
-        audioTag.current.src = url;
-        audioTag.current.load();
-      }
+      (async () => {
+        const url = await MyMusicLibrary.getSongUrl(id);
+        if (url !== null && active) {
+          audioTag.current.src = url;
+          audioTag.current.load();
+        }
+      })();
     }
     return () => {
+      active = false;
       setLoaded(false);
       setPercentLoaded(0);
       setCurrentTime(0);

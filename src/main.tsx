@@ -3,14 +3,9 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 import "@/assets/sass/index.scss";
 import { Login } from "@/components/Login";
-import {
-  Authenticatable,
-  MyMusicLibrary,
-  isAuthenticatable,
-} from "@/Music/MusicLibrary";
+import { MyMusicLibrary, isAuthenticatable } from "@/Music/MusicLibrary";
 import { YoutubeAPI } from "./Youtube/YoutubeAPI";
 (async () => {
-  console.log(__APP_ENV__);
   const root = document.getElementById("root");
   if (!root) {
     console.error("Catastrophic Failure! Failed to load application!");
@@ -39,6 +34,14 @@ import { YoutubeAPI } from "./Youtube/YoutubeAPI";
   </div>
   `;
   await YoutubeAPI.load();
+  if (isAuthenticatable(MyMusicLibrary)) {
+    const isValid = await MyMusicLibrary.tryLoadAuth();
+    if (isValid) {
+      await MyMusicLibrary.loadLibrary();
+    }
+  } else {
+    await MyMusicLibrary.loadLibrary();
+  }
   root.innerHTML = "";
   ReactDOM.createRoot(root as HTMLElement).render(
     <React.StrictMode>
@@ -50,17 +53,12 @@ import { YoutubeAPI } from "./Youtube/YoutubeAPI";
 function Main() {
   const [userLoggedIn, setLoggedIn] = useState(false);
   useEffect(() => {
-    MyMusicLibrary.onLoaded.push(() => {
+    if (MyMusicLibrary.loaded) {
       setLoggedIn(true);
-    });
-    if (isAuthenticatable(MyMusicLibrary)) {
-      MyMusicLibrary.tryLoadAuth().then((isValid) => {
-        if (isValid) {
-          MyMusicLibrary.loadLibrary();
-        }
-      });
     } else {
-      MyMusicLibrary.loadLibrary();
+      MyMusicLibrary.onLoaded.push(() => {
+        setLoggedIn(true);
+      });
     }
   }, []);
 
