@@ -8,5 +8,12 @@ const config: Config = {
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/src/$1",
   },
+  collectCoverage: true,
+  collectCoverageFrom: ["./src/**/*.(ts|tsx|js|jsx)"],
+  coverageThreshold: {
+    global: {
+      lines: 90,
+    },
+  },
 };
 export default config;
