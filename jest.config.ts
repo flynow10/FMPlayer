@@ -10,5 +10,6 @@ const config: Config = {
   },
   collectCoverage: true,
   collectCoverageFrom: ["./src/**/*.(ts|tsx|js|jsx)"],
+  coverageReporters: ["cobertura", "lcov"],
 };
 export default config;
