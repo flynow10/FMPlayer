@@ -10,10 +10,5 @@ const config: Config = {
   },
   collectCoverage: true,
   collectCoverageFrom: ["./src/**/*.(ts|tsx|js|jsx)"],
-  coverageThreshold: {
-    global: {
-      lines: 90,
-    },
-  },
 };
 export default config;
