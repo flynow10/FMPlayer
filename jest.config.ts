@@ -8,5 +8,8 @@ const config: Config = {
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/src/$1",
   },
+  collectCoverage: true,
+  collectCoverageFrom: ["./src/**/*.(ts|tsx|js|jsx)"],
+  coverageReporters: ["cobertura", "lcov"],
 };
 export default config;

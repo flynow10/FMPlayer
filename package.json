@@ -6,9 +6,8 @@
   "scripts": {
     "vercel-dev": "vercel dev --listen 5173",
     "dev": "vite",
-    "build": "jest && tsc && vite build",
-    "clean": "rm -rf ./dist",
-    "proxy": "lcp --proxyUrl https://suggestqueries.google.com",
+    "build": "tsc && vite build",
+    "clean": "rm -rf ./dist; rm -rf ./coverage",
     "preview": "vite preview",
     "test": "jest"
   },
