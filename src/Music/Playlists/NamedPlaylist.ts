@@ -1,4 +1,4 @@
-import { ActionStub, createFromStub } from "../Actions/ActionTypes";
+import { ActionStub, createFromStub } from "@/Music/Actions/ActionTypes";
 import { ID, ICoverImage } from "../Types";
 import { Playlist } from "./Playlist";
 

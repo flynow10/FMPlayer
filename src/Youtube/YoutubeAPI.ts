@@ -1,5 +1,3 @@
-import { IS_LOCAL } from "@/utils/dev";
-
 type Cache = {
   search: { [key: string]: SearchResultList };
   video: { [key: string]: VideoResultList };

@@ -1,7 +1,6 @@
 import { v4 as uuid } from "uuid";
-import { Action } from "../Actions/Action";
-import { PlaySongAction } from "../Actions/PlaySongAction";
-import { ID, IMedia, MediaType } from "../Types";
+import { Action } from "@/Music/Actions/Action";
+import { ID, IMedia, MediaType } from "@/Music/Types";
 import { PlaylistParser } from "./PlaylistParser";
 
 export type ActionSongPair = { songId: ID; actionId: ID };

@@ -1,9 +1,9 @@
-import { Action } from "../Actions/Action";
-import { ActionType } from "../Actions/ActionTypes";
-import { LoopAction } from "../Actions/LoopAction";
-import { NumberAction } from "../Actions/NumberAction";
-import { PlaySongAction } from "../Actions/PlaySongAction";
-import { ID } from "../Types";
+import { Action } from "@/Music/Actions/Action";
+import { ActionType } from "@/Music/Actions/ActionTypes";
+import { LoopAction } from "@/Music/Actions/LoopAction";
+import { NumberAction } from "@/Music/Actions/NumberAction";
+import { PlaySongAction } from "@/Music/Actions/PlaySongAction";
+import { ID } from "@/Music/Types";
 import { ActionSongPair } from "./Playlist";
 
 export class PlaylistParser {

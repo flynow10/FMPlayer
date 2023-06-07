@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
-import "@/assets/sass/index.scss";
-import { Login } from "@/components/Login";
-import { MyMusicLibrary, isAuthenticatable } from "@/Music/MusicLibrary";
+import "@/src/assets/sass/index.scss";
+import { Login } from "@/src/components/Login";
+import { MyMusicLibrary } from "@/Music/Library/MusicLibrary";
 import { YoutubeAPI } from "./Youtube/YoutubeAPI";
+import { isAuthenticatable } from "./Music/Library/Authenticatable";
 (async () => {
   const root = document.getElementById("root");
   if (!root) {
@@ -34,33 +35,31 @@ import { YoutubeAPI } from "./Youtube/YoutubeAPI";
   </div>
   `;
   await YoutubeAPI.load();
+  let loginRequired = false;
   if (isAuthenticatable(MyMusicLibrary)) {
     const isValid = await MyMusicLibrary.tryLoadAuth();
-    if (isValid) {
-      await MyMusicLibrary.loadLibrary();
+    if (!isValid) {
+      loginRequired = true;
     }
-  } else {
-    await MyMusicLibrary.loadLibrary();
   }
   root.innerHTML = "";
   ReactDOM.createRoot(root as HTMLElement).render(
     <React.StrictMode>
-      <Main />
+      {loginRequired ? <WaitForLogin /> : <App />}
     </React.StrictMode>
   );
 })();
 
-function Main() {
+function WaitForLogin() {
   const [userLoggedIn, setLoggedIn] = useState(false);
-  useEffect(() => {
-    if (MyMusicLibrary.loaded) {
-      setLoggedIn(true);
-    } else {
-      MyMusicLibrary.onLoaded.push(() => {
-        setLoggedIn(true);
-      });
-    }
-  }, []);
 
-  return userLoggedIn ? <App /> : <Login />;
+  return userLoggedIn ? (
+    <App />
+  ) : (
+    <Login
+      onAuthenticate={() => {
+        setLoggedIn(true);
+      }}
+    />
+  );
 }
