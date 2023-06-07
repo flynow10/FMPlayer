@@ -1,21 +1,25 @@
-import { Song } from "@/Music/Song";
-import { MediaType } from "@/Music/Types";
 import { Audio } from "@/components/Audio";
+import { Song } from "@prisma/client";
 import { render } from "@testing-library/react";
 import { v4 } from "uuid";
 
 jest.mock("@/Music/MusicLibrary", () => ({
   MyMusicLibrary: {
-    getSong: jest.fn(
-      (id: string): Song => ({
-        duration: 1000,
-        id,
-        title: "Test song",
-        fileType: "mp3",
-        album: v4(),
-        getMediaType: () => MediaType.Song,
-      })
-    ),
+    getSong: jest.fn((id: string): Promise<Song> => {
+      return new Promise((r) =>
+        r({
+          id,
+          title: "Test song",
+          albumId: v4(),
+          artists: [],
+          featuring: [],
+          genre: "Test",
+          trackNumber: 1,
+          createdOn: new Date(),
+          modifiedOn: new Date(),
+        })
+      );
+    }),
   },
 }));
 
