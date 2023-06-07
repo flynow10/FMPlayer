@@ -1,5 +1,5 @@
 import { v4 as uuid } from "uuid";
-import { ID } from "../Types";
+import { ID } from "@/Music/Types";
 import { ActionStub, ActionType } from "./ActionTypes";
 
 export abstract class Action {

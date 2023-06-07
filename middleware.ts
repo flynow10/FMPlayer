@@ -1,4 +1,4 @@
-import { verifyAuth } from "api/_auth";
+import { verifyAuth } from "./lib/_auth";
 
 // Run middleware on all paths following /api/* except for the /api/tryAuth
 export const config = {

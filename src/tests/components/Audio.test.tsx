@@ -1,9 +1,7 @@
-import { Audio } from "@/components/Audio";
+import { Audio } from "@/src/components/Audio";
 import { Song } from "@prisma/client";
-import { getByText } from "@testing-library/react";
 import { waitFor } from "@testing-library/react";
 import { render } from "@testing-library/react";
-import { act } from "react-dom/test-utils";
 import { v4 } from "uuid";
 
 jest.mock("@/Music/Library/MusicLibrary", () => ({

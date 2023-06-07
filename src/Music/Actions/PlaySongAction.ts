@@ -1,4 +1,4 @@
-import { ID } from "../Types";
+import { ID } from "@/Music/Types";
 import { Action } from "./Action";
 import { ActionStub, ActionType } from "./ActionTypes";
 
