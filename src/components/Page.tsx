@@ -1,8 +1,7 @@
 import { ChevronLeft, Play } from "lucide-react";
 import { NavigationMethod, PlayByID } from "./Main";
-import { MyMusicLibrary } from "@/Music/MusicLibrary";
+import { MyMusicLibrary } from "@/Music/Library/MusicLibrary";
 import { ICoverImage, IMedia, MediaType } from "@/Music/Types";
-import { Song } from "@/Music/Song";
 import Upload from "./Upload";
 
 type PageProps = {
@@ -45,64 +44,64 @@ export default function Page(props: PageProps) {
       <div className="h-full overflow-auto px-6">
         {(() => {
           switch (props.type) {
-            case PageType.PlaylistList: {
-              return (
-                <div className="grid grid-cols-5 gap-x-8 overflow-auto">
-                  {MyMusicLibrary.getAllPlaylists().map((playlist) =>
-                    createCoverCard(
-                      playlist,
-                      props.onPlayMedia,
-                      props.onNavigate
-                    )
-                  )}
-                </div>
-              );
-            }
-            case PageType.AlbumList: {
-              return (
-                <div className="grid grid-cols-5 gap-x-8 overflow-auto">
-                  {MyMusicLibrary.getAllAlbums().map((album) =>
-                    createCoverCard(album, props.onPlayMedia, props.onNavigate)
-                  )}
-                </div>
-              );
-            }
-            case PageType.SongList: {
-              var songList: Song[] | undefined = undefined;
-              const album = MyMusicLibrary.getAlbum(props.data);
-              if (album) {
-                songList = MyMusicLibrary.getAlbumSongs(album);
-              }
-              if (!songList) {
-                songList = MyMusicLibrary.getAllSongs();
-              }
-              return (
-                <table className="text-left">
-                  <thead className="border-b-2">
-                    <tr>
-                      <th className="p-1"></th>
-                      <th className="p-1">Title</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {songList.map((song) => (
-                      <tr key={song.id}>
-                        <td
-                          role="button"
-                          className="p-2"
-                          onClick={() => {
-                            props.onPlayMedia(song.id, MediaType.Song);
-                          }}
-                        >
-                          <Play />
-                        </td>
-                        <td className="p-1">{song.title}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              );
-            }
+            // case PageType.PlaylistList: {
+            //   return (
+            //     <div className="grid grid-cols-5 gap-x-8 overflow-auto">
+            //       {MyMusicLibrary.getAllPlaylists().map((playlist) =>
+            //         createCoverCard(
+            //           playlist,
+            //           props.onPlayMedia,
+            //           props.onNavigate
+            //         )
+            //       )}
+            //     </div>
+            //   );
+            // }
+            // case PageType.AlbumList: {
+            //   return (
+            //     <div className="grid grid-cols-5 gap-x-8 overflow-auto">
+            //       {MyMusicLibrary.getAlbumList().map((album) =>
+            //         createCoverCard(album, props.onPlayMedia, props.onNavigate)
+            //       )}
+            //     </div>
+            //   );
+            // }
+            // case PageType.SongList: {
+            //   var songList: Song[] | undefined = undefined;
+            //   const album = MyMusicLibrary.getAlbum(props.data);
+            //   if (album) {
+            //     songList = MyMusicLibrary.getAlbumSongs(album);
+            //   }
+            //   if (!songList) {
+            //     songList = MyMusicLibrary.getAllSongs();
+            //   }
+            //   return (
+            //     <table className="text-left">
+            //       <thead className="border-b-2">
+            //         <tr>
+            //           <th className="p-1"></th>
+            //           <th className="p-1">Title</th>
+            //         </tr>
+            //       </thead>
+            //       <tbody>
+            //         {songList.map((song) => (
+            //           <tr key={song.id}>
+            //             <td
+            //               role="button"
+            //               className="p-2"
+            //               onClick={() => {
+            //                 props.onPlayMedia(song.id, MediaType.Song);
+            //               }}
+            //             >
+            //               <Play />
+            //             </td>
+            //             <td className="p-1">{song.title}</td>
+            //           </tr>
+            //         ))}
+            //       </tbody>
+            //     </table>
+            //   );
+            // }
             default: {
               return `Page Missing! Type: ${props.type}`;
             }

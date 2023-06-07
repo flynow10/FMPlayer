@@ -12,6 +12,7 @@ dist
 dist-ssr
 *.local
 coverage
+.vercel
 
 # Editor directories and files
 .vscode/*
@@ -28,5 +29,4 @@ coverage
 *.env
 
 # Personal Music
-server/static/*
-.vercel
+static/*

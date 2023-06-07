@@ -16,7 +16,7 @@ function checkAuthorization(request: VercelRequest): boolean {
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (checkAuthorization(req)) {
-    return (await setUserCookie(res)).json({ success: true });
+    return (await setUserCookie(res)).status(200).json({ success: true });
   }
-  return res.status(401).json({ success: false });
+  return res.status(200).json({ success: false });
 }
