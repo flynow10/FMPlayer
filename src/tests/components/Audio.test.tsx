@@ -1,9 +1,12 @@
 import { Audio } from "@/components/Audio";
 import { Song } from "@prisma/client";
+import { getByText } from "@testing-library/react";
+import { waitFor } from "@testing-library/react";
 import { render } from "@testing-library/react";
+import { act } from "react-dom/test-utils";
 import { v4 } from "uuid";
 
-jest.mock("@/Music/MusicLibrary", () => ({
+jest.mock("@/Music/Library/MusicLibrary", () => ({
   MyMusicLibrary: {
     getSong: jest.fn((id: string): Promise<Song> => {
       return new Promise((r) =>
@@ -36,5 +39,10 @@ describe("<Audio/>", () => {
         repeatMode="none"
       />
     );
+    await waitFor(() => {
+      expect(document.getElementById("song-title")?.textContent).toBe(
+        "Test song"
+      );
+    });
   });
 });
