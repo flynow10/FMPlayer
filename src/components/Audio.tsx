@@ -8,9 +8,9 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { Song } from "@/Music/Song";
 import { ID } from "@/Music/Types";
-import { MyMusicLibrary } from "@/Music/MusicLibrary";
+import { MyMusicLibrary } from "@/Music/Library/MusicLibrary";
+import { Song } from "@prisma/client";
 
 export type RepeatMode = "none" | "one" | "all";
 export type AudioEvent = () => void;
@@ -33,10 +33,25 @@ export type AudioProps = {
 };
 
 export function Audio(props: AudioProps) {
-  const song: Song | null = useMemo(
-    () => (props.id ? MyMusicLibrary.getSong(props.id) : null),
-    [props.id]
-  );
+  const [song, setSong] = useState<Song | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    load();
+    return () => {
+      active = false;
+    };
+
+    async function load() {
+      if (!props.id) {
+        return;
+      }
+      const song = await MyMusicLibrary.getSong(props.id);
+      if (song && active) {
+        setSong(song);
+      }
+    }
+  }, [props.id]);
 
   const percentPlayed =
     !isNaN(props.duration) && props.duration !== 0

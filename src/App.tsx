@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Audio, RepeatMode } from "@/components/Audio";
-import { MyMusicLibrary } from "@/Music/MusicLibrary";
+import { MyMusicLibrary } from "@/Music/Library/MusicLibrary";
 import { Playlist } from "@/Music/Playlists/Playlist";
 import AudioControlPlaceholder from "@/components/AudioControlPlaceholder";
 import { useAudioPlayer } from "@/Music/useAudioPlayer";
@@ -24,12 +24,13 @@ function App() {
     nextSong(false);
   });
 
-  const beginPlayback = () => {
-    const playlist = MyMusicLibrary.getAllPlaylists()?.[1];
-    if (playlist) {
-      setQueue(playlist);
-      audioPlayer.startPlayback();
-    }
+  const beginPlayback = async () => {
+    const playlist = new Playlist();
+    const songs = await MyMusicLibrary.getSongList();
+    if (songs.length === 0) return;
+    playlist.addAction(new PlaySongAction(songs[0].id));
+    setQueue(playlist);
+    audioPlayer.startPlayback();
   };
   const togglePlayback = () => {
     if (!audioPlayer.playing) {
@@ -125,31 +126,31 @@ function App() {
         searchString={searchString}
         isSearching={isSearching}
         onPlayMedia={(id, type) => {
-          var playlist;
-          switch (type) {
-            case MediaType.Album:
-              const album = MyMusicLibrary.getAlbum(id);
-              if (album) {
-                playlist = MyMusicLibrary.getPlaylistFromAlbum(album);
-              }
-              break;
-            case MediaType.Song:
-              const song = MyMusicLibrary.getSong(id);
-              if (song) {
-                playlist = new Playlist().addAction(
-                  new PlaySongAction(song.id)
-                );
-              }
-              break;
-            case MediaType.Playlist:
-              playlist = MyMusicLibrary.getPlaylist(id);
-              break;
-          }
-          if (playlist) {
-            setQueue(playlist);
-            setCurrentSongIndex(0);
-            audioPlayer.startPlayback();
-          }
+          // var playlist;
+          // switch (type) {
+          //   case MediaType.Album:
+          //     const album = MyMusicLibrary.getAlbum(id);
+          //     if (album) {
+          //       playlist = MyMusicLibrary.getPlaylistFromAlbum(album);
+          //     }
+          //     break;
+          //   case MediaType.Song:
+          //     const song = MyMusicLibrary.getSong(id);
+          //     if (song) {
+          //       playlist = new Playlist().addAction(
+          //         new PlaySongAction(song.id)
+          //       );
+          //     }
+          //     break;
+          //   case MediaType.Playlist:
+          //     playlist = MyMusicLibrary.getPlaylist(id);
+          //     break;
+          // }
+          // if (playlist) {
+          //   setQueue(playlist);
+          //   setCurrentSongIndex(0);
+          //   audioPlayer.startPlayback();
+          // }
         }}
       />
       {audioComponent}

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { MyMusicLibrary } from "./MusicLibrary";
+import { MyMusicLibrary } from "./Library/MusicLibrary";
 
 export function useAudioPlayer(id: string | null, onSongEnded?: () => void) {
   const audioTag = useRef(new Audio());
@@ -56,8 +56,8 @@ export function useAudioPlayer(id: string | null, onSongEnded?: () => void) {
     var active = true;
     if (id !== null) {
       (async () => {
-        const url = await MyMusicLibrary.getSongUrl(id);
-        if (url !== null && active) {
+        const url = await MyMusicLibrary.getMusicFileUrl(id);
+        if (url !== undefined && active) {
           audioTag.current.src = url;
           audioTag.current.load();
         }
