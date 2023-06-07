@@ -1,4 +1,5 @@
 import { defineConfig } from "vite";
+
 import react from "@vitejs/plugin-react";
 import path from "path";
 
@@ -13,8 +14,16 @@ export default defineConfig({
   resolve: {
     alias: [
       {
-        find: "@",
+        find: "@/src",
         replacement: path.resolve(__dirname, "src"),
+      },
+      {
+        find: "@/lib",
+        replacement: path.resolve(__dirname, "lib"),
+      },
+      {
+        find: "@/Music",
+        replacement: path.resolve(__dirname, "src", "Music"),
       },
     ],
   },

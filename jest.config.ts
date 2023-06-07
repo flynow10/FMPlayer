@@ -6,7 +6,9 @@ const config: Config = {
   modulePaths: ["src"],
   moduleDirectories: ["node_modules"],
   moduleNameMapper: {
-    "^@/(.*)$": "<rootDir>/src/$1",
+    "^@/src/(.*)$": "<rootDir>/src/$1",
+    "^@/lib/(.*)$": "<rootDir>/lib/$1",
+    "^@/Music/(.*)$": "<rootDir>/src/Music/$1",
   },
   collectCoverage: true,
   collectCoverageFrom: ["./src/**/*.(ts|tsx|js|jsx)"],

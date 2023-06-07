@@ -1,5 +1,5 @@
 import { VercelRequest, VercelResponse } from "@vercel/node";
-import { getEnvVar, getVercelEnvironment } from "./_constants.js";
+import { getEnvVar, getVercelEnvironment } from "../lib/_constants.js";
 import { PrismaClient } from "@prisma/client";
 import {
   AlbumListOptions,

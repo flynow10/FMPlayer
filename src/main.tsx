@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
-import "@/assets/sass/index.scss";
-import { Login } from "@/components/Login";
+import "@/src/assets/sass/index.scss";
+import { Login } from "@/src/components/Login";
 import { MyMusicLibrary } from "@/Music/Library/MusicLibrary";
 import { YoutubeAPI } from "./Youtube/YoutubeAPI";
 import { isAuthenticatable } from "./Music/Library/Authenticatable";

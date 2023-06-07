@@ -1,13 +1,12 @@
 import { useState } from "react";
-import { Audio, RepeatMode } from "@/components/Audio";
+import { Audio, RepeatMode } from "@/src/components/Audio";
 import { MyMusicLibrary } from "@/Music/Library/MusicLibrary";
 import { Playlist } from "@/Music/Playlists/Playlist";
-import AudioControlPlaceholder from "@/components/AudioControlPlaceholder";
+import AudioControlPlaceholder from "@/src/components/AudioControlPlaceholder";
 import { useAudioPlayer } from "@/Music/useAudioPlayer";
 import Main, { Location } from "./components/Main";
 import Sidebar from "./components/Sidebar";
 import { PlaySongAction } from "./Music/Actions/PlaySongAction";
-import { MediaType } from "./Music/Types";
 
 function App() {
   const [queue, setQueue] = useState<Playlist>(new Playlist());

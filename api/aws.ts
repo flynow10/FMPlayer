@@ -1,7 +1,7 @@
 import { VercelRequest, VercelResponse } from "@vercel/node";
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { getEnvVar, getVercelEnvironment } from "./_constants.js";
+import { getEnvVar, getVercelEnvironment } from "../lib/_constants.js";
 
 const IS_LOCAL = getVercelEnvironment() === "development";
 
