@@ -1,6 +1,6 @@
 import { useState } from "react";
 import YoutubeSearch from "./YoutubeSearch";
-import { isUrl, isYoutubeUrl } from "@/src/Youtube/urlUtils";
+import { isUrl, isYoutubeUrl } from "@/src/utils/urlUtils";
 import FileDrop from "./FileDrop";
 
 type UploadProps = {};
