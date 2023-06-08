@@ -3,8 +3,8 @@ import {
   ThumbnailDetails,
   VideoSnippet,
   YoutubeAPI,
-} from "@/src/Youtube/YoutubeAPI";
-import { isUrl, isYoutubeUrl, splitOutUrls } from "@/src/Youtube/urlUtils";
+} from "@/src/api/YoutubeAPI";
+import { isUrl, isYoutubeUrl, splitOutUrls } from "@/src/utils/urlUtils";
 import { DownloadCloud, ExternalLink } from "lucide-react";
 import { ReactNode, useState } from "react";
 import YoutubeSearchForm from "./YoutubeSearchForm";

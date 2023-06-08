@@ -4,7 +4,7 @@ import App from "./App";
 import "@/src/assets/sass/index.scss";
 import { Login } from "@/src/components/Login";
 import { MyMusicLibrary } from "@/Music/Library/MusicLibrary";
-import { YoutubeAPI } from "./Youtube/YoutubeAPI";
+import { YoutubeAPI } from "./api/YoutubeAPI";
 import { isAuthenticatable } from "./Music/Library/Authenticatable";
 (async () => {
   const root = document.getElementById("root");
