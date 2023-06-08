@@ -31,6 +31,7 @@ export default function YoutubeSearchForm(props: {
   const showSuggestions = inputFocused && suggestions.length > 0;
 
   const suggestionButtons = suggestions.map((suggestion, index) => {
+    var splitText = suggestion.split(searchText);
     return (
       <button
         key={index}
@@ -54,7 +55,14 @@ export default function YoutubeSearchForm(props: {
         }
       >
         <Search size={18} className="mr-2 my-auto" />
-        <span>{suggestion}</span>
+        {splitText.length > 1 ? (
+          <span>
+            {searchText}
+            <span className="font-bold">{splitText[1]}</span>
+          </span>
+        ) : (
+          <span>{suggestion}</span>
+        )}
       </button>
     );
   });
