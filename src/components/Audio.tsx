@@ -11,6 +11,7 @@ import {
 import { ID } from "@/Music/Types";
 import { MyMusicLibrary } from "@/Music/Library/MusicLibrary";
 import { Song } from "@prisma/client";
+import { useAsyncLoad } from "../utils/useAsyncLoad";
 
 export type RepeatMode = "none" | "one" | "all";
 export type AudioEvent = () => void;
@@ -33,25 +34,14 @@ export type AudioProps = {
 };
 
 export function Audio(props: AudioProps) {
-  const [song, setSong] = useState<Song | null>(null);
-
-  useEffect(() => {
-    let active = true;
-    load();
-    return () => {
-      active = false;
-    };
-
-    async function load() {
-      if (!props.id) {
-        return;
-      }
-      const song = await MyMusicLibrary.getSong(props.id);
-      if (song && active) {
-        setSong(song);
-      }
-    }
-  }, [props.id]);
+  const [song, loaded] = useAsyncLoad<Song | null>(
+    async () => {
+      if (!props.id) return null;
+      return (await MyMusicLibrary.getSong(props.id)) || null;
+    },
+    null,
+    [props.id]
+  );
 
   const percentPlayed =
     !isNaN(props.duration) && props.duration !== 0
