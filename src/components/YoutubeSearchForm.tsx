@@ -31,7 +31,33 @@ export default function YoutubeSearchForm(props: {
   const showSuggestions = inputFocused && suggestions.length > 0;
 
   const suggestionButtons = suggestions.map((suggestion, index) => {
-    var splitText = suggestion.split(searchText);
+    const suggestionSplitBySearch = suggestion.split(
+      new RegExp(`^${searchText}`)
+    );
+    var suggestionText;
+    if (
+      suggestionSplitBySearch.length === 2 &&
+      suggestionSplitBySearch[0] === ""
+    ) {
+      suggestionText = (
+        <span>
+          <span>{searchText}</span>
+          <span className="font-bold">{suggestionSplitBySearch[1]}</span>
+        </span>
+      );
+    } else {
+      const splitSearch = searchText.split(" ");
+      const splitSuggestion = suggestion.split(" ");
+      suggestionText = (
+        <span>
+          {splitSuggestion.map((word) => (
+            <span className={splitSearch.includes(word) ? "" : "font-bold"}>
+              {word}{" "}
+            </span>
+          ))}
+        </span>
+      );
+    }
     return (
       <button
         key={index}
@@ -55,14 +81,7 @@ export default function YoutubeSearchForm(props: {
         }
       >
         <Search size={18} className="mr-2 my-auto" />
-        {splitText.length > 1 ? (
-          <span>
-            {searchText}
-            <span className="font-bold">{splitText[1]}</span>
-          </span>
-        ) : (
-          <span>{suggestion}</span>
-        )}
+        {suggestionText}
       </button>
     );
   });
