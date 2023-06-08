@@ -5,6 +5,7 @@ import { MediaType } from "@/src/Music/Types";
 import { Loader2, Play } from "lucide-react";
 import { PageType } from "../Page";
 import { useAsyncLoad } from "@/src/utils/useAsyncLoad";
+import LoadingPage from "./LoadingPage";
 
 export type AlbumListProps = {
   onPlayMedia: PlayByID;
@@ -19,23 +20,16 @@ export default function AlbumList(props: AlbumListProps) {
     [],
     []
   );
-  if (loaded) {
-    return (
-      <div className="grid grid-cols-5 gap-x-8 overflow-auto p-10">
-        {albumList.map((album) =>
-          createAlbumCard(album, props.onPlayMedia, props.onNavigate)
-        )}
-      </div>
-    );
-  } else {
-    return (
-      <div className="relative w-full h-full">
-        <h1 className="text-3xl absolute -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2">
-          Loading <Loader2 className="inline animate-spin" />
-        </h1>
-      </div>
-    );
+  if (!loaded) {
+    return <LoadingPage />;
   }
+  return (
+    <div className="grid grid-cols-5 gap-x-8 overflow-auto p-10">
+      {albumList.map((album) =>
+        createAlbumCard(album, props.onPlayMedia, props.onNavigate)
+      )}
+    </div>
+  );
 }
 
 const createAlbumCard = (

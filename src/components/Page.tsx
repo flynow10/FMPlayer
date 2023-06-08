@@ -3,6 +3,7 @@ import { NavigationMethod, PlayByID } from "./Main";
 import { ICoverImage, IMedia, MediaType } from "@/Music/Types";
 import Upload from "./pages/upload/Upload";
 import AlbumList from "./pages/AlbumList";
+import SongList from "./pages/SongList";
 
 type PageProps = {
   location: string;
@@ -47,6 +48,14 @@ export default function Page(props: PageProps) {
             case PageType.AlbumList: {
               return (
                 <AlbumList
+                  onPlayMedia={props.onPlayMedia}
+                  onNavigate={props.onNavigate}
+                />
+              );
+            }
+            case PageType.SongList: {
+              return (
+                <SongList
                   onPlayMedia={props.onPlayMedia}
                   onNavigate={props.onNavigate}
                 />
