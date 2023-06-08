@@ -1,4 +1,3 @@
-import { AWSAPI } from "@/src/utils/AWSAPI";
 import { Download } from "lucide-react";
 import { DragEvent as ReactDragEvent, useEffect, useState } from "react";
 

@@ -1,6 +1,16 @@
 export type SortType = "asc" | "desc";
-export type SongSortFields = "title" | "artist" | "genre";
-export type AlbumSortFields = "title" | "artist" | "genre";
+export type SongSortFields =
+  | "title"
+  | "artists"
+  | "genre"
+  | "modifiedOn"
+  | "createdOn";
+export type AlbumSortFields =
+  | "title"
+  | "artists"
+  | "genre"
+  | "modifiedOn"
+  | "createdOn";
 
 export type SongListOptions = {
   page: number;

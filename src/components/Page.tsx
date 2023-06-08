@@ -1,8 +1,8 @@
-import { ChevronLeft, Play } from "lucide-react";
+import { Play } from "lucide-react";
 import { NavigationMethod, PlayByID } from "./Main";
-import { MyMusicLibrary } from "@/Music/Library/MusicLibrary";
 import { ICoverImage, IMedia, MediaType } from "@/Music/Types";
-import Upload from "./Upload";
+import Upload from "./pages/upload/Upload";
+import AlbumList from "./pages/AlbumList";
 
 type PageProps = {
   location: string;
@@ -41,9 +41,17 @@ export default function Page(props: PageProps) {
   }
   return (
     <div className={pageClass}>
-      <div className="h-full overflow-auto px-6">
+      <div className="h-full overflow-auto">
         {(() => {
           switch (props.type) {
+            case PageType.AlbumList: {
+              return (
+                <AlbumList
+                  onPlayMedia={props.onPlayMedia}
+                  onNavigate={props.onNavigate}
+                />
+              );
+            }
             // case PageType.PlaylistList: {
             //   return (
             //     <div className="grid grid-cols-5 gap-x-8 overflow-auto">
