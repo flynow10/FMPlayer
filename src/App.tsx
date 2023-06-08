@@ -12,7 +12,7 @@ function App() {
   const [queue, setQueue] = useState<Playlist>(new Playlist());
   const [currentSongIndex, setCurrentSongIndex] = useState(0);
   const [repeatMode, setRepeatMode] = useState<RepeatMode>("none");
-  const [location, setLocation] = useState<Location>(Location.Import);
+  const [location, setLocation] = useState<Location>(Location.Album);
   const [searchString, setSearchString] = useState("");
   const [isSearching, setIsSearching] = useState(false);
 
@@ -23,11 +23,11 @@ function App() {
     nextSong(false);
   });
 
-  const beginPlayback = async () => {
+  const beginPlayback = () => {
     const playlist = new Playlist();
-    const songs = await MyMusicLibrary.getSongList();
-    if (songs.length === 0) return;
-    playlist.addAction(new PlaySongAction(songs[0].id));
+    playlist.addAction(
+      new PlaySongAction("0179e8ca-3ff8-4ad8-bfba-332296670252")
+    );
     setQueue(playlist);
     audioPlayer.startPlayback();
   };
