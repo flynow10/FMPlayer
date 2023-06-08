@@ -1,6 +1,6 @@
 import { VercelRequest, VercelResponse } from "@vercel/node";
 import { getEnvVar, getVercelEnvironment } from "../lib/_constants.js";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Song, Album } from "@prisma/client";
 import {
   AlbumListOptions,
   AlbumSortFields,
@@ -69,54 +69,71 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     case "getAlbumList": {
-      const { page, limit, sort, order } = req.query;
+      const { page, limit, sortBy, sort } = req.query;
       const options: AlbumListOptions = {
         page: page ? parseInt(page as string) : 1,
         limit: limit ? parseInt(limit as string) : 10,
-        sort: order ? (order as SortType) : "desc",
-        sortBy: sort ? (sort as AlbumSortFields) : "title",
+        sort: sort ? (sort as SortType) : "asc",
+        sortBy: sortBy ? (sortBy as AlbumSortFields) : "title",
       };
 
-      const albumList = await prismaClient.album.findMany({
-        skip: (options.page - 1) * options.limit,
-        take: options.limit,
-        orderBy: [
-          {
-            [options.sortBy]: options.sort,
-          },
-          {
-            title: "desc",
-            modifiedOn: "desc",
-          },
-        ],
-      });
-      res.status(200).json(albumList);
+      var defaultSort: any = {};
+
+      if (options.sortBy !== "title") {
+        defaultSort["title"] = options.sort;
+      }
+
+      try {
+        const albumList = await prismaClient.album.findMany({
+          skip: (options.page - 1) * options.limit,
+          take: options.limit,
+          orderBy: [
+            {
+              [options.sortBy]: options.sort,
+            },
+            defaultSort,
+          ],
+        });
+        res.status(200).json(albumList);
+      } catch (e) {
+        console.error(e);
+        res.status(400).json("Something went wrong when querying the database");
+      }
+
       return;
     }
 
     case "getSongList": {
-      const { page, limit, sort, order } = req.query;
+      const { page, limit, sort, sortBy } = req.query;
       const options: SongListOptions = {
         page: page ? parseInt(page as string) : 1,
         limit: limit ? parseInt(limit as string) : 10,
-        sort: order ? (order as SortType) : "desc",
-        sortBy: sort ? (sort as SongSortFields) : "title",
+        sort: sort ? (sort as SortType) : "asc",
+        sortBy: sortBy ? (sortBy as SongSortFields) : "title",
       };
 
-      const songList = await prismaClient.song.findMany({
-        skip: (options.page - 1) * options.limit,
-        take: options.limit,
-        // orderBy: [
-        //   {
-        //     [options.sortBy]: options.sort,
-        //   },
-        //   {
-        //     title: "desc",
-        //     modifiedOn: "desc",
-        //   },
-        // ],
-      });
-      res.status(200).json(songList);
+      var defaultSort: any = {};
+
+      if (options.sortBy !== "title") {
+        defaultSort["title"] = options.sort;
+      }
+      try {
+        const songList = await prismaClient.song.findMany({
+          skip: (options.page - 1) * options.limit,
+          take: options.limit,
+          orderBy: [
+            {
+              [options.sortBy]: options.sort,
+            },
+            defaultSort,
+          ],
+        });
+        res.status(200).json(songList);
+      } catch (e) {
+        console.error(e);
+        res.status(400).json("Something went wrong when querying the database");
+      }
+
       return;
     }
 
