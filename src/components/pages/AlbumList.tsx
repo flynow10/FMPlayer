@@ -5,7 +5,7 @@ import { MediaType } from "@/src/Music/Types";
 import { Loader2, Play } from "lucide-react";
 import { PageType } from "../Page";
 import { useAsyncLoad } from "@/src/utils/useAsyncLoad";
-import LoadingPage from "./LoadingPage";
+import { FullCover } from "./LoadingPages";
 
 export type AlbumListProps = {
   onPlayMedia: PlayByID;
@@ -21,7 +21,7 @@ export default function AlbumList(props: AlbumListProps) {
     []
   );
   if (!loaded) {
-    return <LoadingPage />;
+    return <FullCover />;
   }
   return (
     <div className="grid grid-cols-5 gap-x-8 overflow-auto p-10">
