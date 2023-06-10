@@ -3,26 +3,18 @@ import { Authenticatable } from "./Authenticatable";
 import { AlbumListOptions, SongListOptions } from "api/_postgres-types";
 
 class PostgresMusicLibrary implements Authenticatable {
-  public async tryLoadAuth(): Promise<boolean> {
-    const hash = localStorage.getItem("hash");
-    return hash !== null && (await this.login(hash));
-  }
-
   public async isAuthenticated(): Promise<boolean> {
     return (await (await fetch("/api/tryAuth")).json()) === true;
   }
 
-  public async authenticate(key: string): Promise<boolean> {
-    const utf8 = new TextEncoder().encode(key);
+  public async authenticate(password: string): Promise<boolean> {
+    const utf8 = new TextEncoder().encode(password);
     const hashBuffer = await crypto.subtle.digest("SHA-256", utf8);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     const hashHex = hashArray
       .map((bytes) => bytes.toString(16).padStart(2, "0"))
       .join("");
-    const valid = await this.login(hashHex);
-    if (!valid) return false;
-    localStorage.setItem("hash", hashHex);
-    return true;
+    return await this.login(hashHex);
   }
 
   private async login(hash: string): Promise<boolean> {
