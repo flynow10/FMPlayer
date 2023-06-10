@@ -8,7 +8,6 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { ID } from "@/Music/Types";
 import { MyMusicLibrary } from "@/Music/Library/MusicLibrary";
 import { Song } from "@prisma/client";
 import { useAsyncLoad } from "../utils/useAsyncLoad";
@@ -17,7 +16,7 @@ export type RepeatMode = "none" | "one" | "all";
 export type AudioEvent = () => void;
 export type SongEndBehavior = "stop" | "play";
 export type AudioProps = {
-  id: ID | null;
+  id: string | null;
   loaded: boolean;
   playing: boolean;
   percentLoaded: number;

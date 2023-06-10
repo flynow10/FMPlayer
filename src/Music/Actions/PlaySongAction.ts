@@ -1,11 +1,10 @@
-import { ID } from "@/Music/Types";
 import { Action } from "./Action";
 import { ActionStub, ActionType } from "./ActionTypes";
 
 export class PlaySongAction extends Action {
-  public songId: ID;
+  public songId: string;
 
-  constructor(songId: ID) {
+  constructor(songId: string) {
     super();
     this.songId = songId;
   }

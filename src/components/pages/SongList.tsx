@@ -1,7 +1,7 @@
 import { MyMusicLibrary } from "@/src/Music/Library/MusicLibrary";
 import { useAsyncLoad } from "@/src/utils/useAsyncLoad";
 import { NavigationMethod, PlayByID } from "../Main";
-import { MediaType } from "@/src/Music/Types";
+import { MediaType } from "@/src/utils/types";
 import { ChevronDown, ChevronUp, Play } from "lucide-react";
 import { Blur, FullCover } from "./LoadingPages";
 import { useState } from "react";
