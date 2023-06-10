@@ -1,4 +1,4 @@
-import { ID, MediaType } from "@/Music/Types";
+import { MediaType } from "@/src/utils/types";
 import { UUID } from "./UUID";
 import { ReactNode, useState } from "react";
 import Page, { PageType } from "./Page";
@@ -33,6 +33,7 @@ export default function Main(props: MainProps) {
     pagesObject[Location.Playlist] = [
       { type: PageType.PlaylistList, data: "" },
     ];
+    pagesObject[Location.Genre] = [{ type: PageType.GenreList, data: "" }];
     pagesObject[Location.Import] = [{ type: PageType.UploadMedia, data: "" }];
     return pagesObject;
   });
@@ -122,7 +123,7 @@ export default function Main(props: MainProps) {
   );
 }
 
-export type PlayByID = (id: ID, type: MediaType) => void;
+export type PlayByID = (id: string, type: MediaType) => void;
 export type NavigationMethod = (
   navigateType: NavigationType,
   page?: PageType,

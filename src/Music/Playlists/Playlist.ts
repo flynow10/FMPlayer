@@ -1,12 +1,12 @@
 import { v4 as uuid } from "uuid";
 import { Action } from "@/Music/Actions/Action";
-import { ID, IMedia, MediaType } from "@/Music/Types";
+import { MediaType } from "@/src/utils/types";
 import { PlaylistParser } from "./PlaylistParser";
 
-export type ActionSongPair = { songId: ID; actionId: ID };
+export type ActionSongPair = { songId: string; actionId: string };
 
-export class Playlist implements IMedia {
-  public id: ID;
+export class Playlist {
+  public id: string;
   private _actionList: Action[];
   public songList: ActionSongPair[];
 
