@@ -25,6 +25,7 @@ const prismaClient = new PrismaClient({
 });
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  console.log("Recieved Request");
   if (req.method !== "GET") {
     res.status(405).json("Method not allowed");
     return;
@@ -38,6 +39,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   printRequestType("postgres", req.query.type);
 
   switch (req.query.type) {
+    case "getTest": {
+      res.status(200).json("Test");
+      return;
+    }
     case "getSong": {
       const { id } = req.query;
       if (typeof id !== "string") {
