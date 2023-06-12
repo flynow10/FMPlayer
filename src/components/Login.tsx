@@ -9,18 +9,20 @@ export function Login({ onAuthenticate }: { onAuthenticate: () => void }) {
   const onLogin = (e: FormEvent) => {
     e.preventDefault();
     if (isAuthenticatable(MyMusicLibrary)) {
-      MyMusicLibrary.authenticate(password).then((isCorrect) => {
-        if (isCorrect) {
+      MyMusicLibrary.authenticate(password).then((response) => {
+        if (response.success) {
           onAuthenticate();
         } else {
-          addError();
+          addError(response.error);
         }
       });
     }
   };
   const [errors, setErrors] = useState<ReactNode[]>([]);
-  const addError = () => {
-    setErrors([...errors, <Error key={errors.length} />]);
+  const addError = (
+    error: string = "Something went wrong, please try again later."
+  ) => {
+    setErrors([...errors, <Error key={errors.length} error={error} />]);
   };
   return (
     <>
@@ -57,7 +59,7 @@ export function Login({ onAuthenticate }: { onAuthenticate: () => void }) {
   );
 }
 
-function Error() {
+function Error({ error }: { error: string }) {
   const [closed, setClosed] = useState(false);
   const [closing, setClosing] = useState(false);
   const [open, setOpen] = useState(false);
@@ -84,7 +86,7 @@ function Error() {
   }, []);
   return (
     <div className={classes}>
-      Wrong Password{" "}
+      {error + " "}
       <button onClick={onClose} className="inline float-right">
         <X />
       </button>
