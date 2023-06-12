@@ -1,3 +1,5 @@
+import { Album, Song } from "@prisma/client";
+
 export type SortType = "asc" | "desc";
 export type SongSortFields =
   | "title"
@@ -12,16 +14,29 @@ export type AlbumSortFields =
   | "modifiedOn"
   | "createdOn";
 
-export type SongListOptions = {
+export type PaginationOptions = {
   page: number;
   limit: number;
-  sort: SortType;
+  sortDirection: SortType;
+  sortBy: string;
+};
+
+export type SongListOptions = PaginationOptions & {
   sortBy: SongSortFields;
 };
 
-export type AlbumListOptions = {
-  page: number;
-  limit: number;
-  sort: SortType;
+export type AlbumListOptions = PaginationOptions & {
   sortBy: AlbumSortFields;
+};
+
+export type GenreListResponse = {
+  genre: string;
+  song_count: number;
+  album_count: number;
+};
+
+export type GenreMediaResponse = {
+  genre: string;
+  songs: Song[];
+  albums: Album[];
 };
