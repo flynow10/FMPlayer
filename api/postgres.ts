@@ -17,12 +17,17 @@ const prismaClient = new PrismaClient({
   datasources: { db: { url: prismaDatasource } },
 });
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  console.log("Recieved Request");
   if (req.method !== "GET") {
     res.status(405).json("Method not allowed");
     return;
   }
 
   switch (req.query.type) {
+    case "getTest": {
+      res.status(200).json("Test");
+      return;
+    }
     case "getSong": {
       const { id } = req.query;
       if (typeof id !== "string") {

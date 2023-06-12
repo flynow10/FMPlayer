@@ -1,5 +1,5 @@
 import { Album, Song } from "@prisma/client";
-import { Authenticatable } from "./Authenticatable";
+import { Authenticatable, LoginResponse } from "./Authenticatable";
 import { AlbumListOptions, SongListOptions } from "api/_postgres-types";
 
 class PostgresMusicLibrary implements Authenticatable {
@@ -7,7 +7,7 @@ class PostgresMusicLibrary implements Authenticatable {
     return (await (await fetch("/api/tryAuth")).json()) === true;
   }
 
-  public async authenticate(password: string): Promise<boolean> {
+  public async authenticate(password: string): Promise<LoginResponse> {
     const utf8 = new TextEncoder().encode(password);
     const hashBuffer = await crypto.subtle.digest("SHA-256", utf8);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
@@ -17,9 +17,20 @@ class PostgresMusicLibrary implements Authenticatable {
     return await this.login(hashHex);
   }
 
-  private async login(hash: string): Promise<boolean> {
-    const { success } = await (await fetch(`/api/login?p=${hash}`)).json();
-    return success;
+  private async login(hash: string): Promise<LoginResponse> {
+    const responseJson: LoginResponse = await (
+      await fetch(`/api/login`, {
+        method: "POST",
+        body: JSON.stringify({ hash }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+    ).json();
+    if (!responseJson.success) {
+      console.warn(responseJson.error);
+    }
+    return responseJson;
   }
 
   public async getSong(id: string): Promise<Song | undefined> {
