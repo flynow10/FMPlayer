@@ -14,6 +14,14 @@ export type AlbumSortFields =
   | "modifiedOn"
   | "createdOn";
 
+export type AlbumWithSongs = Album & {
+  songs: Song[];
+};
+
+export type SongWithAlbum = Song & {
+  album: Album | null;
+};
+
 export type PaginationOptions = {
   page: number;
   limit: number;
