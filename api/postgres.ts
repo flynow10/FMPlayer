@@ -4,9 +4,11 @@ import { PrismaClient, Song, Album, Prisma } from "@prisma/client";
 import {
   AlbumListOptions,
   AlbumSortFields,
+  AlbumWithSongs,
   GenreListResponse,
   SongListOptions,
   SongSortFields,
+  SongWithAlbum,
 } from "./_postgres-types.js";
 import {
   getPaginationOptions,
@@ -43,9 +45,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return;
       }
 
-      const song = await prismaClient.song.findUnique({
+      const song: SongWithAlbum | null = await prismaClient.song.findUnique({
         where: {
           id,
+        },
+        include: {
+          album: true,
         },
       });
 

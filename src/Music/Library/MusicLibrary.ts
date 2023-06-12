@@ -2,9 +2,11 @@ import { Album, Song } from "@prisma/client";
 import { Authenticatable } from "./Authenticatable";
 import {
   AlbumListOptions,
+  AlbumWithSongs,
   GenreListResponse,
   GenreMediaResponse,
   SongListOptions,
+  SongWithAlbum,
 } from "api/_postgres-types";
 
 class PostgresMusicLibrary implements Authenticatable {
@@ -35,8 +37,8 @@ class PostgresMusicLibrary implements Authenticatable {
     return success;
   }
 
-  public async getSong(id: string): Promise<Song | undefined> {
-    const responseJson: Song | string = await (
+  public async getSong(id: string): Promise<SongWithAlbum | undefined> {
+    const responseJson: SongWithAlbum | string = await (
       await fetch(`/api/postgres?type=getSong&id=${id}`)
     ).json();
     if (typeof responseJson === "string" || responseJson === null) {
@@ -46,8 +48,8 @@ class PostgresMusicLibrary implements Authenticatable {
     return responseJson;
   }
 
-  public async getAlbum(id: string): Promise<Album | undefined> {
-    const responseJson: Album | string = await (
+  public async getAlbum(id: string): Promise<AlbumWithSongs | undefined> {
+    const responseJson: AlbumWithSongs | string = await (
       await fetch(`/api/postgres?type=getAlbum&id=${id}`)
     ).json();
     if (typeof responseJson === "string" || responseJson === null) {
