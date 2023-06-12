@@ -1,5 +1,4 @@
 import { Album, Song } from "@prisma/client";
-import { Authenticatable } from "./Authenticatable";
 import {
   AlbumListOptions,
   AlbumWithSongs,
@@ -8,33 +7,37 @@ import {
   SongListOptions,
   SongWithAlbum,
 } from "api/_postgres-types";
+import { Authenticatable, LoginResponse } from "./Authenticatable";
 
 class PostgresMusicLibrary implements Authenticatable {
-  public async tryLoadAuth(): Promise<boolean> {
-    const hash = localStorage.getItem("hash");
-    return hash !== null && (await this.login(hash));
-  }
-
   public async isAuthenticated(): Promise<boolean> {
     return (await (await fetch("/api/tryAuth")).json()) === true;
   }
 
-  public async authenticate(key: string): Promise<boolean> {
-    const utf8 = new TextEncoder().encode(key);
+  public async authenticate(password: string): Promise<LoginResponse> {
+    const utf8 = new TextEncoder().encode(password);
     const hashBuffer = await crypto.subtle.digest("SHA-256", utf8);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     const hashHex = hashArray
       .map((bytes) => bytes.toString(16).padStart(2, "0"))
       .join("");
-    const valid = await this.login(hashHex);
-    if (!valid) return false;
-    localStorage.setItem("hash", hashHex);
-    return true;
+    return await this.login(hashHex);
   }
 
-  private async login(hash: string): Promise<boolean> {
-    const { success } = await (await fetch(`/api/login?p=${hash}`)).json();
-    return success;
+  private async login(hash: string): Promise<LoginResponse> {
+    const responseJson: LoginResponse = await (
+      await fetch(`/api/login`, {
+        method: "POST",
+        body: JSON.stringify({ hash }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+    ).json();
+    if (!responseJson.success) {
+      console.warn(responseJson.error);
+    }
+    return responseJson;
   }
 
   public async getSong(id: string): Promise<SongWithAlbum | undefined> {
