@@ -1,8 +1,10 @@
 import { Play } from "lucide-react";
 import { NavigationMethod, PlayByID } from "./Main";
-import { ICoverImage, IMedia, MediaType } from "@/Music/Types";
+import { MediaType } from "@/src/utils/types";
 import Upload from "./pages/upload/Upload";
 import AlbumList from "./pages/AlbumList";
+import SongList from "./pages/SongList";
+import GenreList from "./pages/GenreList";
 
 type PageProps = {
   location: string;
@@ -22,6 +24,7 @@ export enum PageType {
   PlaylistList,
   AlbumDisplay,
   UploadMedia,
+  GenreList,
 }
 
 export default function Page(props: PageProps) {
@@ -41,12 +44,28 @@ export default function Page(props: PageProps) {
   }
   return (
     <div className={pageClass}>
-      <div className="h-full overflow-auto">
+      <div className="h-full overflow-auto relative">
         {(() => {
           switch (props.type) {
             case PageType.AlbumList: {
               return (
                 <AlbumList
+                  onPlayMedia={props.onPlayMedia}
+                  onNavigate={props.onNavigate}
+                />
+              );
+            }
+            case PageType.SongList: {
+              return (
+                <SongList
+                  onPlayMedia={props.onPlayMedia}
+                  onNavigate={props.onNavigate}
+                />
+              );
+            }
+            case PageType.GenreList: {
+              return (
+                <GenreList
                   onPlayMedia={props.onPlayMedia}
                   onNavigate={props.onNavigate}
                 />
@@ -119,40 +138,3 @@ export default function Page(props: PageProps) {
     </div>
   );
 }
-
-const createCoverCard = (
-  media: ICoverImage & IMedia,
-  onPlayMedia: PlayByID,
-  onNavigate: NavigationMethod
-) => {
-  return (
-    <div className="flex flex-col" role="button" key={media.id}>
-      <div
-        className="group relative aspect-square overflow-hidden shadow-[0_3px_10px_rgb(0,0,0,0.2)] rounded-2xl"
-        onClick={() => {
-          onPlayMedia(media.id, media.getMediaType());
-        }}
-      >
-        <img
-          src={media.coverUrl ? media.coverUrl : "./square-placeholder.jpg"}
-          className="w-full h-full group-hover:blur transition-[filter]"
-        />
-        <Play
-          size={48}
-          className="opacity-0 group-hover:opacity-100 transition-opacity absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-        />
-      </div>
-      <a
-        className="h-12 mt-1 overflow-ellipsis overflow-clip break-words hover:underline"
-        role="link"
-        onClick={() => {
-          if (media.getMediaType() === MediaType.Album) {
-            onNavigate("new", PageType.AlbumDisplay, media.id);
-          }
-        }}
-      >
-        {media.title}
-      </a>
-    </div>
-  );
-};

@@ -2,6 +2,7 @@ import { VercelRequest, VercelResponse } from "@vercel/node";
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { getEnvVar, getVercelEnvironment } from "../lib/_constants.js";
+import { printRequestType } from "../lib/_api-utils.js";
 
 const IS_LOCAL = getVercelEnvironment() === "development";
 
@@ -10,6 +11,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.status(405).json("Method not allowed");
     return;
   }
+
+  if (typeof req.query.type !== "string" || req.query.type === "") {
+    res.status(400).json("Missing type");
+    return;
+  }
+
+  printRequestType("aws", req.query.type);
 
   switch (req.query.type) {
     case "songUrl": {

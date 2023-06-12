@@ -1,13 +1,20 @@
 import { VercelRequest, VercelResponse } from "@vercel/node";
 import { getEnvVar, getVercelEnvironment } from "../lib/_constants.js";
-import { PrismaClient, Song, Album } from "@prisma/client";
+import { PrismaClient, Song, Album, Prisma } from "@prisma/client";
 import {
   AlbumListOptions,
   AlbumSortFields,
+  AlbumWithSongs,
+  GenreListResponse,
   SongListOptions,
   SongSortFields,
-  SortType,
+  SongWithAlbum,
 } from "./_postgres-types.js";
+import {
+  getPaginationOptions,
+  getPrismaSelectPaginationOptions,
+  printRequestType,
+} from "../lib/_api-utils.js";
 
 const prismaDatasource =
   getVercelEnvironment() === "development"
@@ -16,12 +23,20 @@ const prismaDatasource =
 const prismaClient = new PrismaClient({
   datasources: { db: { url: prismaDatasource } },
 });
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   console.log("Recieved Request");
   if (req.method !== "GET") {
     res.status(405).json("Method not allowed");
     return;
   }
+
+  if (typeof req.query.type !== "string" || req.query.type === "") {
+    res.status(400).json("Missing type");
+    return;
+  }
+
+  printRequestType("postgres", req.query.type);
 
   switch (req.query.type) {
     case "getTest": {
@@ -35,9 +50,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return;
       }
 
-      const song = await prismaClient.song.findUnique({
+      const song: SongWithAlbum | null = await prismaClient.song.findUnique({
         where: {
           id,
+        },
+        include: {
+          album: true,
         },
       });
 
@@ -74,31 +92,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     case "getAlbumList": {
-      const { page, limit, sortBy, sort } = req.query;
+      const { sortBy } = req.query;
       const options: AlbumListOptions = {
-        page: page ? parseInt(page as string) : 1,
-        limit: limit ? parseInt(limit as string) : 10,
-        sort: sort ? (sort as SortType) : "asc",
+        ...getPaginationOptions(req),
         sortBy: sortBy ? (sortBy as AlbumSortFields) : "title",
       };
 
-      var defaultSort: any = {};
-
-      if (options.sortBy !== "title") {
-        defaultSort["title"] = options.sort;
-      }
+      const selectQuery = getPrismaSelectPaginationOptions(options, "title");
 
       try {
-        const albumList = await prismaClient.album.findMany({
-          skip: (options.page - 1) * options.limit,
-          take: options.limit,
-          orderBy: [
-            {
-              [options.sortBy]: options.sort,
-            },
-            defaultSort,
-          ],
-        });
+        const albumList = await prismaClient.album.findMany(selectQuery);
         res.status(200).json(albumList);
       } catch (e) {
         console.error(e);
@@ -109,36 +112,82 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     case "getSongList": {
-      const { page, limit, sort, sortBy } = req.query;
+      const { sortBy } = req.query;
       const options: SongListOptions = {
-        page: page ? parseInt(page as string) : 1,
-        limit: limit ? parseInt(limit as string) : 10,
-        sort: sort ? (sort as SortType) : "asc",
+        ...getPaginationOptions(req),
         sortBy: sortBy ? (sortBy as SongSortFields) : "title",
       };
 
-      var defaultSort: any = {};
+      const selectQuery = getPrismaSelectPaginationOptions(options, "title");
 
-      if (options.sortBy !== "title") {
-        defaultSort["title"] = options.sort;
-      }
       try {
-        const songList = await prismaClient.song.findMany({
-          skip: (options.page - 1) * options.limit,
-          take: options.limit,
-          orderBy: [
-            {
-              [options.sortBy]: options.sort,
-            },
-            defaultSort,
-          ],
-        });
+        const songList = await prismaClient.song.findMany(selectQuery);
         res.status(200).json(songList);
       } catch (e) {
         console.error(e);
         res.status(400).json("Something went wrong when querying the database");
       }
+      return;
+    }
 
+    case "getGenreMedia": {
+      const { genre } = req.query;
+      if (typeof genre !== "string") {
+        res.status(400).json("Invalid genre");
+        return;
+      }
+      const paginationOptions = getPaginationOptions(req);
+      const options = {
+        ...paginationOptions,
+        genre,
+      };
+
+      const selectQuery = getPrismaSelectPaginationOptions(options, "title");
+
+      const genreSongs = await prismaClient.song.findMany({
+        where: {
+          OR: [
+            {
+              album: {
+                genre: options.genre,
+              },
+            },
+            {
+              genre: options.genre,
+            },
+          ],
+        },
+        ...selectQuery,
+      });
+      const genreAlbums = await prismaClient.album.findMany({
+        where: {
+          genre: options.genre,
+        },
+        include: {
+          songs: {
+            select: {
+              id: true,
+            },
+          },
+        },
+        ...selectQuery,
+      });
+
+      res.status(200).json({ genre, songs: genreSongs, albums: genreAlbums });
+      return;
+    }
+
+    case "getGenreList": {
+      const genreResults = (
+        await prismaClient.$queryRaw<
+          { genre: string; song_count: bigint; album_count: bigint }[]
+        >`select s1.genre, s1.count as song_count, coalesce(s2.count, 0) as album_count from (select genre, COUNT(*) from "Song" group by genre) s1 left join (select genre, COUNT(*) from "Album" group by genre) s2 on (s1.genre = s2.genre) union select s1.genre, coalesce(s2.count, 0) as song_count, s1.count as album_count from (select genre, COUNT(*) from "Album" group by genre) s1 left join (select genre, COUNT(*) from "Song" group by genre) s2 on (s1.genre = s2.genre) order by genre asc;`
+      ).map<GenreListResponse>((obj) => ({
+        genre: obj.genre,
+        song_count: Number(obj.song_count),
+        album_count: Number(obj.album_count),
+      }));
+      res.status(200).json(genreResults);
       return;
     }
 

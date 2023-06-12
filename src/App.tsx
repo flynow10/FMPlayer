@@ -7,6 +7,8 @@ import { useAudioPlayer } from "@/Music/useAudioPlayer";
 import Main, { Location } from "./components/Main";
 import Sidebar from "./components/Sidebar";
 import { PlaySongAction } from "./Music/Actions/PlaySongAction";
+import { MediaType } from "./utils/types";
+import { PlaylistHelper } from "./Music/Utils/PlaylistHelper";
 
 function App() {
   const [queue, setQueue] = useState<Playlist>(new Playlist());
@@ -124,32 +126,32 @@ function App() {
         location={location}
         searchString={searchString}
         isSearching={isSearching}
-        onPlayMedia={(id, type) => {
-          // var playlist;
-          // switch (type) {
-          //   case MediaType.Album:
-          //     const album = MyMusicLibrary.getAlbum(id);
-          //     if (album) {
-          //       playlist = MyMusicLibrary.getPlaylistFromAlbum(album);
-          //     }
-          //     break;
-          //   case MediaType.Song:
-          //     const song = MyMusicLibrary.getSong(id);
-          //     if (song) {
-          //       playlist = new Playlist().addAction(
-          //         new PlaySongAction(song.id)
-          //       );
-          //     }
-          //     break;
-          //   case MediaType.Playlist:
-          //     playlist = MyMusicLibrary.getPlaylist(id);
-          //     break;
-          // }
-          // if (playlist) {
-          //   setQueue(playlist);
-          //   setCurrentSongIndex(0);
-          //   audioPlayer.startPlayback();
-          // }
+        onPlayMedia={async (id, type) => {
+          var playlist;
+          switch (type) {
+            case MediaType.Album:
+              const album = await MyMusicLibrary.getAlbum(id);
+              if (album) {
+                playlist = PlaylistHelper.getPlaylistFromAlbum(album);
+              }
+              break;
+            case MediaType.Song:
+              const song = await MyMusicLibrary.getSong(id);
+              if (song) {
+                playlist = new Playlist().addAction(
+                  new PlaySongAction(song.id)
+                );
+              }
+              break;
+            // case MediaType.Playlist:
+            //   playlist = MyMusicLibrary.getPlaylist(id);
+            //   break;
+          }
+          if (playlist) {
+            setQueue(playlist);
+            setCurrentSongIndex(0);
+            audioPlayer.startPlayback();
+          }
         }}
       />
       {audioComponent}
