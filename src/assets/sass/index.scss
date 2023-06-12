@@ -34,3 +34,7 @@
 .main {
   grid-area: main;
 }
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

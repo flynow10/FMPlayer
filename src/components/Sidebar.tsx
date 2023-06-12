@@ -11,8 +11,9 @@ export default function Sidebar(props: SidebarProps) {
   const notDisabled = [
     Location.Album,
     Location.Song,
-    Location.Playlist,
+    // Location.Playlist,
     Location.Import,
+    Location.Genre,
   ];
   const libraryButtons: Location[] = [
     Location.Recent,

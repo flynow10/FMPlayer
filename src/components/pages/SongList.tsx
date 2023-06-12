@@ -48,7 +48,7 @@ export default function SongList(props: SongListProps) {
   const [sortBy, setSortBy] = useState<SongSortFields>("title");
   const [sort, setSort] = useState<SortType>("asc");
   const [songList, loaded] = useAsyncLoad(
-    () => MyMusicLibrary.getSongList({ sort, sortBy }),
+    () => MyMusicLibrary.getSongList({ sortDirection: sort, sortBy }),
     [],
     [sortBy, sort]
   );
