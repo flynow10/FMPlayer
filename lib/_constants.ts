@@ -1,5 +1,7 @@
 export const USER_TOKEN = "user-token";
 
+export const DEFAULT_PAGE_LIMIT = 20;
+
 export function getJwtSecretKey(): string {
   return getEnvVar("JWT_SECRET_KEY");
 }

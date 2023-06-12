@@ -1,15 +1,14 @@
 import { ActionStub, createFromStub } from "@/Music/Actions/ActionTypes";
-import { ID, ICoverImage } from "../Types";
 import { Playlist } from "./Playlist";
 
 export interface PlaylistJson {
-  id: ID;
+  id: string;
   title: string;
   coverUrl?: string;
   actionList: ActionStub[];
 }
 
-export class NamedPlaylist extends Playlist implements ICoverImage {
+export class NamedPlaylist extends Playlist {
   public title: string;
   public coverUrl?: string;
 

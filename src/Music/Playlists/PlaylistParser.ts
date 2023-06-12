@@ -3,7 +3,6 @@ import { ActionType } from "@/Music/Actions/ActionTypes";
 import { LoopAction } from "@/Music/Actions/LoopAction";
 import { NumberAction } from "@/Music/Actions/NumberAction";
 import { PlaySongAction } from "@/Music/Actions/PlaySongAction";
-import { ID } from "@/Music/Types";
 import { ActionSongPair } from "./Playlist";
 
 export class PlaylistParser {
@@ -126,9 +125,9 @@ enum PlaySongType {
 class PlaySong implements ASTNode {
   public type: PlaySongType;
   public value: string;
-  public actionId: ID;
+  public actionId: string;
 
-  constructor(type: PlaySongType, value: string, actionId: ID) {
+  constructor(type: PlaySongType, value: string, actionId: string) {
     this.type = type;
     this.value = value;
     this.actionId = actionId;
