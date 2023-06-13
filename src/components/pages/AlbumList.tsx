@@ -3,7 +3,10 @@ import { NavigationMethod, PlayByID } from "../Main";
 import { MediaType } from "@/src/utils/types";
 import { useAsyncLoad } from "@/src/utils/useAsyncLoad";
 import { FullCover } from "./LoadingPages";
-import { MediaCard, MediaCardSize } from "../MediaDisplays";
+import {
+  MediaCard,
+  MediaCardSize,
+} from "@/src/components/MediaDisplays/MediaCard";
 
 export type AlbumListProps = {
   onPlayMedia: PlayByID;
