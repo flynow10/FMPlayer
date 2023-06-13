@@ -3,7 +3,11 @@ import { NavigationMethod, PlayByID } from "../Main";
 import { MyMusicLibrary } from "@/src/Music/Library/MusicLibrary";
 import { FullCover } from "./LoadingPages";
 import { GenreMediaResponse } from "api/_postgres-types";
-import { MediaCard, MediaCardSize, MediaCarousel } from "../MediaDisplays";
+import {
+  MediaCard,
+  MediaCardSize,
+} from "@/src/components/MediaDisplays/MediaCard";
+import { MediaCarousel } from "@/src/components/MediaDisplays/MediaCarousel";
 import { MediaType } from "@/src/utils/types";
 
 export type GenreListProps = {
