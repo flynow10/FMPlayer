@@ -7,7 +7,9 @@
     "vercel-dev": "vercel dev --listen 5173",
     "dev": "vite",
     "build": "tsc && vite build",
-    "clean": "rm -rf ./dist; rm -rf ./coverage",
+    "clean": "yarn clean-build; yarn clean-test",
+    "clean-build": "rm -rf ./dist",
+    "clean-test": "rm -rf .coverage",
     "preview": "vite preview",
     "test": "jest",
     "postinstall": "prisma generate"
