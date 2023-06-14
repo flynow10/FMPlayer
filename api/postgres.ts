@@ -25,7 +25,6 @@ const prismaClient = new PrismaClient({
 });
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  console.log("Recieved Request");
   if (req.method !== "GET") {
     res.status(405).json("Method not allowed");
     return;
