@@ -19,7 +19,7 @@ import {
 const prismaDatasource =
   getVercelEnvironment() === "development"
     ? getEnvVar("DEVELOPMENT_DB_URL")
-    : getEnvVar("POSTGRES_PRISMA_URL");
+    : getEnvVar("SUPABASE_DATABASE_URL");
 const prismaClient = new PrismaClient({
   datasources: { db: { url: prismaDatasource } },
 });
