@@ -19,6 +19,7 @@
     "@aws-sdk/s3-presigned-post": "^3.327.0",
     "@aws-sdk/s3-request-presigner": "^3.328.0",
     "@prisma/client": "4.15.0",
+    "@supabase/supabase-js": "^2.25.0",
     "@types/cookie": "^0.5.1",
     "@types/gapi": "^0.0.44",
     "@types/uuid": "^9.0.0",
