@@ -9,7 +9,7 @@
     "build": "tsc && vite build",
     "clean": "yarn clean-build; yarn clean-test",
     "clean-build": "rm -rf ./dist",
-    "clean-test": "rm -rf .coverage",
+    "clean-test": "rm -rf ./coverage",
     "preview": "vite preview",
     "test": "jest",
     "postinstall": "prisma generate"
