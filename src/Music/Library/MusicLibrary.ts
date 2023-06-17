@@ -8,10 +8,22 @@ import {
   SongWithAlbum,
 } from "api/_postgres-types";
 import { Authenticatable, LoginResponse } from "./Authenticatable";
+import { cookieExists } from "@/src/utils/cookies";
+import { USER_TOKEN } from "@/lib/_constants";
+import { AblyClient } from "./AblyClient";
 
 class PostgresMusicLibrary implements Authenticatable {
-  public async isAuthenticated(): Promise<boolean> {
-    return (await (await fetch("/api/tryAuth")).json()) === true;
+  public ably: AblyClient;
+
+  constructor() {
+    this.ably = new AblyClient();
+    if (this.isAuthenticated()) {
+      this.ably.connect();
+    }
+  }
+
+  public isAuthenticated(): boolean {
+    return cookieExists(USER_TOKEN);
   }
 
   public async authenticate(password: string): Promise<LoginResponse> {
@@ -34,8 +46,11 @@ class PostgresMusicLibrary implements Authenticatable {
         },
       })
     ).json();
+
     if (!responseJson.success) {
       console.warn(responseJson.error);
+    } else {
+      this.ably.connect();
     }
     return responseJson;
   }

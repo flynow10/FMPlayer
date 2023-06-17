@@ -1,3 +1,5 @@
+import Ably from "ably";
+
 export type LoginResponse =
   | { success: true }
   | {
@@ -5,7 +7,7 @@ export type LoginResponse =
       error: string;
     };
 export interface Authenticatable {
-  isAuthenticated(): Promise<boolean>;
+  isAuthenticated(): boolean;
   authenticate(key: string): Promise<LoginResponse>;
 }
 
