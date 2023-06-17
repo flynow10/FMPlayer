@@ -37,7 +37,7 @@ import { isAuthenticatable } from "./Music/Library/Authenticatable";
   await YoutubeAPI.load();
   let loginRequired = false;
   if (isAuthenticatable(MyMusicLibrary)) {
-    const isValid = await MyMusicLibrary.isAuthenticated();
+    const isValid = MyMusicLibrary.isAuthenticated();
     if (!isValid) {
       loginRequired = true;
     }

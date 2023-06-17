@@ -122,7 +122,13 @@ export default function SongList(props: SongListProps) {
                 })}
               </tr>
             ))}
-            {!loaded && <Blur />}
+            {!loaded && (
+              <tr className="h-full">
+                <td colSpan={columns.length}>
+                  <Blur />
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
