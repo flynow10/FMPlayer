@@ -56,7 +56,7 @@ export default function Sidebar(props: SidebarProps) {
       <div className="p-3 flex flex-col flex-1">
         <input
           placeholder="Search"
-          className="border-2 rounded-md my-2"
+          className="border-2 rounded-md my-2 px-2"
           onFocus={(target) => {
             const value = target.currentTarget.value;
             if (value !== "") {
