@@ -68,3 +68,5 @@ export class AblyClient {
     console.log("Ably connected");
   }
 }
+
+export const LambdaStatus = new AblyClient();

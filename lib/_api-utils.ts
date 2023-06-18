@@ -1,5 +1,5 @@
 import { VercelRequest } from "@vercel/node";
-import { PaginationOptions, SortType } from "api/_postgres-types.js";
+import { PaginationOptions, SortType } from "./_postgres-types.js";
 import { DEFAULT_PAGE_LIMIT } from "./_constants.js";
 
 export const printRequestType = (endpoint: string, type: string) => {
@@ -8,7 +8,7 @@ export const printRequestType = (endpoint: string, type: string) => {
   //   .join(" ")
   //   .toLowerCase()
   //   .replace(/\b\w/, (l) => l.toUpperCase());
-  console.log(`[serverless][${endpoint}]: Recived "${type}" request`);
+  console.log(`[serverless][${endpoint}]: Received "${type}" request`);
 };
 
 export const getPaginationOptions = (req: VercelRequest) => {

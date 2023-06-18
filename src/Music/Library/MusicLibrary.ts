@@ -6,22 +6,14 @@ import {
   GenreMediaResponse,
   SongListOptions,
   SongWithAlbum,
-} from "api/_postgres-types";
+} from "@/lib/_postgres-types";
 import { Authenticatable, LoginResponse } from "./Authenticatable";
 import { cookieExists } from "@/src/utils/cookies";
 import { USER_TOKEN } from "@/lib/_constants";
 import { AblyClient } from "./AblyClient";
+import { PresignedPost } from "@aws-sdk/s3-presigned-post";
 
 class PostgresMusicLibrary implements Authenticatable {
-  public ably: AblyClient;
-
-  constructor() {
-    this.ably = new AblyClient();
-    if (this.isAuthenticated()) {
-      this.ably.connect();
-    }
-  }
-
   public isAuthenticated(): boolean {
     return cookieExists(USER_TOKEN);
   }
@@ -49,114 +41,128 @@ class PostgresMusicLibrary implements Authenticatable {
 
     if (!responseJson.success) {
       console.warn(responseJson.error);
-    } else {
-      this.ably.connect();
     }
     return responseJson;
   }
 
-  public async getSong(id: string): Promise<SongWithAlbum | undefined> {
-    const responseJson: SongWithAlbum | string = await (
-      await fetch(`/api/postgres?type=getSong&id=${id}`)
+  private async makePostgresRequest(
+    type: string,
+    options: object,
+    defaultResponse?: any
+  ): Promise<any> {
+    const requestUrl = `/api/postgres?${this.optionsToUrl({
+      type,
+      ...options,
+    })}`;
+    const responseJson: object | string = await (
+      await fetch(`/api/postgres?${this.optionsToUrl({ type, ...options })}`)
     ).json();
-    if (typeof responseJson === "string" || responseJson === null) {
+    if (typeof responseJson === "string") {
       console.warn(responseJson);
-      return undefined;
+      return defaultResponse;
     }
     return responseJson;
   }
 
-  public async getAlbum(id: string): Promise<AlbumWithSongs | undefined> {
-    const responseJson: AlbumWithSongs | string = await (
-      await fetch(`/api/postgres?type=getAlbum&id=${id}`)
+  private async makeAWSRequest(
+    type: string,
+    options: object,
+    defaultResponse?: any
+  ): Promise<any> {
+    const responseJson: object | string = await (
+      await fetch(`/api/aws?${this.optionsToUrl({ type, ...options })}`)
     ).json();
-    if (typeof responseJson === "string" || responseJson === null) {
+    if (typeof responseJson === "string") {
       console.warn(responseJson);
-      return undefined;
+      return defaultResponse;
     }
     return responseJson;
   }
 
   private optionsToUrl(options: object): string {
-    return new URLSearchParams(
+    const urlSearchParams = new URLSearchParams(
       Object.entries(options).reduce((obj, val) => {
-        obj[val[0]] = val[1];
+        if (typeof val[1] === "number") {
+          obj[val[0]] = val[1].toString(10);
+        } else if (!Array.isArray(val[1])) {
+          obj[val[0]] = val[1];
+        }
         return obj;
       }, {} as Record<string, string>)
-    ).toString();
+    );
+    Object.entries(options).forEach(([key, value]) => {
+      if (Array.isArray(value)) {
+        value.forEach((v) => urlSearchParams.append(key, v));
+      }
+    });
+    return urlSearchParams.toString();
+  }
+
+  public async getSong(id: string): Promise<SongWithAlbum | undefined> {
+    return this.makePostgresRequest("getSong", { id }, undefined);
+  }
+
+  public async getAlbum(id: string): Promise<AlbumWithSongs | undefined> {
+    return this.makePostgresRequest("getAlbum", { id }, undefined);
   }
 
   public async getSongList(
     options: Partial<SongListOptions> = {}
   ): Promise<Song[]> {
-    const responseJson: Song[] | string = await (
-      await fetch(
-        `/api/postgres?${this.optionsToUrl({
-          type: "getSongList",
-          ...options,
-        })}`
-      )
-    ).json();
-    if (typeof responseJson === "string") {
-      console.warn(responseJson);
-      return [];
-    }
-    return responseJson;
+    return this.makePostgresRequest("getSongList", options, []);
   }
 
   public async getAlbumList(
     options: Partial<AlbumListOptions> = {}
   ): Promise<Album[]> {
-    const responseJson: Album[] | string = await (
-      await fetch(
-        `/api/postgres?${this.optionsToUrl({
-          ...options,
-          type: "getAlbumList",
-        })}`
-      )
-    ).json();
-    if (typeof responseJson === "string") {
-      console.warn(responseJson);
-      return [];
-    }
-    return responseJson;
+    return this.makePostgresRequest("getAlbumList", options, []);
   }
 
   public async getGenreList(): Promise<GenreListResponse[]> {
-    const responseJson: GenreListResponse[] | string = await (
-      await fetch(`/api/postgres?type=getGenreList`)
-    ).json();
-    if (typeof responseJson === "string") {
-      console.warn(responseJson);
-      return [];
-    }
-    return responseJson;
+    return this.makePostgresRequest("getGenreList", {}, []);
   }
 
   public async getGenreMedia(genre: string): Promise<GenreMediaResponse> {
-    const responseJson: GenreMediaResponse | string = await (
-      await fetch(`/api/postgres?type=getGenreMedia&genre=${genre}`)
-    ).json();
-    if (typeof responseJson === "string") {
-      console.warn(responseJson);
-      return {
+    return this.makePostgresRequest(
+      "getGenreMedia",
+      { genre },
+      {
         genre: "",
         songs: [],
         albums: [],
-      };
+      }
+    );
+  }
+
+  private async uploadFileToConvert(
+    fileName: string,
+    fileType: string,
+    file: Blob
+  ): Promise<void> {
+    const presignedUrl: PresignedPost = await this.makeAWSRequest(
+      "presigned-post",
+      {
+        fileName: `${fileName}.${fileType}`,
+      }
+    );
+    const formData = new FormData();
+    for (const [key, value] of Object.entries(presignedUrl.fields)) {
+      formData.append(key, value);
     }
-    return responseJson;
+    formData.append("file", file);
+    console.log(
+      await fetch(presignedUrl.url, {
+        method: "POST",
+        body: formData,
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
+    );
   }
 
   public async getMusicFileUrl(id: string): Promise<string | undefined> {
-    const responseJson: { url: string } | string = await (
-      await fetch(`/api/aws?type=songUrl&id=${id}`)
-    ).json();
-    if (typeof responseJson === "string") {
-      console.warn(responseJson);
-      return undefined;
-    }
-    return responseJson.url;
+    return this.makeAWSRequest("songUrl", { id }, undefined);
   }
 }
 

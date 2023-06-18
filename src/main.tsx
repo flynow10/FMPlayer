@@ -6,6 +6,7 @@ import { Login } from "@/src/components/Login";
 import { MyMusicLibrary } from "@/Music/Library/MusicLibrary";
 import { YoutubeAPI } from "./api/YoutubeAPI";
 import { isAuthenticatable } from "./Music/Library/Authenticatable";
+import { LambdaStatus } from "./Music/Library/AblyClient";
 (async () => {
   const root = document.getElementById("root");
   if (!root) {
@@ -41,6 +42,10 @@ import { isAuthenticatable } from "./Music/Library/Authenticatable";
     if (!isValid) {
       loginRequired = true;
     }
+  }
+
+  if (!loginRequired) {
+    await LambdaStatus.connect();
   }
   root.innerHTML = "";
   ReactDOM.createRoot(root as HTMLElement).render(
