@@ -1,28 +1,18 @@
 import { VercelRequest, VercelResponse } from "@vercel/node";
-import { getEnvVar, getVercelEnvironment } from "../lib/_constants.js";
-import { PrismaClient, Song, Album, Prisma } from "@prisma/client";
 import {
   AlbumListOptions,
   AlbumSortFields,
-  AlbumWithSongs,
   GenreListResponse,
   SongListOptions,
   SongSortFields,
   SongWithAlbum,
-} from "./_postgres-types.js";
+} from "../lib/_postgres-types.js";
 import {
   getPaginationOptions,
   getPrismaSelectPaginationOptions,
   printRequestType,
 } from "../lib/_api-utils.js";
-
-const prismaDatasource =
-  getVercelEnvironment() === "development"
-    ? getEnvVar("DEVELOPMENT_DB_URL")
-    : getEnvVar("SUPABASE_DATABASE_URL");
-const prismaClient = new PrismaClient({
-  datasources: { db: { url: prismaDatasource } },
-});
+import { prismaClient } from "../lib/_data-clients.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "GET") {
