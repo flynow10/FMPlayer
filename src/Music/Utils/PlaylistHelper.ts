@@ -1,4 +1,4 @@
-import { AlbumWithSongs } from "@/lib/_postgres-types";
+import { AlbumWithSongs } from "api-lib/_postgres-types";
 import { PlaySongAction } from "@/Music/Actions/PlaySongAction";
 import { Playlist } from "@/Music/Playlists/Playlist";
 

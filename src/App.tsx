@@ -109,7 +109,7 @@ function App() {
       <Sidebar
         location={location}
         isSearching={isSearching}
-        onNavigate={(toLocation) => {
+        onSelectTab={(toLocation) => {
           setLocation(toLocation);
           setIsSearching(false);
         }}

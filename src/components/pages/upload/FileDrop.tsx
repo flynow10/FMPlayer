@@ -1,6 +1,10 @@
 import { Download } from "lucide-react";
 import { DragEvent as ReactDragEvent, useEffect, useState } from "react";
 
+export type FileDropProps = {
+  onReceiveFiles: (files: File[]) => void;
+};
+
 enum DropZoneState {
   NoFile,
   Valid,
@@ -8,7 +12,7 @@ enum DropZoneState {
   Dropped,
 }
 
-export default function FileDrop() {
+export default function FileDrop(props: FileDropProps) {
   const [dropZoneState, setDropZoneState] = useState(DropZoneState.NoFile);
 
   useEffect(() => {
@@ -28,24 +32,25 @@ export default function FileDrop() {
   };
 
   const isValidFile = (file: File): boolean => {
-    return true;
-    // return file.type.startsWith("audio/");
+    return file.size > 0 && file.type.indexOf("audio") !== -1;
+  };
+
+  const showInvalidFile = () => {
+    setDropZoneState(DropZoneState.Invalid);
+    setTimeout(() => {
+      setDropZoneState(DropZoneState.NoFile);
+    }, 500);
   };
 
   const onDrop = (event: ReactDragEvent<HTMLDivElement>) => {
     event.preventDefault();
     if (!isValidDrop(event.dataTransfer)) {
-      setDropZoneState(DropZoneState.Invalid);
-      setTimeout(() => {
-        setDropZoneState(DropZoneState.NoFile);
-      }, 500);
+      showInvalidFile();
       return;
     }
-    setDropZoneState(DropZoneState.Dropped);
+    setDropZoneState(DropZoneState.NoFile);
     const files = getFiles(event.dataTransfer);
-    files.forEach((file) => {
-      onRecieveFile(file);
-    });
+    props.onReceiveFiles(files);
   };
 
   const getFiles = (dataTransfer: DataTransfer): File[] => {
@@ -71,21 +76,20 @@ export default function FileDrop() {
   const openFilePicker = () => {
     const input = document.createElement("input");
     input.type = "file";
-    input.multiple = false;
-    // input.accept = "audio/*";
+    input.multiple = true;
+    input.accept = "audio/";
     input.addEventListener("change", () => {
       if (input.files && input.files.length > 0) {
-        const file = input.files[0];
-        if (file && isValidFile(file)) {
-          onRecieveFile(file);
-          setDropZoneState(DropZoneState.Dropped);
+        const filesArray = Array.from(input.files);
+        if (filesArray.every((file) => isValidFile(file))) {
+          props.onReceiveFiles(filesArray);
+          setDropZoneState(DropZoneState.NoFile);
+        } else {
+          showInvalidFile();
         }
       }
     });
     input.click();
-  };
-  const onRecieveFile = (file: File) => {
-    console.log(file);
   };
 
   return (

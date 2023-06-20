@@ -9,9 +9,16 @@ export type LoginResponse =
 export interface Authenticatable {
   isAuthenticated(): boolean;
   authenticate(key: string): Promise<LoginResponse>;
+  addLoginListener(listener: () => void): void;
+  removeLoginListener(listener: () => void): void;
 }
 
 export function isAuthenticatable(object: any): object is Authenticatable {
-  const props = ["isAuthenticated", "authenticate"];
+  const props = [
+    "isAuthenticated",
+    "authenticate",
+    "addLoginListener",
+    "removeLoginListener",
+  ];
   return props.every((prop) => prop in object);
 }

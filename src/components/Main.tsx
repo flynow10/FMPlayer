@@ -23,18 +23,20 @@ export enum Location {
   EditPlaylist = "Edit Playlists",
 }
 
+type PageStore = {
+  type: PageType;
+  data?: any;
+};
+
 export default function Main(props: MainProps) {
-  const [pages, updatePages] = useState(() => {
-    const pagesObject: { [key: string]: { type: PageType; data: string }[] } =
-      {};
-    pagesObject["Search"] = [{ type: PageType.SearchResults, data: "" }];
-    pagesObject[Location.Album] = [{ type: PageType.AlbumList, data: "" }];
-    pagesObject[Location.Song] = [{ type: PageType.SongList, data: "" }];
-    pagesObject[Location.Playlist] = [
-      { type: PageType.PlaylistList, data: "" },
-    ];
-    pagesObject[Location.Genre] = [{ type: PageType.GenreList, data: "" }];
-    pagesObject[Location.Import] = [{ type: PageType.UploadMedia, data: "" }];
+  const [tabs, updateTabs] = useState(() => {
+    const pagesObject: { [key: string]: PageStore[] } = {};
+    pagesObject["Search"] = [{ type: PageType.SearchResults }];
+    pagesObject[Location.Album] = [{ type: PageType.AlbumList }];
+    pagesObject[Location.Song] = [{ type: PageType.SongList }];
+    pagesObject[Location.Playlist] = [{ type: PageType.PlaylistList }];
+    pagesObject[Location.Genre] = [{ type: PageType.GenreList }];
+    pagesObject[Location.Import] = [{ type: PageType.FileSearch }];
     return pagesObject;
   });
 
@@ -44,35 +46,29 @@ export default function Main(props: MainProps) {
 
   const pageElements: ReactNode[] = [];
 
-  const onNavigate = (
-    navigateType: NavigationType,
-    pageType?: PageType,
-    data: string = ""
-  ) => {
-    if (navigateType === "new") {
-      if (!pageType) {
-        throw new Error("Page Type missing from new page");
+  const onNavigate = (navigateType: NavigationType, pageData?: PageStore) => {
+    if (navigateType === NavigationType.New) {
+      if (!pageData) {
+        throw new Error("Page Data missing from new page");
       }
-      updatePages({
-        ...pages,
-        [props.location]: [...pages[props.location], { type: pageType, data }],
+      updateTabs({
+        ...tabs,
+        [props.location]: [...tabs[props.location], pageData],
       });
     }
-    if (navigateType === "back") {
-      if (pages[props.location].length > 1) {
-        updatePages({
-          ...pages,
+    if (navigateType === NavigationType.Back) {
+      if (tabs[props.location].length > 1) {
+        updateTabs({
+          ...tabs,
           [props.location]: [
-            ...pages[props.location].filter(
-              (_, i, arr) => i !== arr.length - 1
-            ),
+            ...tabs[props.location].filter((_, i, arr) => i !== arr.length - 1),
           ],
         });
       }
     }
   };
 
-  Object.entries(pages).forEach(([location, pageList]) => {
+  Object.entries(tabs).forEach(([location, pageList]) => {
     pageList.forEach((page, index) => {
       pageElements.push(
         <Page
@@ -82,7 +78,7 @@ export default function Main(props: MainProps) {
           data={page.data}
           locationPageCount={pageList.length}
           currentLocation={props.isSearching ? "Search" : props.location}
-          key={location + index + page.type + page.data}
+          key={location + index + page.type + JSON.stringify(page.data)}
           onNavigate={onNavigate}
           onPlayMedia={(id, type) => {
             props.onPlayMedia?.(id, type);
@@ -104,12 +100,12 @@ export default function Main(props: MainProps) {
               "rounded-lg",
               {
                 "text-gray-500 hover:bg-inherit":
-                  pages[props.location].length === 1,
+                  tabs[props.location].length === 1,
               }
             )}
-            disabled={pages[props.location].length === 1}
+            disabled={tabs[props.location].length === 1}
             onClick={() => {
-              onNavigate("back");
+              onNavigate(NavigationType.Back);
             }}
           >
             <ChevronLeft />
@@ -126,7 +122,9 @@ export default function Main(props: MainProps) {
 export type PlayByID = (id: string, type: MediaType) => void;
 export type NavigationMethod = (
   navigateType: NavigationType,
-  page?: PageType,
-  data?: string
+  pageData?: PageStore
 ) => void;
-export type NavigationType = "new" | "back";
+export enum NavigationType {
+  New,
+  Back,
+}

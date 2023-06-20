@@ -3,7 +3,7 @@ import { Location } from "./Main";
 export type SidebarProps = {
   location: Location;
   isSearching: boolean;
-  onNavigate?: (location: Location) => void;
+  onSelectTab?: (location: Location) => void;
   onSearch?: (search: string) => void;
 };
 
@@ -41,7 +41,7 @@ export default function Sidebar(props: SidebarProps) {
       disabled={!notDisabled.includes(location)}
       key={location}
       onClick={() => {
-        props.onNavigate?.(location);
+        props.onSelectTab?.(location);
       }}
     >
       {location}

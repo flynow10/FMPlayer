@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { getEnvVar } from "../lib/_constants.js";
+import { getEnvVar } from "../api-lib/_constants.js";
 import Ably from "ably";
 
 const ABLY_ROOT_KEY = getEnvVar("ABLY_ROOT_KEY");
