@@ -1,24 +1,12 @@
 import { v4 as uuid } from "uuid";
-import { printRequestType } from "../lib/_api-utils.js";
-import { getEnvVar } from "../lib/_constants.js";
+import { printRequestType } from "../api-lib/_api-utils.js";
+import { getEnvVar } from "../api-lib/_constants.js";
 import { VercelRequest, VercelResponse } from "@vercel/node";
-import { prismaClient, s3Client } from "../lib/_data-clients.js";
+import { prismaClient, s3Client } from "../api-lib/_data-clients.js";
 import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
+import type { UploadFileBody } from "../api-lib/_upload-types.js";
 
 const S3_SONG_CONVERSION_BUCKET = getEnvVar("S3_SONG_CONVERSION_BUCKET");
-
-type FileData = {
-  ext: string;
-};
-
-type MetaData = {
-  title?: string;
-  genre?: string;
-  artists?: string[] | string;
-  featuring?: string[] | string;
-  albumId?: string;
-  trackNumber?: number;
-};
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") {
@@ -43,8 +31,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         res.status(400).json("Missing metadata");
         return;
       }
-      const { file, metadata }: { file: FileData; metadata: MetaData } =
-        req.body;
+      const { file, metadata }: UploadFileBody = req.body;
       if (file.ext.match(/^([0-9A-z]{1,4})$/) === null) {
         res.status(400).json("Invalid file type");
         return;

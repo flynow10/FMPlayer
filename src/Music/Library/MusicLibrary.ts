@@ -6,14 +6,15 @@ import {
   GenreMediaResponse,
   SongListOptions,
   SongWithAlbum,
-} from "@/lib/_postgres-types";
+} from "@/api-lib/_postgres-types";
 import { Authenticatable, LoginResponse } from "./Authenticatable";
 import { cookieExists } from "@/src/utils/cookies";
-import { USER_TOKEN } from "@/lib/_constants";
-import { AblyClient } from "./AblyClient";
+import { USER_TOKEN } from "@/api-lib/_constants";
 import { PresignedPost } from "@aws-sdk/s3-presigned-post";
 
 class PostgresMusicLibrary implements Authenticatable {
+  private onLogin: (() => void)[] = [];
+
   public isAuthenticated(): boolean {
     return cookieExists(USER_TOKEN);
   }
@@ -28,21 +29,37 @@ class PostgresMusicLibrary implements Authenticatable {
     return await this.login(hashHex);
   }
 
-  private async login(hash: string): Promise<LoginResponse> {
-    const responseJson: LoginResponse = await (
-      await fetch(`/api/login`, {
-        method: "POST",
-        body: JSON.stringify({ hash }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-    ).json();
+  public addLoginListener(listener: () => void): void {
+    this.onLogin.push(listener);
+  }
 
-    if (!responseJson.success) {
-      console.warn(responseJson.error);
+  public removeLoginListener(listener: () => void): void {
+    this.onLogin = this.onLogin.filter((v) => v !== listener);
+  }
+
+  private async login(hash: string): Promise<LoginResponse> {
+    try {
+      const responseJson: LoginResponse = await (
+        await fetch(`/api/login`, {
+          method: "POST",
+          body: JSON.stringify({ hash }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+      ).json();
+      if (!responseJson.success) {
+        console.warn(responseJson.error);
+      } else {
+        this.onLogin.forEach((listener) => listener());
+      }
+      return responseJson;
+    } catch (e: any) {
+      return {
+        success: false,
+        error: e.toString(),
+      };
     }
-    return responseJson;
   }
 
   private async makePostgresRequest(
@@ -162,7 +179,7 @@ class PostgresMusicLibrary implements Authenticatable {
   }
 
   public async getMusicFileUrl(id: string): Promise<string | undefined> {
-    return this.makeAWSRequest("songUrl", { id }, undefined);
+    return (await this.makeAWSRequest("songUrl", { id }, undefined)).url;
   }
 }
 

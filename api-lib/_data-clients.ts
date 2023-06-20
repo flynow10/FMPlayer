@@ -8,7 +8,6 @@ const prismaDatasource =
   getVercelEnvironment() === "development"
     ? getEnvVar("DEVELOPMENT_DB_URL")
     : getEnvVar("SUPABASE_DATABASE_URL");
-console.log(prismaDatasource);
 export const prismaClient = new PrismaClient({
   datasources: { db: { url: prismaDatasource } },
   errorFormat: IS_LOCAL ? "pretty" : "minimal",

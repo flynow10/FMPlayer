@@ -62,10 +62,11 @@ export class AblyClient {
     this.uploadStatusChannel.subscribe(callback);
   }
 
-  public async connect(): Promise<void> {
+  public connect() {
     this.client.connect();
-    await this.client.connection.once("connected");
-    console.log("Ably connected");
+    this.client.connection.once("connected", () => {
+      console.log("Ably connected");
+    });
   }
 }
 

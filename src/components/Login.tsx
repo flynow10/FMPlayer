@@ -1,8 +1,8 @@
-import classNames from "classnames";
-import { Lock, Music4, X } from "lucide-react";
-import { FormEvent, ReactNode, useEffect, useState } from "react";
+import { Lock, Music4 } from "lucide-react";
+import { FormEvent, useState } from "react";
 import { MyMusicLibrary } from "@/Music/Library/MusicLibrary";
 import { isAuthenticatable } from "@/Music/Library/Authenticatable";
+import { toast } from "react-toastify";
 
 export function Login({ onAuthenticate }: { onAuthenticate: () => void }) {
   const [password, setPassword] = useState("");
@@ -18,11 +18,10 @@ export function Login({ onAuthenticate }: { onAuthenticate: () => void }) {
       });
     }
   };
-  const [errors, setErrors] = useState<ReactNode[]>([]);
   const addError = (
     error: string = "Something went wrong, please try again later."
   ) => {
-    setErrors([...errors, <Error key={errors.length} error={error} />]);
+    toast.error(error);
   };
   return (
     <>
@@ -52,44 +51,6 @@ export function Login({ onAuthenticate }: { onAuthenticate: () => void }) {
           </div>
         </form>
       </div>
-      <div className="absolute right-0 m-2 bottom-0 flex flex-col-reverse">
-        {errors}
-      </div>
     </>
-  );
-}
-
-function Error({ error }: { error: string }) {
-  const [closed, setClosed] = useState(false);
-  const [closing, setClosing] = useState(false);
-  const [open, setOpen] = useState(false);
-  const classes = classNames(
-    "transition-[transform,_opacity] m-1 rounded border-2 border-red-600 bg-red-500 text-white p-2 w-80",
-    {
-      "opacity-100 scale-y-100": !closing,
-      "opacity-0 scale-y-0": closing,
-      hidden: closed,
-      "translate-x-full": !open,
-      "translate-x-0": open,
-    }
-  );
-  const onClose = () => {
-    setClosing(true);
-    setTimeout(() => {
-      setClosed(true);
-    }, 200);
-  };
-  useEffect(() => {
-    setTimeout(() => {
-      setOpen(true);
-    }, 10);
-  }, []);
-  return (
-    <div className={classes}>
-      {error + " "}
-      <button onClick={onClose} className="inline float-right">
-        <X />
-      </button>
-    </div>
   );
 }
