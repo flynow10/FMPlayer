@@ -151,9 +151,7 @@ export default function YoutubeSearchForm(props: {
           {suggestionButtons}
         </div>
       </div>
-      <button className="border-y-2 border-r-2 p-2 border-emerald-500 bg-green-500 text-white rounded-r-lg active:bg-green-600">
-        Search
-      </button>
+      <button className="border-l-0 rounded-l-none btn success">Search</button>
     </form>
   );
 }

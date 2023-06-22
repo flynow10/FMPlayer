@@ -4,6 +4,7 @@ import { ReactNode, useState } from "react";
 import Page, { PageType } from "./Page";
 import { ChevronLeft } from "lucide-react";
 import classNames from "classnames";
+import YoutubeSearchForm from "./pages/upload/YoutubeSearchForm";
 
 export type MainProps = {
   onPlayMedia?: PlayByID;

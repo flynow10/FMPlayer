@@ -52,7 +52,7 @@ export async function setUserCookie(res: VercelResponse) {
       secure: true,
       path: "/",
       httpOnly: getVercelEnvironment() !== "development",
-      maxAge: 60 * 60 * 2,
+      // maxAge: 60 * 60 * 2,
     })
   );
 

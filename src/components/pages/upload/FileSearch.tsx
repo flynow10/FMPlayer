@@ -66,7 +66,7 @@ export default function FileSearch(props: FileSearchProps) {
               Use youtube search to the left
             </div>
             <button
-              className="border-y-2 border-r-2 p-2 disabled:border-gray-500 border-emerald-500 disabled:bg-gray-500 bg-green-500 text-white rounded-r-lg active:bg-green-600"
+              className="border-l-0 rounded-l-none btn success"
               disabled={!isUrl(urlText) || isTextYoutubeUrl}
               onClick={() => {
                 props.onNavigate(NavigationType.New, {
