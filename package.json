@@ -15,10 +15,12 @@
     "lint:stylefix": "stylelint \"./src/**/*.(css|sass|scss)\" --customSyntax postcss-scss --fix",
     "clean": "yarn clean-build; yarn clean-test",
     "clean-build": "rm -rf ./dist",
-    "clean-test": "rm -rf .coverage",
+    "clean-test": "rm -rf ./coverage",
     "preview": "vite preview",
     "test": "jest",
-    "postinstall": "prisma generate; patch-package"
+    "test:coverage": "jest --collect-coverage",
+    "postinstall": "prisma generate; patch-package",
+    "prepare": "husky install"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.327.0",
@@ -45,6 +47,8 @@
     "uuid": "^9.0.0"
   },
   "devDependencies": {
+    "@commitlint/cli": "^17.6.5",
+    "@commitlint/config-conventional": "^17.6.5",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^14.0.0",
     "@testing-library/user-event": "^14.4.3",
@@ -64,6 +68,7 @@
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-react": "^7.32.2",
     "eslint-plugin-react-hooks": "^4.6.0",
+    "husky": "^8.0.0",
     "jest": "^29.5.0",
     "jest-chain": "^1.1.6",
     "jest-environment-jsdom": "^29.5.0",

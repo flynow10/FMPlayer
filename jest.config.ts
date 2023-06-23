@@ -10,8 +10,8 @@ const config: Config = {
     "^@/api-lib/(.*)$": "<rootDir>/api-lib/$1",
     "^@/Music/(.*)$": "<rootDir>/src/Music/$1",
   },
-  collectCoverage: true,
-  collectCoverageFrom: ["./src/**/*.(ts|tsx|js|jsx)"],
+  collectCoverage: false,
+  // collectCoverageFrom: ["./src/**/*.(ts|tsx|js|jsx)"],
   coverageReporters: ["cobertura", "lcov"],
 };
 export default config;
