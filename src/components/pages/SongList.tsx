@@ -107,7 +107,7 @@ export default function SongList(props: SongListProps) {
                   <Play />
                 </td>
                 {columns.map((column) => {
-                  var value = song[column.prop];
+                  let value = song[column.prop];
                   if (value instanceof Date) {
                     value = value.toISOString();
                   }

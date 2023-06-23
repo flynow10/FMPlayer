@@ -1,9 +1,9 @@
 // https://stackoverflow.com/questions/5968196/how-do-i-check-if-a-cookie-exists
 export const getCookie = (name: string) => {
-  var dc = document.cookie;
-  var prefix = name + "=";
-  var begin = dc.indexOf("; " + prefix);
-  var end = undefined;
+  const dc = document.cookie;
+  const prefix = name + "=";
+  let begin = dc.indexOf("; " + prefix);
+  let end = undefined;
   if (begin == -1) {
     begin = dc.indexOf(prefix);
     if (begin != 0) return null;

@@ -19,7 +19,7 @@ export function Login({ onAuthenticate }: { onAuthenticate: () => void }) {
     }
   };
   const addError = (
-    error: string = "Something went wrong, please try again later."
+    error = "Something went wrong, please try again later."
   ) => {
     toast.error(error);
   };

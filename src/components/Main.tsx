@@ -4,7 +4,6 @@ import { ReactNode, useState } from "react";
 import Page, { PageType } from "./Page";
 import { ChevronLeft } from "lucide-react";
 import classNames from "classnames";
-import YoutubeSearchForm from "./pages/upload/YoutubeSearchForm";
 
 export type MainProps = {
   onPlayMedia?: PlayByID;
@@ -26,7 +25,7 @@ export enum Location {
 
 type PageStore = {
   type: PageType;
-  data?: any;
+  data?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 };
 
 export default function Main(props: MainProps) {

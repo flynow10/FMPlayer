@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Loader2,
   PauseCircle,
@@ -33,7 +33,7 @@ export type AudioProps = {
 };
 
 export function Audio(props: AudioProps) {
-  const [song, loaded] = useAsyncLoad<Song | null>(
+  const [song] = useAsyncLoad<Song | null>(
     async () => {
       if (!props.id) return null;
       return (await MyMusicLibrary.getSong(props.id)) || null;
@@ -82,7 +82,7 @@ export function Audio(props: AudioProps) {
       window.removeEventListener("mousemove", onSeekMove);
       window.removeEventListener("mouseup", onSeekUp);
     };
-  }, [seeking, setSeeking, props.onStopSeek, props.onSeekChange]);
+  }, [seeking, setSeeking, props]);
 
   const startSeek = () => {
     props.onStartSeek?.();

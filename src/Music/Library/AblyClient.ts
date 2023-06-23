@@ -8,7 +8,7 @@ class AblyChannelWrapper {
 
   public subscribe(
     callback: (status: Types.Message) => void,
-    event: string = "status"
+    event = "status"
   ): void {
     this.channel.subscribe(event, (msg: Types.Message) => {
       callback(msg);
@@ -16,7 +16,7 @@ class AblyChannelWrapper {
   }
 
   public unsubscribe(
-    event: string = "all",
+    event = "all",
     callback?: (status: Types.Message) => void
   ): void {
     if (event === "all") {

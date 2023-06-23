@@ -726,51 +726,51 @@ class FileTypeParser {
         mime: "audio/ape",
       };
     }
+    async function readField() {
+      const msb = await tokenizer.peekNumber(Token.UINT8);
+      let mask = 0x80;
+      let ic = 0; // 0 = A, 1 = B, 2 = C, 3
+      // = D
+
+      while ((msb & mask) === 0 && mask !== 0) {
+        ++ic;
+        mask >>= 1;
+      }
+
+      const id = new Uint8Array(ic + 1);
+      await tokenizer.readBuffer(id);
+      return id;
+    }
+
+    async function readElement() {
+      const id = await readField();
+      const lengthField = await readField();
+      lengthField[0] ^= 0x80 >> (lengthField.length - 1);
+      const nrLength = Math.min(6, lengthField.length); // JavaScript can max read 6 bytes integer
+      return {
+        id: readUIntBE(id, 0, id.length),
+        len: readUIntBE(lengthField, lengthField.length - nrLength, nrLength),
+      };
+    }
+
+    async function readChildren(children: number) {
+      while (children > 0) {
+        const element = await readElement();
+        if (element.id === 0x42_82) {
+          const rawValue = await tokenizer.readToken(
+            new Token.StringType(element.len, "utf-8")
+          );
+          return rawValue.replace(/\00.*$/g, ""); // Return DocType
+        }
+
+        await tokenizer.ignore(element.len); // ignore payload
+        --children;
+      }
+    }
 
     // https://github.com/threatstack/libmagic/blob/master/magic/Magdir/matroska
     if (this.check([0x1a, 0x45, 0xdf, 0xa3])) {
       // Root element: EBML
-      async function readField() {
-        const msb = await tokenizer.peekNumber(Token.UINT8);
-        let mask = 0x80;
-        let ic = 0; // 0 = A, 1 = B, 2 = C, 3
-        // = D
-
-        while ((msb & mask) === 0 && mask !== 0) {
-          ++ic;
-          mask >>= 1;
-        }
-
-        const id = new Uint8Array(ic + 1);
-        await tokenizer.readBuffer(id);
-        return id;
-      }
-
-      async function readElement() {
-        const id = await readField();
-        const lengthField = await readField();
-        lengthField[0] ^= 0x80 >> (lengthField.length - 1);
-        const nrLength = Math.min(6, lengthField.length); // JavaScript can max read 6 bytes integer
-        return {
-          id: readUIntBE(id, 0, id.length),
-          len: readUIntBE(lengthField, lengthField.length - nrLength, nrLength),
-        };
-      }
-
-      async function readChildren(children: number) {
-        while (children > 0) {
-          const element = await readElement();
-          if (element.id === 0x42_82) {
-            const rawValue = await tokenizer.readToken(
-              new Token.StringType(element.len, "utf-8")
-            );
-            return rawValue.replace(/\00.*$/g, ""); // Return DocType
-          }
-
-          await tokenizer.ignore(element.len); // ignore payload
-          --children;
-        }
-      }
 
       const re = await readElement();
       const docType = await readChildren(re.len);
@@ -1078,6 +1078,13 @@ class FileTypeParser {
 
     // -- 8-byte signatures --
 
+    async function readChunkHeader() {
+      return {
+        length: await tokenizer.readToken(Token.INT32_BE),
+        type: await tokenizer.readToken(new Token.StringType(4, "binary")),
+      };
+    }
+
     if (this.check([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])) {
       // APNG format (https://wiki.mozilla.org/APNG_Specification)
       // 1. Find the first IDAT (image data) chunk (49 44 41 54)
@@ -1088,13 +1095,6 @@ class FileTypeParser {
       // - 4 (length) + 4 (chunk type) + 13 (chunk data) + 4 (CRC): IHDR chunk
 
       await tokenizer.ignore(8); // ignore PNG signature
-
-      async function readChunkHeader() {
-        return {
-          length: await tokenizer.readToken(Token.INT32_BE),
-          type: await tokenizer.readToken(new Token.StringType(4, "binary")),
-        };
-      }
 
       do {
         const chunk = await readChunkHeader();
@@ -1180,19 +1180,18 @@ class FileTypeParser {
       };
     }
 
+    async function readHeader() {
+      const guid = new Uint8Array(16);
+      await tokenizer.readBuffer(guid);
+      return {
+        id: guid,
+        size: Number(await tokenizer.readToken(Token.UINT64_LE)),
+      };
+    }
     // ASF_Header_Object first 80 bytes
     if (
       this.check([0x30, 0x26, 0xb2, 0x75, 0x8e, 0x66, 0xcf, 0x11, 0xa6, 0xd9])
     ) {
-      async function readHeader() {
-        const guid = new Uint8Array(16);
-        await tokenizer.readBuffer(guid);
-        return {
-          id: guid,
-          size: Number(await tokenizer.readToken(Token.UINT64_LE)),
-        };
-      }
-
       await tokenizer.ignore(30);
       // Search for header should be in first 1KB of file.
       while (tokenizer.position + 24 < tokenizer.fileInfo.size) {
@@ -1467,7 +1466,7 @@ class FileTypeParser {
               mime: "application/x-asar",
             };
           }
-        } catch {}
+        } catch {} // eslint-disable-line
       }
     }
 

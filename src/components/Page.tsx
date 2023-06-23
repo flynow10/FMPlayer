@@ -11,7 +11,7 @@ type PageProps = {
   index: number;
   locationPageCount: number;
   type: PageType;
-  data: any;
+  data: any; // eslint-disable-line @typescript-eslint/no-explicit-any
   onNavigate: NavigationMethod;
   onPlayMedia: PlayByID;
 };

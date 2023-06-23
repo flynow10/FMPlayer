@@ -7,7 +7,7 @@ import { ActionSongPair } from "./Playlist";
 
 export class PlaylistParser {
   public actionList: Action[] = [];
-  public currentAction: number = 0;
+  public currentAction = 0;
   private readonly TOKEN_MISMATCH = new Error("Token mismatch!");
 
   parse(actionList: Action[]): ActionSongPair[] {
@@ -48,7 +48,7 @@ export class PlaylistParser {
 
   block(): Block {
     const block = new Block();
-    var nextToken = this.getCurrentToken();
+    let nextToken = this.getCurrentToken();
     if (nextToken === null) {
       return block;
     }
@@ -72,12 +72,12 @@ export class PlaylistParser {
         return block;
       }
     }
-    this.stepNextToken();
+    this.stepNextToken()
     return block;
   }
 
   loop(): Loop {
-    const loopToken = this.stepNextToken()!;
+    const loopToken = this.stepNextToken()!; // eslint-disable-line @typescript-eslint/no-non-null-assertion
     if (!this.isTokenType<LoopAction>(loopToken, ActionType.Loop)) {
       throw this.TOKEN_MISMATCH;
     }
@@ -86,7 +86,7 @@ export class PlaylistParser {
   }
 
   number(): NumberNode {
-    const numberToken = this.stepNextToken()!;
+    const numberToken = this.stepNextToken()!; // eslint-disable-line @typescript-eslint/no-non-null-assertion
     if (!this.isTokenType<NumberAction>(numberToken, ActionType.Number)) {
       throw this.TOKEN_MISMATCH;
     }
@@ -94,7 +94,7 @@ export class PlaylistParser {
   }
 
   playSong(): PlaySong {
-    const token = this.stepNextToken()!;
+    const token = this.stepNextToken()!; // eslint-disable-line @typescript-eslint/no-non-null-assertion
     if (!this.isTokenType<PlaySongAction>(token, ActionType.PlaySong)) {
       throw this.TOKEN_MISMATCH;
     }
@@ -163,7 +163,7 @@ class NumberNode implements ASTNode {
     this.value = value;
   }
 
-  public walk(scope: Scope) {
+  public walk() {
     return this.value;
   }
 }
@@ -176,5 +176,5 @@ class Scope {
 }
 
 interface ASTNode {
-  walk(scope: Scope): any;
+  walk(scope: Scope): any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }

@@ -12,6 +12,11 @@ import { cookieExists } from "@/src/utils/cookies";
 import { USER_TOKEN } from "@/api-lib/_constants";
 import { PresignedPost } from "@aws-sdk/s3-presigned-post";
 
+enum ApiEndpoint {
+  POSTGRES = "/api/postgres",
+  AWS = "/api/aws",
+}
+
 class PostgresMusicLibrary implements Authenticatable {
   private onLogin: (() => void)[] = [];
 
@@ -54,46 +59,35 @@ class PostgresMusicLibrary implements Authenticatable {
         this.onLogin.forEach((listener) => listener());
       }
       return responseJson;
-    } catch (e: any) {
+    } catch (e) {
       return {
         success: false,
-        error: e.toString(),
+        error: e?.toString(),
       };
     }
   }
 
-  private async makePostgresRequest(
+  private async makeRequest<T>(
+    endpoint: ApiEndpoint,
     type: string,
     options: object,
-    defaultResponse?: any
-  ): Promise<any> {
-    const requestUrl = `/api/postgres?${this.optionsToUrl({
+    defaultResponse?: T
+  ): Promise<T> {
+    const requestUrl = `${endpoint}?${this.optionsToUrl({
       type,
       ...options,
     })}`;
     const responseJson: object | string = await (
-      await fetch(`/api/postgres?${this.optionsToUrl({ type, ...options })}`)
+      await fetch(requestUrl)
     ).json();
     if (typeof responseJson === "string") {
       console.warn(responseJson);
+      if (defaultResponse === undefined) {
+        throw new Error(`Failed to make call to ${requestUrl}`);
+      }
       return defaultResponse;
     }
-    return responseJson;
-  }
-
-  private async makeAWSRequest(
-    type: string,
-    options: object,
-    defaultResponse?: any
-  ): Promise<any> {
-    const responseJson: object | string = await (
-      await fetch(`/api/aws?${this.optionsToUrl({ type, ...options })}`)
-    ).json();
-    if (typeof responseJson === "string") {
-      console.warn(responseJson);
-      return defaultResponse;
-    }
-    return responseJson;
+    return responseJson as T;
   }
 
   private optionsToUrl(options: object): string {
@@ -116,31 +110,37 @@ class PostgresMusicLibrary implements Authenticatable {
   }
 
   public async getSong(id: string): Promise<SongWithAlbum | undefined> {
-    return this.makePostgresRequest("getSong", { id }, undefined);
+    return this.makeRequest(ApiEndpoint.POSTGRES, "getSong", { id }, undefined);
   }
 
   public async getAlbum(id: string): Promise<AlbumWithSongs | undefined> {
-    return this.makePostgresRequest("getAlbum", { id }, undefined);
+    return this.makeRequest(
+      ApiEndpoint.POSTGRES,
+      "getAlbum",
+      { id },
+      undefined
+    );
   }
 
   public async getSongList(
     options: Partial<SongListOptions> = {}
   ): Promise<Song[]> {
-    return this.makePostgresRequest("getSongList", options, []);
+    return this.makeRequest(ApiEndpoint.POSTGRES, "getSongList", options, []);
   }
 
   public async getAlbumList(
     options: Partial<AlbumListOptions> = {}
   ): Promise<Album[]> {
-    return this.makePostgresRequest("getAlbumList", options, []);
+    return this.makeRequest(ApiEndpoint.POSTGRES, "getAlbumList", options, []);
   }
 
   public async getGenreList(): Promise<GenreListResponse[]> {
-    return this.makePostgresRequest("getGenreList", {}, []);
+    return this.makeRequest(ApiEndpoint.POSTGRES, "getGenreList", {}, []);
   }
 
   public async getGenreMedia(genre: string): Promise<GenreMediaResponse> {
-    return this.makePostgresRequest(
+    return this.makeRequest(
+      ApiEndpoint.POSTGRES,
       "getGenreMedia",
       { genre },
       {
@@ -156,7 +156,8 @@ class PostgresMusicLibrary implements Authenticatable {
     fileType: string,
     file: Blob
   ): Promise<void> {
-    const presignedUrl: PresignedPost = await this.makeAWSRequest(
+    const presignedUrl: PresignedPost = await this.makeRequest(
+      ApiEndpoint.AWS,
       "presigned-post",
       {
         fileName: `${fileName}.${fileType}`,
@@ -179,7 +180,15 @@ class PostgresMusicLibrary implements Authenticatable {
   }
 
   public async getMusicFileUrl(id: string): Promise<string | undefined> {
-    return (await this.makeAWSRequest("songUrl", { id }, undefined)).url;
+    const url = (
+      await this.makeRequest<{ url: string }>(
+        ApiEndpoint.AWS,
+        "songUrl",
+        { id },
+        { url: "" }
+      )
+    ).url;
+    return url !== "" ? url : undefined;
   }
 }
 

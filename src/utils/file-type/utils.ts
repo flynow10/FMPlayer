@@ -1,7 +1,7 @@
 import { BufferEncoding } from "./types";
 
 export function stringToBytes(string: string) {
-  return [...string].map((character) => character.charCodeAt(0)); // eslint-disable-line unicorn/prefer-code-point
+  return [...string].map((character) => character.charCodeAt(0));
 }
 
 /**
@@ -90,7 +90,7 @@ export function slowToString(
 
   if (!encoding) encoding = "utf-8";
 
-  while (true) {
+  for (;;) {
     switch (encoding) {
       case "utf-8":
         return utf8Slice(buffer, start, end);
@@ -112,16 +112,15 @@ const MAX_ARGUMENTS_LENGTH = 0x1000;
 function decodeCodePointsArray(codePoints: number[]) {
   const len = codePoints.length;
   if (len <= MAX_ARGUMENTS_LENGTH) {
-    return String.fromCharCode.apply(String, codePoints); // avoid extra slice()
+    return String.fromCharCode(...codePoints); // avoid extra slice()
   }
 
   // Decode in chunks to avoid "call stack size exceeded".
   let res = "";
   let i = 0;
   while (i < len) {
-    res += String.fromCharCode.apply(
-      String,
-      codePoints.slice(i, (i += MAX_ARGUMENTS_LENGTH))
+    res += String.fromCharCode(
+      ...codePoints.slice(i, (i += MAX_ARGUMENTS_LENGTH))
     );
   }
   return res;
@@ -309,8 +308,8 @@ function fromString(string: string, encoding?: string) {
 
 function byteLength(string: string, encoding: string) {
   const len = string.length;
-  const mustMatch = arguments.length > 2 && arguments[2] === true;
-  if (!mustMatch && len === 0) return 0;
+  // const mustMatch = arguments.length > 2 && arguments[2] === true;
+  // if (!mustMatch && len === 0) return 0;
 
   // Use a for loop to avoid recursion
   let loweredCase = false;
@@ -345,7 +344,7 @@ function byteLength(string: string, encoding: string) {
 
 function write(buffer: Uint8Array, string: string, encoding: string) {
   // Buffer#write(string)
-  let offset = 0;
+  const offset = 0;
   let length = buffer.length;
 
   const remaining = buffer.length - offset;
@@ -539,9 +538,9 @@ function arrayIndexOf(
   val: ArrayLike<number>,
   byteOffset: number
 ) {
-  let indexSize = 1;
-  let arrLength = arr.length;
-  let valLength = val.length;
+  const indexSize = 1;
+  const arrLength = arr.length;
+  const valLength = val.length;
 
   function read(buf: ArrayLike<number>, i: number) {
     return buf[i];

@@ -22,7 +22,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   printRequestType("upload", req.query.type);
 
   switch (req.query.type) {
-    case "upload-file":
+    case "upload-file": {
       if (req.body.file === undefined) {
         res.status(400).json("Missing file");
         return;
@@ -66,6 +66,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
       res.status(200).json({ id, song, post });
       return;
+    }
     case "conversion-complete": {
       const { id } = req.body;
       if (typeof id !== "string" || id === "") {
