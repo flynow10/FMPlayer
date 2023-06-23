@@ -2,7 +2,7 @@ import { useAsyncLoad } from "@/src/utils/useAsyncLoad";
 import { NavigationMethod, PlayByID } from "../Main";
 import { MyMusicLibrary } from "@/src/Music/Library/MusicLibrary";
 import { FullCover } from "./LoadingPages";
-import { GenreMediaResponse } from "api/_postgres-types";
+import { GenreMediaResponse } from "api-lib/_postgres-types";
 import {
   MediaCard,
   MediaCardSize,

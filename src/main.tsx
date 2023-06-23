@@ -2,10 +2,13 @@ import React, { useState } from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import "@/src/assets/sass/index.scss";
+import "react-toastify/dist/ReactToastify.min.css";
 import { Login } from "@/src/components/Login";
 import { MyMusicLibrary } from "@/Music/Library/MusicLibrary";
 import { YoutubeAPI } from "./api/YoutubeAPI";
 import { isAuthenticatable } from "./Music/Library/Authenticatable";
+import { LambdaStatus } from "./Music/Library/AblyClient";
+import { ToastContainer } from "react-toastify";
 (async () => {
   const root = document.getElementById("root");
   if (!root) {
@@ -37,15 +40,30 @@ import { isAuthenticatable } from "./Music/Library/Authenticatable";
   await YoutubeAPI.load();
   let loginRequired = false;
   if (isAuthenticatable(MyMusicLibrary)) {
-    const isValid = await MyMusicLibrary.isAuthenticated();
+    const isValid = MyMusicLibrary.isAuthenticated();
     if (!isValid) {
       loginRequired = true;
     }
+  }
+
+  if (!loginRequired) {
+    LambdaStatus.connect();
+  } else {
+    MyMusicLibrary.addLoginListener(() => {
+      LambdaStatus.connect();
+    });
   }
   root.innerHTML = "";
   ReactDOM.createRoot(root as HTMLElement).render(
     <React.StrictMode>
       {loginRequired ? <WaitForLogin /> : <App />}
+      <ToastContainer
+        position="bottom-right"
+        draggable={true}
+        draggableDirection="x"
+        limit={5}
+        theme="colored"
+      />
     </React.StrictMode>
   );
 })();

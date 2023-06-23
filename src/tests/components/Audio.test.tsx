@@ -18,6 +18,7 @@ jest.mock("@/Music/Library/MusicLibrary", () => ({
           trackNumber: 1,
           createdOn: new Date(),
           modifiedOn: new Date(),
+          audioUploaded: null,
         })
       );
     }),

@@ -1,16 +1,21 @@
+@import url("./button.scss");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 .audio-button {
   @apply m-2;
+
   &:disabled {
     @apply text-gray-500;
   }
+
   &:not(:disabled) {
     .lucide {
       @apply transition-transform;
     }
+
     &:hover .lucide {
       @apply scale-90;
     }

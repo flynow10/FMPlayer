@@ -1,31 +1,20 @@
 import { VercelRequest, VercelResponse } from "@vercel/node";
-import { getEnvVar, getVercelEnvironment } from "../lib/_constants.js";
-import { PrismaClient, Song, Album, Prisma } from "@prisma/client";
 import {
   AlbumListOptions,
   AlbumSortFields,
-  AlbumWithSongs,
   GenreListResponse,
   SongListOptions,
   SongSortFields,
   SongWithAlbum,
-} from "./_postgres-types.js";
+} from "../api-lib/_postgres-types.js";
 import {
   getPaginationOptions,
   getPrismaSelectPaginationOptions,
   printRequestType,
-} from "../lib/_api-utils.js";
-
-const prismaDatasource =
-  getVercelEnvironment() === "development"
-    ? getEnvVar("DEVELOPMENT_DB_URL")
-    : getEnvVar("POSTGRES_PRISMA_URL");
-const prismaClient = new PrismaClient({
-  datasources: { db: { url: prismaDatasource } },
-});
+} from "../api-lib/_api-utils.js";
+import { prismaClient } from "../api-lib/_data-clients.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  console.log("Recieved Request");
   if (req.method !== "GET") {
     res.status(405).json("Method not allowed");
     return;

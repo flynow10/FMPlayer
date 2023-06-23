@@ -5,7 +5,7 @@ import { MediaType } from "@/src/utils/types";
 import { ChevronDown, ChevronUp, Play } from "lucide-react";
 import { Blur, FullCover } from "./LoadingPages";
 import { useState } from "react";
-import { SongSortFields, SortType } from "api/_postgres-types";
+import { SongSortFields, SortType } from "api-lib/_postgres-types";
 import { Song } from "@prisma/client";
 
 export type SongListProps = {
@@ -107,7 +107,7 @@ export default function SongList(props: SongListProps) {
                   <Play />
                 </td>
                 {columns.map((column) => {
-                  var value = song[column.prop];
+                  let value = song[column.prop];
                   if (value instanceof Date) {
                     value = value.toISOString();
                   }

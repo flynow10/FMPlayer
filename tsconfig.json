@@ -18,11 +18,10 @@
     "baseUrl": "./",
     "paths": {
       "@/src/*": ["./src/*"],
-      "@/api/*": ["./src/api/*"],
-      "@/lib/*": ["./lib/*"],
+      "@/api-lib/*": ["./api-lib/*"],
       "@/Music/*": ["./src/Music/*"]
     }
   },
-  "include": ["src", "middleware.ts", "api", "lib"]
+  "include": ["src", "middleware.ts", "api", "api-lib"]
   // "references": [{ "path": "./tsconfig.node.json" }]
 }

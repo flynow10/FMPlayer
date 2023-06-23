@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { setUserCookie } from "../lib/_auth.js";
+import { setUserCookie } from "../api-lib/_auth.js";
 
 function checkAuthorization(request: VercelRequest): boolean {
   const hash = request.body.hash,

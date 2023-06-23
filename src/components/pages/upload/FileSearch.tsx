@@ -2,14 +2,19 @@ import { useState } from "react";
 import YoutubeSearch from "./YoutubeSearch";
 import { isUrl, isYoutubeUrl } from "@/src/utils/urlUtils";
 import FileDrop from "./FileDrop";
+import { NavigationMethod, NavigationType } from "@/src/components/Main";
+import { PageType } from "../../Page";
+import { FileUploadType } from "./FileUpload";
 
-type UploadProps = {};
+type FileSearchProps = {
+  onNavigate: NavigationMethod;
+};
 
-export default function Upload(props: UploadProps) {
-  const [isTextUrl, setIsTextUrl] = useState(false);
+export default function FileSearch(props: FileSearchProps) {
+  const [urlText, setUrlText] = useState("");
   const [isTextYoutubeUrl, setIsTextYoutubeUrl] = useState(false);
   return (
-    <div className="flex flex-row h-full">
+    <div className="px-4 flex flex-row h-full">
       <div className="youtube-search w-2/3 border-r-2 h-full pr-3 flex flex-col">
         <h1 className="text-xl pt-4 pb-2">From Youtube</h1>
         <YoutubeSearch
@@ -21,7 +26,17 @@ export default function Upload(props: UploadProps) {
       <div className="file-upload grow pl-3 flex flex-col">
         <div className="grow flex flex-col">
           <h1 className="text-xl pt-4 pb-2 border-b-2">From Computer</h1>
-          <FileDrop />
+          <FileDrop
+            onReceiveFiles={(files) => {
+              props.onNavigate(NavigationType.New, {
+                type: PageType.FileUpload,
+                data: {
+                  uploadType: FileUploadType.File,
+                  files,
+                },
+              });
+            }}
+          />
         </div>
         <div>
           <h1 className="text-xl pt-4 pb-2">From URL</h1>
@@ -36,7 +51,7 @@ export default function Upload(props: UploadProps) {
               placeholder="Paste URL"
               onChange={(event) => {
                 const inputValue = event.currentTarget.value;
-                setIsTextUrl(isUrl(inputValue));
+                setUrlText(inputValue);
                 isYoutubeUrl(inputValue).then((videoId) => {
                   setIsTextYoutubeUrl(videoId !== false);
                 });
@@ -51,8 +66,17 @@ export default function Upload(props: UploadProps) {
               Use youtube search to the left
             </div>
             <button
-              className="border-y-2 border-r-2 p-2 disabled:border-gray-500 border-emerald-500 disabled:bg-gray-500 bg-green-500 text-white rounded-r-lg active:bg-green-600"
-              disabled={!isTextUrl || isTextYoutubeUrl}
+              className="border-l-0 rounded-l-none btn success"
+              disabled={!isUrl(urlText) || isTextYoutubeUrl}
+              onClick={() => {
+                props.onNavigate(NavigationType.New, {
+                  type: PageType.FileUpload,
+                  data: {
+                    uploadType: FileUploadType.Url,
+                    url: urlText,
+                  },
+                });
+              }}
             >
               Upload
             </button>
