@@ -14,7 +14,7 @@ jobs:
         with:
           node-version: 18.x
           cache: "yarn"
-      - run: yarn install --frozen-lockfile
+      - run: yarn add --dev @commitlint/cli @commitlint/config-conventional
       - name: Print versions
         run: |
           git --version
