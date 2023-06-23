@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { SetStateAction, useEffect, useState } from "react";
 
 export function useAsyncLoad<T>(
   load: () => Promise<T>,
   initialValue: T,
   deps?: React.DependencyList
-): [T, boolean] {
+): [T, boolean, React.Dispatch<SetStateAction<T>>] {
   const [data, setData] = useState<T>(initialValue);
   const [loaded, setLoaded] = useState(false);
 
@@ -23,6 +23,6 @@ export function useAsyncLoad<T>(
         setData(newData);
       }
     }
-  }, deps);
-  return [data, loaded];
+  }, deps); // eslint-disable-line react-hooks/exhaustive-deps
+  return [data, loaded, setData];
 }

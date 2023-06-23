@@ -1,8 +1,9 @@
 import { VercelRequest, VercelResponse } from "@vercel/node";
-import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
+import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { getEnvVar, getVercelEnvironment } from "../lib/_constants.js";
-import { printRequestType } from "../lib/_api-utils.js";
+import { getEnvVar, getVercelEnvironment } from "../api-lib/_constants.js";
+import { printRequestType } from "../api-lib/_api-utils.js";
+import { s3Client } from "../api-lib/_data-clients.js";
 
 const IS_LOCAL = getVercelEnvironment() === "development";
 
@@ -43,10 +44,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
 const S3_SONGS_BUCKET = getEnvVar("S3_SONGS_BUCKET");
 
-const s3Client = new S3Client({});
-
 const urlCache = new Map<string, { time: number; url: string }>();
-const expirationTimeS = 60 * 60 * 12; // 12 hours
+const expirationTimeS = 60 * 60 * 3; // 3 hours
 const expirationTimeMS = expirationTimeS * 1000;
 
 const maxTimeMarginS = 60 * 60; // 1 hour

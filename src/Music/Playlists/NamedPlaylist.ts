@@ -24,7 +24,7 @@ export class NamedPlaylist extends Playlist {
         ...playlistData.actionList.map((a) => createFromStub(a))
       );
     }
-    delete (playlistData as any).actionList;
+    delete (playlistData as any).actionList; // eslint-disable-line @typescript-eslint/no-explicit-any
     return Object.assign(playlist, playlistData);
   }
 }

@@ -6,12 +6,22 @@ import {
   GenreMediaResponse,
   SongListOptions,
   SongWithAlbum,
-} from "api/_postgres-types";
+} from "@/api-lib/_postgres-types";
 import { Authenticatable, LoginResponse } from "./Authenticatable";
+import { cookieExists } from "@/src/utils/cookies";
+import { USER_TOKEN } from "@/api-lib/_constants";
+import { PresignedPost } from "@aws-sdk/s3-presigned-post";
+
+enum ApiEndpoint {
+  POSTGRES = "/api/postgres",
+  AWS = "/api/aws",
+}
 
 class PostgresMusicLibrary implements Authenticatable {
-  public async isAuthenticated(): Promise<boolean> {
-    return (await (await fetch("/api/tryAuth")).json()) === true;
+  private onLogin: (() => void)[] = [];
+
+  public isAuthenticated(): boolean {
+    return cookieExists(USER_TOKEN);
   }
 
   public async authenticate(password: string): Promise<LoginResponse> {
@@ -24,124 +34,161 @@ class PostgresMusicLibrary implements Authenticatable {
     return await this.login(hashHex);
   }
 
+  public addLoginListener(listener: () => void): void {
+    this.onLogin.push(listener);
+  }
+
+  public removeLoginListener(listener: () => void): void {
+    this.onLogin = this.onLogin.filter((v) => v !== listener);
+  }
+
   private async login(hash: string): Promise<LoginResponse> {
-    const responseJson: LoginResponse = await (
-      await fetch(`/api/login`, {
-        method: "POST",
-        body: JSON.stringify({ hash }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-    ).json();
-    if (!responseJson.success) {
-      console.warn(responseJson.error);
+    try {
+      const responseJson: LoginResponse = await (
+        await fetch(`/api/login`, {
+          method: "POST",
+          body: JSON.stringify({ hash }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+      ).json();
+      if (!responseJson.success) {
+        console.warn(responseJson.error);
+      } else {
+        this.onLogin.forEach((listener) => listener());
+      }
+      return responseJson;
+    } catch (e) {
+      return {
+        success: false,
+        error: e?.toString(),
+      };
     }
-    return responseJson;
   }
 
-  public async getSong(id: string): Promise<SongWithAlbum | undefined> {
-    const responseJson: SongWithAlbum | string = await (
-      await fetch(`/api/postgres?type=getSong&id=${id}`)
+  private async makeRequest<T>(
+    endpoint: ApiEndpoint,
+    type: string,
+    options: object,
+    defaultResponse?: T
+  ): Promise<T> {
+    const requestUrl = `${endpoint}?${this.optionsToUrl({
+      type,
+      ...options,
+    })}`;
+    const responseJson: object | string = await (
+      await fetch(requestUrl)
     ).json();
-    if (typeof responseJson === "string" || responseJson === null) {
+    if (typeof responseJson === "string") {
       console.warn(responseJson);
-      return undefined;
+      if (defaultResponse === undefined) {
+        throw new Error(`Failed to make call to ${requestUrl}`);
+      }
+      return defaultResponse;
     }
-    return responseJson;
-  }
-
-  public async getAlbum(id: string): Promise<AlbumWithSongs | undefined> {
-    const responseJson: AlbumWithSongs | string = await (
-      await fetch(`/api/postgres?type=getAlbum&id=${id}`)
-    ).json();
-    if (typeof responseJson === "string" || responseJson === null) {
-      console.warn(responseJson);
-      return undefined;
-    }
-    return responseJson;
+    return responseJson as T;
   }
 
   private optionsToUrl(options: object): string {
-    return new URLSearchParams(
+    const urlSearchParams = new URLSearchParams(
       Object.entries(options).reduce((obj, val) => {
-        obj[val[0]] = val[1];
+        if (typeof val[1] === "number") {
+          obj[val[0]] = val[1].toString(10);
+        } else if (!Array.isArray(val[1])) {
+          obj[val[0]] = val[1];
+        }
         return obj;
       }, {} as Record<string, string>)
-    ).toString();
+    );
+    Object.entries(options).forEach(([key, value]) => {
+      if (Array.isArray(value)) {
+        value.forEach((v) => urlSearchParams.append(key, v));
+      }
+    });
+    return urlSearchParams.toString();
+  }
+
+  public async getSong(id: string): Promise<SongWithAlbum | undefined> {
+    return this.makeRequest(ApiEndpoint.POSTGRES, "getSong", { id }, undefined);
+  }
+
+  public async getAlbum(id: string): Promise<AlbumWithSongs | undefined> {
+    return this.makeRequest(
+      ApiEndpoint.POSTGRES,
+      "getAlbum",
+      { id },
+      undefined
+    );
   }
 
   public async getSongList(
     options: Partial<SongListOptions> = {}
   ): Promise<Song[]> {
-    const responseJson: Song[] | string = await (
-      await fetch(
-        `/api/postgres?${this.optionsToUrl({
-          type: "getSongList",
-          ...options,
-        })}`
-      )
-    ).json();
-    if (typeof responseJson === "string") {
-      console.warn(responseJson);
-      return [];
-    }
-    return responseJson;
+    return this.makeRequest(ApiEndpoint.POSTGRES, "getSongList", options, []);
   }
 
   public async getAlbumList(
     options: Partial<AlbumListOptions> = {}
   ): Promise<Album[]> {
-    const responseJson: Album[] | string = await (
-      await fetch(
-        `/api/postgres?${this.optionsToUrl({
-          ...options,
-          type: "getAlbumList",
-        })}`
-      )
-    ).json();
-    if (typeof responseJson === "string") {
-      console.warn(responseJson);
-      return [];
-    }
-    return responseJson;
+    return this.makeRequest(ApiEndpoint.POSTGRES, "getAlbumList", options, []);
   }
 
   public async getGenreList(): Promise<GenreListResponse[]> {
-    const responseJson: GenreListResponse[] | string = await (
-      await fetch(`/api/postgres?type=getGenreList`)
-    ).json();
-    if (typeof responseJson === "string") {
-      console.warn(responseJson);
-      return [];
-    }
-    return responseJson;
+    return this.makeRequest(ApiEndpoint.POSTGRES, "getGenreList", {}, []);
   }
 
   public async getGenreMedia(genre: string): Promise<GenreMediaResponse> {
-    const responseJson: GenreMediaResponse | string = await (
-      await fetch(`/api/postgres?type=getGenreMedia&genre=${genre}`)
-    ).json();
-    if (typeof responseJson === "string") {
-      console.warn(responseJson);
-      return {
+    return this.makeRequest(
+      ApiEndpoint.POSTGRES,
+      "getGenreMedia",
+      { genre },
+      {
         genre: "",
         songs: [],
         albums: [],
-      };
+      }
+    );
+  }
+
+  private async uploadFileToConvert(
+    fileName: string,
+    fileType: string,
+    file: Blob
+  ): Promise<void> {
+    const presignedUrl: PresignedPost = await this.makeRequest(
+      ApiEndpoint.AWS,
+      "presigned-post",
+      {
+        fileName: `${fileName}.${fileType}`,
+      }
+    );
+    const formData = new FormData();
+    for (const [key, value] of Object.entries(presignedUrl.fields)) {
+      formData.append(key, value);
     }
-    return responseJson;
+    formData.append("file", file);
+    console.log(
+      await fetch(presignedUrl.url, {
+        method: "POST",
+        body: formData,
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
+    );
   }
 
   public async getMusicFileUrl(id: string): Promise<string | undefined> {
-    const responseJson: { url: string } | string = await (
-      await fetch(`/api/aws?type=songUrl&id=${id}`)
-    ).json();
-    if (typeof responseJson === "string") {
-      console.warn(responseJson);
-      return undefined;
-    }
-    return responseJson.url;
+    const url = (
+      await this.makeRequest<{ url: string }>(
+        ApiEndpoint.AWS,
+        "songUrl",
+        { id },
+        { url: "" }
+      )
+    ).url;
+    return url !== "" ? url : undefined;
   }
 }
 

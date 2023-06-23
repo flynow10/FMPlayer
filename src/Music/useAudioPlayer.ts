@@ -13,7 +13,7 @@ export function useAudioPlayer(id: string | null, onSongEnded?: () => void) {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
 
-  const seekToTime = (time: number, end: boolean = false) => {
+  const seekToTime = (time: number, end = false) => {
     if (!audioTag.current.paused) {
       audioTag.current.pause();
     }
@@ -53,13 +53,14 @@ export function useAudioPlayer(id: string | null, onSongEnded?: () => void) {
   }, [audioTag]);
 
   useEffect(() => {
-    var active = true;
+    let active = true;
+    const audioRef = audioTag.current;
     if (id !== null) {
       (async () => {
         const url = await MyMusicLibrary.getMusicFileUrl(id);
         if (url !== undefined && active) {
-          audioTag.current.src = url;
-          audioTag.current.load();
+          audioRef.src = url;
+          audioRef.load();
         }
       })();
     }
@@ -69,54 +70,52 @@ export function useAudioPlayer(id: string | null, onSongEnded?: () => void) {
       setPercentLoaded(0);
       setCurrentTime(0);
       setDuration(0);
-      audioTag.current.src = "";
+      audioRef.src = "";
     };
   }, [id]);
 
   useEffect(() => {
+    const audioRef = audioTag.current;
     if (onSongEnded) {
-      audioTag.current.addEventListener("ended", onSongEnded);
+      audioRef.addEventListener("ended", onSongEnded);
     }
     return () => {
       if (onSongEnded) {
-        audioTag.current.removeEventListener("ended", onSongEnded);
+        audioRef.removeEventListener("ended", onSongEnded);
       }
     };
   }, [onSongEnded]);
 
   useEffect(() => {
+    const audioRef = audioTag.current;
     const canPlayThroughCallback = () => {
       setLoaded(true);
       if (playing && !seeking) {
-        audioTag.current.play();
+        audioRef.play();
       }
     };
     const progressCallback = () => {
-      const buffered = audioTag.current.buffered;
+      const buffered = audioRef.buffered;
 
       if (buffered.length) {
-        setPercentLoaded((100 * buffered.end(0)) / audioTag.current.duration);
+        setPercentLoaded((100 * buffered.end(0)) / audioRef.duration);
       }
     };
     const timeUpdateCallback = () => {
-      setCurrentTime(audioTag.current.currentTime);
-      if (!isNaN(audioTag.current.duration)) {
-        setDuration(audioTag.current.duration);
+      setCurrentTime(audioRef.currentTime);
+      if (!isNaN(audioRef.duration)) {
+        setDuration(audioRef.duration);
       }
     };
-    audioTag.current.addEventListener("canplaythrough", canPlayThroughCallback);
-    audioTag.current.addEventListener("progress", progressCallback);
-    audioTag.current.addEventListener("timeupdate", timeUpdateCallback);
+    audioRef.addEventListener("canplaythrough", canPlayThroughCallback);
+    audioRef.addEventListener("progress", progressCallback);
+    audioRef.addEventListener("timeupdate", timeUpdateCallback);
     return () => {
-      audioTag.current.removeEventListener(
-        "canplaythrough",
-        canPlayThroughCallback
-      );
-      audioTag.current.removeEventListener("progress", progressCallback);
-      audioTag.current.removeEventListener("timeupdate", timeUpdateCallback);
+      audioRef.removeEventListener("canplaythrough", canPlayThroughCallback);
+      audioRef.removeEventListener("progress", progressCallback);
+      audioRef.removeEventListener("timeupdate", timeUpdateCallback);
     };
   }, [
-    audioTag.current,
     setLoaded,
     setPercentLoaded,
     setCurrentTime,

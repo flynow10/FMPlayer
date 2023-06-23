@@ -18,12 +18,8 @@ export default defineConfig({
         replacement: path.resolve(__dirname, "src"),
       },
       {
-        find: "@/api",
-        replacement: path.resolve(__dirname, "src", "api"),
-      },
-      {
-        find: "@/lib",
-        replacement: path.resolve(__dirname, "lib"),
+        find: "@/api-lib",
+        replacement: path.resolve(__dirname, "api-lib"),
       },
       {
         find: "@/Music",

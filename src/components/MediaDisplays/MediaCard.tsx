@@ -1,4 +1,4 @@
-import { NavigationMethod, PlayByID } from "../Main";
+import { NavigationMethod, NavigationType, PlayByID } from "../Main";
 import { Play } from "lucide-react";
 import { PageType } from "../Page";
 import { MediaType } from "@/src/utils/types";
@@ -49,7 +49,10 @@ export function MediaCard(props: MediaCardProps) {
           className="h-12 mt-1 overflow-ellipsis overflow-clip break-words hover:underline"
           role="link"
           onClick={() => {
-            props.onNavigate("new", PageType.AlbumDisplay, props.id);
+            props.onNavigate(NavigationType.New, {
+              type: PageType.AlbumDisplay,
+              data: props.id,
+            });
           }}
         >
           {props.title}

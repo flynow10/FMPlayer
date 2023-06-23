@@ -3,17 +3,16 @@ import { Search } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 export default function YoutubeSearchForm(props: {
-  onSearch: (searchText: string) => any;
+  onSearch: (searchText: string) => void;
 }) {
   const [searchText, setSearchText] = useState("");
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [inputFocused, setInputFocused] = useState(false);
   const [suggestionIndex, setSuggestionIndex] = useState(-1);
-  const [hoveringButton, setHoveringButton] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    var active = true;
+    let active = true;
     (async () => {
       if (searchText === "") {
         setSuggestions([]);
@@ -34,7 +33,7 @@ export default function YoutubeSearchForm(props: {
     const suggestionSplitBySearch = suggestion.split(
       new RegExp(`^${searchText}`)
     );
-    var suggestionText;
+    let suggestionText;
     if (
       suggestionSplitBySearch.length === 2 &&
       suggestionSplitBySearch[0] === ""
@@ -51,7 +50,10 @@ export default function YoutubeSearchForm(props: {
       suggestionText = (
         <span>
           {splitSuggestion.map((word) => (
-            <span className={splitSearch.includes(word) ? "" : "font-bold"}>
+            <span
+              key={word}
+              className={splitSearch.includes(word) ? "" : "font-bold"}
+            >
               {word}{" "}
             </span>
           ))}
@@ -63,11 +65,7 @@ export default function YoutubeSearchForm(props: {
         key={index}
         type="button"
         onMouseOver={() => {
-          setHoveringButton(true);
           setSuggestionIndex(-1);
-        }}
-        onMouseLeave={() => {
-          setHoveringButton(false);
         }}
         onMouseDown={() => {
           props.onSearch(suggestion);
@@ -116,7 +114,7 @@ export default function YoutubeSearchForm(props: {
             switch (event.key) {
               case "ArrowDown": {
                 event.preventDefault();
-                var newIndex = suggestionIndex + 1;
+                let newIndex = suggestionIndex + 1;
                 if (newIndex >= suggestions.length) {
                   newIndex = -1;
                 }
@@ -125,7 +123,7 @@ export default function YoutubeSearchForm(props: {
               }
               case "ArrowUp": {
                 event.preventDefault();
-                var newIndex = suggestionIndex - 1;
+                let newIndex = suggestionIndex - 1;
                 if (newIndex <= -2) {
                   newIndex = suggestions.length - 1;
                 }
@@ -151,9 +149,7 @@ export default function YoutubeSearchForm(props: {
           {suggestionButtons}
         </div>
       </div>
-      <button className="border-y-2 border-r-2 p-2 border-emerald-500 bg-green-500 text-white rounded-r-lg active:bg-green-600">
-        Search
-      </button>
+      <button className="border-l-0 rounded-l-none btn success">Search</button>
     </form>
   );
 }
