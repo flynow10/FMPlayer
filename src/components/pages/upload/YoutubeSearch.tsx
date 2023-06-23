@@ -4,9 +4,9 @@ import {
   VideoSnippet,
   YoutubeAPI,
 } from "@/src/api/YoutubeAPI";
-import { isUrl, isYoutubeUrl, splitOutUrls } from "@/src/utils/urlUtils";
+import { isYoutubeUrl, splitOutUrls } from "@/src/utils/urlUtils";
 import { DownloadCloud, ExternalLink } from "lucide-react";
-import { ReactNode, useState } from "react";
+import { useState } from "react";
 import YoutubeSearchForm from "./YoutubeSearchForm";
 
 type YoutubeSearchProps = {
@@ -21,7 +21,7 @@ export default function YoutubeSearch(props: YoutubeSearchProps) {
   const onSearch = async (searchText: string) => {
     const videoId = await isYoutubeUrl(searchText);
     if (typeof videoId === "string") {
-      var videoResult = await YoutubeAPI.video(videoId);
+      const videoResult = await YoutubeAPI.video(videoId);
       if (videoResult) {
         setResultList(
           videoResult.items.map((video) => ({
@@ -91,7 +91,7 @@ function YoutubeResult(props: YoutubeSearchResultProps) {
       return value;
     },
     undefined
-  )!;
+  );
   const parsedDescription = splitOutUrls(props.videoSnippet.description).map(
     (split, index) => {
       if (split.type === "string") {
@@ -99,7 +99,12 @@ function YoutubeResult(props: YoutubeSearchResultProps) {
       } else {
         return (
           <span key={index}>
-            <a target="_blank" href={split.data} className="underline">
+            <a
+              target="_blank"
+              rel="noreferrer"
+              href={split.data}
+              className="underline"
+            >
               {split.data}
             </a>
           </span>
@@ -113,11 +118,12 @@ function YoutubeResult(props: YoutubeSearchResultProps) {
       <a
         href={videoLink}
         target="_blank"
+        rel="noreferrer"
         className="max-w-[240px] max-h-[135px] mr-2"
       >
         <div className="group relative rounded-md overflow-hidden">
           <img
-            src={thumbnail.url}
+            src={thumbnail?.url}
             width={240}
             height={135}
             className="object-cover min-h-[135px] max-h-[135px] min-w-[240px]"
@@ -135,6 +141,7 @@ function YoutubeResult(props: YoutubeSearchResultProps) {
           <a
             href={videoLink}
             target="_blank"
+            rel="noreferrer"
             className="my-auto block grow min-w-0 whitespace-nowrap overflow-hidden overflow-ellipsis"
           >
             {props.videoSnippet.title}
@@ -153,6 +160,7 @@ function YoutubeResult(props: YoutubeSearchResultProps) {
         <a
           className="ml-3 text-gray-600 font-light underline inline"
           target="_blank"
+          rel="noreferrer"
           href={`https://youtube.com/channel/${props.videoSnippet.channelId}`}
         >
           By: {props.videoSnippet.channelTitle}

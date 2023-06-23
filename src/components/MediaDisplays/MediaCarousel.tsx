@@ -1,5 +1,5 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { ReactElement, useEffect, useRef, useState } from "react";
+import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
 import { MediaCardProps } from "./MediaCard";
 
 export type MediaCarouselProps = {
@@ -95,29 +95,23 @@ type CarouselButtonProps = {
 function CarouselButton(props: CarouselButtonProps) {
   const [state, setState] = useState(ButtonState.Hidden);
 
-  function shouldButtonShow() {
-    return props.direction === ButtonDirection.Right
-      ? shouldRightButtonShow()
-      : shouldLeftButtonShow();
-  }
-
-  function shouldRightButtonShow() {
-    if (!props.carouselRef) return false;
-    const scrollWidth = props.carouselRef.scrollWidth;
-    const scrollLeft = props.carouselRef.scrollLeft;
-    const clientWidth = props.carouselRef.clientWidth;
-    return scrollWidth - scrollLeft - clientWidth > 0;
-  }
-
-  function shouldLeftButtonShow() {
-    if (!props.carouselRef) return false;
-    const scrollLeft = props.carouselRef.scrollLeft;
-    return scrollLeft > 0;
-  }
+  const shouldButtonShow = useCallback(() => {
+    if (props.direction === ButtonDirection.Right) {
+      if (!props.carouselRef) return false;
+      const scrollWidth = props.carouselRef.scrollWidth;
+      const scrollLeft = props.carouselRef.scrollLeft;
+      const clientWidth = props.carouselRef.clientWidth;
+      return scrollWidth - scrollLeft - clientWidth > 0;
+    } else {
+      if (!props.carouselRef) return false;
+      const scrollLeft = props.carouselRef.scrollLeft;
+      return scrollLeft > 0;
+    }
+  }, [props.direction, props.carouselRef]);
 
   useEffect(() => {
     const onScroll = () => {
-      var update = false;
+      let update = false;
       const currentShouldButtonShown = shouldButtonShow();
       if (
         currentShouldButtonShown &&
@@ -153,8 +147,7 @@ function CarouselButton(props: CarouselButtonProps) {
         props.carouselRef?.removeEventListener("scroll", onScroll);
       };
     }
-    return () => {};
-  }, [props.carouselRef, state, props.direction]);
+  }, [props.carouselRef, state, props.direction, shouldButtonShow]);
 
   useEffect(() => {
     if (props.carouselRef) {
@@ -171,7 +164,7 @@ function CarouselButton(props: CarouselButtonProps) {
         intersectionObserver.disconnect();
       };
     }
-  }, [props.carouselRef]);
+  }, [props.carouselRef, shouldButtonShow]);
   return (
     <button
       onClick={props.onClick}

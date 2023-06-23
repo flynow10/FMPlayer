@@ -1,12 +1,12 @@
 export async function isYoutubeUrl(
   searchString: string
 ): Promise<string | boolean> {
-  var videoId;
+  let videoId;
   if (isUrl(searchString)) {
     const url = new URL(searchString);
     if (url.protocol !== "http:" && url.protocol !== "https:") return false;
     const match = searchString.match(
-      /(?:youtu\.be\/|youtube\.com(?:\/embed\/|\/v\/|\/watch\?v=|\/user\/\S+|\/ytscreeningroom\?v=))([\w\-]{10,12})\b/
+      /(?:youtu\.be\/|youtube\.com(?:\/embed\/|\/v\/|\/watch\?v=|\/user\/\S+|\/ytscreeningroom\?v=))([\w-]{10,12})\b/
     );
     if (match === null) return false;
     videoId = match[1];
@@ -32,11 +32,10 @@ export async function isYoutubeUrl(
 type URLSplitObject = { type: "url" | "string"; data: string };
 export function splitOutUrls(text: string): URLSplitObject[] {
   const url_pattern =
-    /(?:https?:\/\/.)(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b(?:[-a-zA-Z0-9@:%_\+.~#?&//=]*)/gi;
+    /(?:https?:\/\/.)(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b(?:[-a-zA-Z0-9@:%_+.~#?&//=]*)/gi;
   const urls = text.match(url_pattern) || [];
   const non_urls = text.split(url_pattern);
-  var output: URLSplitObject[] = [];
-  var index = 0;
+  const output: URLSplitObject[] = [];
   for (let i = 0; i < non_urls.length; i++) {
     output.push({ type: "string", data: non_urls[i] });
     if (i < urls.length) {

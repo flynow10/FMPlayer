@@ -23,6 +23,6 @@ export function useAsyncLoad<T>(
         setData(newData);
       }
     }
-  }, deps);
+  }, deps); // eslint-disable-line react-hooks/exhaustive-deps
   return [data, loaded, setData];
 }

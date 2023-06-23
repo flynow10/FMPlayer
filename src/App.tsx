@@ -56,7 +56,7 @@ function App() {
       audioPlayer.startPlayback();
     }
   };
-  const nextSong = (isManual: boolean = false) => {
+  const nextSong = (isManual = false) => {
     if (repeatMode === "one" && !isManual) {
       audioPlayer.resetPlayback();
       audioPlayer.startPlayback();
@@ -127,15 +127,16 @@ function App() {
         searchString={searchString}
         isSearching={isSearching}
         onPlayMedia={async (id, type) => {
-          var playlist;
+          let playlist;
           switch (type) {
-            case MediaType.Album:
+            case MediaType.Album: {
               const album = await MyMusicLibrary.getAlbum(id);
               if (album) {
                 playlist = PlaylistHelper.getPlaylistFromAlbum(album);
               }
               break;
-            case MediaType.Song:
+            }
+            case MediaType.Song: {
               const song = await MyMusicLibrary.getSong(id);
               if (song) {
                 playlist = new Playlist().addAction(
@@ -143,6 +144,7 @@ function App() {
                 );
               }
               break;
+            }
             // case MediaType.Playlist:
             //   playlist = MyMusicLibrary.getPlaylist(id);
             //   break;

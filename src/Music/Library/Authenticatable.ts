@@ -1,10 +1,8 @@
-import Ably from "ably";
-
 export type LoginResponse =
   | { success: true }
   | {
       success: false;
-      error: string;
+      error?: string;
     };
 export interface Authenticatable {
   isAuthenticated(): boolean;
@@ -13,7 +11,7 @@ export interface Authenticatable {
   removeLoginListener(listener: () => void): void;
 }
 
-export function isAuthenticatable(object: any): object is Authenticatable {
+export function isAuthenticatable(object: object): object is Authenticatable {
   const props = [
     "isAuthenticated",
     "authenticate",

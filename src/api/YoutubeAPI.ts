@@ -5,7 +5,7 @@ type Cache = {
 
 type CacheType = keyof Cache;
 class YoutubeAPISingleton {
-  public loaded: boolean = false;
+  public loaded = false;
   private cache: Cache = {
     search: {},
     video: {},
@@ -32,7 +32,7 @@ class YoutubeAPISingleton {
       await gapi.client.init({
         apiKey: "AIzaSyC7lJPoPpw-U0IVzpZX5Un2X1fqG3SdQG0",
         cookiepolicy: "single_host_origin",
-      } as any);
+      } as any); // eslint-disable-line @typescript-eslint/no-explicit-any
       this.loaded = true;
     } catch (e) {
       console.warn("Unable to connect to Google Cloud");
@@ -58,7 +58,7 @@ class YoutubeAPISingleton {
     }
   }
 
-  public async search(searchTerm: string, maxResults: number = 5) {
+  public async search(searchTerm: string, maxResults = 5) {
     searchTerm = searchTerm.trim();
     if (!searchTerm || searchTerm === "") {
       return null;
