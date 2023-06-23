@@ -39,6 +39,8 @@ class AblyChannelWrapper {
 export class AblyClient {
   private readonly client: Types.RealtimePromise;
   private readonly uploadStatusChannel: AblyChannelWrapper;
+  private static readonly CONNETION_TIMEOUT = 10000;
+
   constructor() {
     this.client = new Realtime.Promise({
       authUrl: "/api/ably-auth",
@@ -62,12 +64,33 @@ export class AblyClient {
     this.uploadStatusChannel.subscribe(callback);
   }
 
-  public connect() {
+  public async connect(): Promise<AblyConnectionStatus> {
     this.client.connect();
-    this.client.connection.once("connected", () => {
-      console.log("Ably connected");
+    return new Promise((resolve) => {
+      let status = AblyConnectionStatus.Pending;
+      this.client.connection.once("connected", () => {
+        if (status === AblyConnectionStatus.Pending) {
+          status = AblyConnectionStatus.Connected;
+          console.log("Ably connected");
+          resolve(status);
+        }
+      });
+      setTimeout(() => {
+        if (status === AblyConnectionStatus.Pending) {
+          status = AblyConnectionStatus.Timeout;
+          this.client.close();
+          resolve(status);
+        }
+      }, AblyClient.CONNETION_TIMEOUT);
     });
   }
 }
 
 export const LambdaStatus = new AblyClient();
+
+export enum AblyConnectionStatus {
+  Pending,
+  Connected,
+  Timeout,
+  Failed,
+}
