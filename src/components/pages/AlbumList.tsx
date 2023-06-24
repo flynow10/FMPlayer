@@ -1,4 +1,4 @@
-import { MyMusicLibrary } from "@/src/Music/Library/MusicLibrary";
+import { MyMusicLibrary } from "@/src/music/library/MusicLibrary";
 import { NavigationMethod, PlayByID } from "../Main";
 import { MediaType } from "@/src/utils/types";
 import { useAsyncLoad } from "@/src/utils/useAsyncLoad";
@@ -6,7 +6,7 @@ import { FullCover } from "./LoadingPages";
 import {
   MediaCard,
   MediaCardSize,
-} from "@/src/components/MediaDisplays/MediaCard";
+} from "@/src/components/media-displays/MediaCard";
 
 export type AlbumListProps = {
   onPlayMedia: PlayByID;

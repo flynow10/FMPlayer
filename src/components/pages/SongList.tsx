@@ -1,4 +1,4 @@
-import { MyMusicLibrary } from "@/src/Music/Library/MusicLibrary";
+import { MyMusicLibrary } from "@/src/music/library/MusicLibrary";
 import { useAsyncLoad } from "@/src/utils/useAsyncLoad";
 import { NavigationMethod, PlayByID } from "../Main";
 import { MediaType } from "@/src/utils/types";

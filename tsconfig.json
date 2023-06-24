@@ -18,8 +18,7 @@
     "baseUrl": "./",
     "paths": {
       "@/src/*": ["./src/*"],
-      "@/api-lib/*": ["./api-lib/*"],
-      "@/Music/*": ["./src/Music/*"]
+      "@/api-lib/*": ["./api-lib/*"]
     }
   },
   "include": ["src", "middleware.ts", "api", "api-lib"]

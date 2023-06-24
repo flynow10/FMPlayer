@@ -1,8 +1,8 @@
-import { Action } from "@/Music/Actions/Action";
-import { ActionType } from "@/Music/Actions/ActionTypes";
-import { LoopAction } from "@/Music/Actions/LoopAction";
-import { NumberAction } from "@/Music/Actions/NumberAction";
-import { PlaySongAction } from "@/Music/Actions/PlaySongAction";
+import { Action } from "@/src/music/actions/Action";
+import { ActionType } from "@/src/music/actions/ActionTypes";
+import { LoopAction } from "@/src/music/actions/LoopAction";
+import { NumberAction } from "@/src/music/actions/NumberAction";
+import { PlaySongAction } from "@/src/music/actions/PlaySongAction";
 import { ActionSongPair } from "./Playlist";
 
 export class PlaylistParser {
@@ -72,7 +72,7 @@ export class PlaylistParser {
         return block;
       }
     }
-    this.stepNextToken()
+    this.stepNextToken();
     return block;
   }
 

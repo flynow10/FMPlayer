@@ -15,7 +15,7 @@ import App from "./App";
 import { Login } from "./components/Login";
 import { YoutubeAPI } from "./api/YoutubeAPI";
 import { VercelAPI } from "./api/VercelAPI";
-import { LambdaStatus } from "./Music/Library/AblyClient";
+import { LambdaStatus } from "@/src/api/AblyClient";
 import { FullCover } from "./components/pages/LoadingPages";
 (async () => {
   const root = document.getElementById("root");

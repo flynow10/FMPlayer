@@ -1,4 +1,4 @@
-import { ActionStub, createFromStub } from "@/Music/Actions/ActionTypes";
+import { ActionStub, createFromStub } from "@/src/music/actions/ActionTypes";
 import { Playlist } from "./Playlist";
 
 export interface PlaylistJson {

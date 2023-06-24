@@ -1,9 +1,9 @@
-import { Action } from "@/Music/Actions/Action";
-import { EndLoopAction, LoopAction } from "@/Music/Actions/LoopAction";
-import { NumberAction } from "@/Music/Actions/NumberAction";
-import { PlaySongAction } from "@/Music/Actions/PlaySongAction";
-import { ActionSongPair } from "@/Music/Playlists/Playlist";
-import { PlaylistParser } from "@/Music/Playlists/PlaylistParser";
+import { Action } from "@/src/music/actions/Action";
+import { EndLoopAction, LoopAction } from "@/src/music/actions/LoopAction";
+import { NumberAction } from "@/src/music/actions/NumberAction";
+import { PlaySongAction } from "@/src/music/actions/PlaySongAction";
+import { ActionSongPair } from "@/src/music/playlists/Playlist";
+import { PlaylistParser } from "@/src/music/playlists/PlaylistParser";
 
 describe("PlaylistParser", () => {
   const parser = new PlaylistParser();
