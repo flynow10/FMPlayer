@@ -1,11 +1,11 @@
-import { MyMusicLibrary } from "@/src/music/library/MusicLibrary";
-import { useAsyncLoad } from "@/src/hooks/useAsyncLoad";
+import { MyMusicLibrary } from "@/src/music/library/music-library";
+import { useAsyncLoad } from "@/src/hooks/use-async-load";
 import { NavigationMethod, PlayByID } from "@/src/components/layout/Main";
 import { MediaType } from "@/src/utils/types";
 import { ChevronDown, ChevronUp, Play } from "lucide-react";
 import { Blur, FullCover } from "@/src/components/pages/LoadingPages";
 import { useState } from "react";
-import { SongSortFields, SortType } from "api-lib/_postgres-types";
+import { SongSortFields, SortType } from "@/api-lib/postgres-types";
 import { Song } from "@prisma/client";
 
 export type SongListProps = {

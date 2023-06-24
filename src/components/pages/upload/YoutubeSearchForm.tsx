@@ -1,4 +1,4 @@
-import { YoutubeAPI } from "@/src/api/YoutubeAPI";
+import { YoutubeAPI } from "@/src/api/youtube-API";
 import { Search } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 

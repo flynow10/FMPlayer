@@ -1,5 +1,3 @@
-import { BufferEncoding } from "./Types";
-
 export function stringToBytes(string: string) {
   return [...string].map((character) => character.charCodeAt(0));
 }
@@ -52,7 +50,7 @@ export const uint32SyncSafeToken = {
 */
 export function slowToString(
   buffer: Uint8Array,
-  encoding: BufferEncoding,
+  encoding: FileType.BufferEncoding,
   start: number,
   end: number
 ) {

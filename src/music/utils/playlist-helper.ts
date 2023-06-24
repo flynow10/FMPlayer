@@ -1,6 +1,6 @@
-import { AlbumWithSongs } from "api-lib/_postgres-types";
-import { PlaySongAction } from "@/src/music/actions/PlaySongAction";
-import { Playlist } from "@/src/music/playlists/Playlist";
+import { AlbumWithSongs } from "@/api-lib/postgres-types";
+import { PlaySongAction } from "@/src/music/actions/play-song-action";
+import { Playlist } from "@/src/music/playlists/playlist";
 
 export const PlaylistHelper = {
   getPlaylistFromAlbum(album: AlbumWithSongs): Playlist {

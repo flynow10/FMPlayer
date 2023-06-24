@@ -8,9 +8,9 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { MyMusicLibrary } from "@/src/music/library/MusicLibrary";
+import { MyMusicLibrary } from "@/src/music/library/music-library";
 import { Song } from "@prisma/client";
-import { useAsyncLoad } from "@/src/hooks/useAsyncLoad";
+import { useAsyncLoad } from "@/src/hooks/use-async-load";
 
 export type RepeatMode = "none" | "one" | "all";
 export type AudioEvent = () => void;

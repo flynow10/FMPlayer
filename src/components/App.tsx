@@ -1,15 +1,15 @@
 import { useState } from "react";
 import { Audio, RepeatMode } from "@/src/components/layout/Audio";
-import { MyMusicLibrary } from "@/src/music/library/MusicLibrary";
-import { Playlist } from "@/src/music/playlists/Playlist";
+import { MyMusicLibrary } from "@/src/music/library/music-library";
+import { Playlist } from "@/src/music/playlists/playlist";
 import AudioControlPlaceholder from "@/src/components/layout/AudioControlPlaceholder";
-import { useAudioPlayer } from "@/src/hooks/useAudioPlayer";
+import { useAudioPlayer } from "@/src/hooks/use-audio-player";
 import Main, { Location } from "@/src/components/layout/Main";
 import Sidebar from "@/src/components/layout/Sidebar";
-import { PlaySongAction } from "@/src/music/actions/PlaySongAction";
+import { PlaySongAction } from "@/src/music/actions/play-song-action";
 import { MediaType } from "@/src/utils/types";
-import { PlaylistHelper } from "@/src/music/utils/PlaylistHelper";
-import { useLoaderData } from "react-router-dom";
+import { PlaylistHelper } from "@/src/music/utils/playlist-helper";
+// import { useLoaderData } from "react-router-dom";
 
 export default function App() {
   const [queue, setQueue] = useState<Playlist>(new Playlist());
@@ -18,7 +18,7 @@ export default function App() {
   const [location, setLocation] = useState<Location>(Location.Album);
   const [searchString, setSearchString] = useState("");
   const [isSearching, setIsSearching] = useState(false);
-  const data = useLoaderData();
+  // const data = useLoaderData();
 
   const songId = queue.isBlank()
     ? null

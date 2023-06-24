@@ -12,9 +12,9 @@ import React, { Suspense } from "react";
 
 import App from "@/src/components/App";
 import { Login } from "@/src/components/auth/Login";
-import { YoutubeAPI } from "@/src/api/YoutubeAPI";
-import { VercelAPI } from "@/src/api/VercelAPI";
-import { LambdaStatus } from "@/src/api/AblyClient";
+import { YoutubeAPI } from "@/src/api/youtube-API";
+import { VercelAPI } from "@/src/api/vercel-API";
+import { LambdaStatus } from "@/src/api/ably-client";
 import { FullCover } from "@/src/components/pages/LoadingPages";
 
 import "react-toastify/dist/ReactToastify.min.css";

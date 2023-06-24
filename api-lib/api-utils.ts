@@ -1,6 +1,6 @@
 import { VercelRequest } from "@vercel/node";
-import { PaginationOptions, SortType } from "./_postgres-types.js";
-import { DEFAULT_PAGE_LIMIT } from "./_constants.js";
+import { PaginationOptions, SortType } from "./postgres-types.js";
+import { DEFAULT_PAGE_LIMIT } from "./constants.js";
 
 export const printRequestType = (endpoint: string, type: string) => {
   // const formattedRequestName = type

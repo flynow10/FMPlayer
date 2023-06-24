@@ -1,10 +1,10 @@
 import { v4 as uuid } from "uuid";
-import { printRequestType } from "../api-lib/_api-utils.js";
-import { getEnvVar } from "../api-lib/_constants.js";
+import { printRequestType } from "../api-lib/api-utils.js";
+import { getEnvVar } from "../api-lib/constants.js";
 import { VercelRequest, VercelResponse } from "@vercel/node";
-import { prismaClient, s3Client } from "../api-lib/_data-clients.js";
+import { prismaClient, s3Client } from "../api-lib/data-clients.js";
 import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
-import type { UploadFileBody } from "../api-lib/_upload-types.js";
+import type { UploadFileBody } from "../api-lib/upload-types.js";
 
 const S3_SONG_CONVERSION_BUCKET = getEnvVar("S3_SONG_CONVERSION_BUCKET");
 

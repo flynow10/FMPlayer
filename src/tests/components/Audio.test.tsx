@@ -4,7 +4,7 @@ import { waitFor } from "@testing-library/react";
 import { render } from "@testing-library/react";
 import { v4 } from "uuid";
 
-jest.mock("@/src/music/library/MusicLibrary", () => ({
+jest.mock("@/src/music/library/music-library", () => ({
   MyMusicLibrary: {
     getSong: jest.fn((id: string): Promise<Song> => {
       return new Promise((r) =>

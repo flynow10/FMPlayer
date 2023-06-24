@@ -1,6 +1,7 @@
-import { FileTypeResult } from "@/src/utils/file-type/Types";
-
-export type UploadFileBody = { file: FileTypeResult; metadata: Metadata };
+export type UploadFileBody = {
+  file: FileType.FileTypeResult;
+  metadata: Metadata;
+};
 export type Metadata = {
   title?: string;
   genre?: string;
