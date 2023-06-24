@@ -9,6 +9,7 @@ import Sidebar from "./components/Sidebar";
 import { PlaySongAction } from "./Music/Actions/PlaySongAction";
 import { MediaType } from "./utils/types";
 import { PlaylistHelper } from "./Music/Utils/PlaylistHelper";
+import { useLoaderData } from "react-router-dom";
 
 function App() {
   const [queue, setQueue] = useState<Playlist>(new Playlist());
@@ -17,6 +18,8 @@ function App() {
   const [location, setLocation] = useState<Location>(Location.Album);
   const [searchString, setSearchString] = useState("");
   const [isSearching, setIsSearching] = useState(false);
+  const data = useLoaderData();
+  console.log(data);
 
   const songId = queue.isBlank()
     ? null
