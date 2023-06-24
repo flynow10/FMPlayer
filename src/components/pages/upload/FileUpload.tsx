@@ -1,11 +1,11 @@
 import { UploadFileBody } from "api-lib/_upload-types";
-import { fetchFile } from "@/src/utils/fetchFile";
-import { useAsyncLoad } from "@/src/utils/useAsyncLoad";
+import { fetchFile } from "@/src/utils/FetchFile";
+import { useAsyncLoad } from "@/src/hooks/useAsyncLoad";
 import { fileTypeFromBuffer } from "@/src/utils/file-type";
 import * as jsmediatags from "jsmediatags";
 import { v4 as uuid } from "uuid";
 import { useState } from "react";
-import { FullCover } from "../LoadingPages";
+import { FullCover } from "@/src/components/pages/LoadingPages";
 import classNames from "classnames";
 import { CheckSquare, Square } from "lucide-react";
 

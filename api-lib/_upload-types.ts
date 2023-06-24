@@ -1,4 +1,4 @@
-import { FileTypeResult } from "@/src/utils/file-type/types";
+import { FileTypeResult } from "@/src/utils/file-type/Types";
 
 export type UploadFileBody = { file: FileTypeResult; metadata: Metadata };
 export type Metadata = {

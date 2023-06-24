@@ -1,4 +1,4 @@
-import { Audio } from "@/src/components/Audio";
+import { Audio } from "@/src/components/layout/Audio";
 import { Song } from "@prisma/client";
 import { waitFor } from "@testing-library/react";
 import { render } from "@testing-library/react";

@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { MyMusicLibrary } from "@/src/music/library/MusicLibrary";
 import { Song } from "@prisma/client";
-import { useAsyncLoad } from "../utils/useAsyncLoad";
+import { useAsyncLoad } from "@/src/hooks/useAsyncLoad";
 
 export type RepeatMode = "none" | "one" | "all";
 export type AudioEvent = () => void;

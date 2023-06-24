@@ -1,4 +1,4 @@
-import { isYoutubeUrl } from "@/src/utils/urlUtils";
+import { isYoutubeUrl } from "@/src/utils/UrlUtils";
 
 describe("isYoutubeUrl", () => {
   const urls = {

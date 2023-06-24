@@ -1,5 +1,5 @@
-import { BufferEncoding } from "../types";
-import { slowToString } from "../utils";
+import { BufferEncoding } from "../Types";
+import { slowToString } from "../Utils";
 import { IToken } from "../Tokenizer/Types";
 
 function dv<Array extends Uint8Array = Uint8Array>(array: Array) {

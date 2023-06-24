@@ -1,8 +1,8 @@
 import { MyMusicLibrary } from "@/src/music/library/MusicLibrary";
-import { NavigationMethod, PlayByID } from "../Main";
+import { NavigationMethod, PlayByID } from "@/src/components/layout/Main";
 import { MediaType } from "@/src/utils/types";
-import { useAsyncLoad } from "@/src/utils/useAsyncLoad";
-import { FullCover } from "./LoadingPages";
+import { useAsyncLoad } from "@/src/hooks/useAsyncLoad";
+import { FullCover } from "@/src/components/pages/LoadingPages";
 import {
   MediaCard,
   MediaCardSize,

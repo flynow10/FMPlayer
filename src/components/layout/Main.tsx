@@ -1,7 +1,7 @@
 import { MediaType } from "@/src/utils/types";
-import { UUID } from "./UUID";
+import { UUID } from "@/src/components/UUID";
 import { ReactNode, useState } from "react";
-import Page, { PageType } from "./Page";
+import Page, { PageType } from "@/src/components/layout/Page";
 import { ChevronLeft } from "lucide-react";
 import classNames from "classnames";
 

@@ -1,7 +1,7 @@
-import { useAsyncLoad } from "@/src/utils/useAsyncLoad";
-import { NavigationMethod, PlayByID } from "../Main";
+import { useAsyncLoad } from "@/src/hooks/useAsyncLoad";
+import { NavigationMethod, PlayByID } from "@/src/components/layout/Main";
 import { MyMusicLibrary } from "@/src/music/library/MusicLibrary";
-import { FullCover } from "./LoadingPages";
+import { FullCover } from "@/src/components/pages/LoadingPages";
 import { GenreMediaResponse } from "api-lib/_postgres-types";
 import {
   MediaCard,
