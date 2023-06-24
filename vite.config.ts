@@ -35,8 +35,10 @@ export default defineConfig({
             id.includes("node_modules") &&
             id.match(/\.(css|scss|sass|less)$/) === null
           ) {
-            if (id.includes("react")) {
-              return "react-vendor";
+            if (id.includes("lucide")) {
+              return "lucide-vendor";
+            } else if (id.includes("ably")) {
+              return "ably-vendor";
             }
             return "vendor";
           }
