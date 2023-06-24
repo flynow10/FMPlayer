@@ -1,6 +1,3 @@
-import { USER_TOKEN } from "@/api-lib/_constants";
-import { cookieExists } from "../utils/cookies";
-
 export type LoginResponse =
   | { success: true }
   | {
@@ -14,18 +11,7 @@ export enum ApiEndpoint {
 }
 
 export const VercelAPI = {
-  /**
-   * Only checks if the user token exists, not if it has expired
-   */
-  quickIsLoggedIn: () => {
-    return cookieExists(USER_TOKEN);
-  },
-
   isLoggedIn: async () => {
-    if (!VercelAPI.quickIsLoggedIn()) {
-      return false;
-    }
-
     try {
       const heartbeatResponse = await (await fetch("/api/heartbeat")).json();
       if (typeof heartbeatResponse === "string") {
