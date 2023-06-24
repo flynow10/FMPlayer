@@ -11,7 +11,7 @@ import { MediaType } from "@/src/utils/types";
 import { PlaylistHelper } from "@/src/music/utils/PlaylistHelper";
 import { useLoaderData } from "react-router-dom";
 
-function App() {
+export default function App() {
   const [queue, setQueue] = useState<Playlist>(new Playlist());
   const [currentSongIndex, setCurrentSongIndex] = useState(0);
   const [repeatMode, setRepeatMode] = useState<RepeatMode>("none");
@@ -19,7 +19,6 @@ function App() {
   const [searchString, setSearchString] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const data = useLoaderData();
-  console.log(data);
 
   const songId = queue.isBlank()
     ? null
@@ -163,5 +162,3 @@ function App() {
     </div>
   );
 }
-
-export default App;

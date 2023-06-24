@@ -10,8 +10,8 @@ import ReactDOM from "react-dom/client";
 import { ToastContainer } from "react-toastify";
 import React, { Suspense } from "react";
 
-import App from "@/src/App";
-import { Login } from "@/src/components/Login";
+import App from "@/src/components/App";
+import { Login } from "@/src/components/auth/Login";
 import { YoutubeAPI } from "@/src/api/YoutubeAPI";
 import { VercelAPI } from "@/src/api/VercelAPI";
 import { LambdaStatus } from "@/src/api/AblyClient";
