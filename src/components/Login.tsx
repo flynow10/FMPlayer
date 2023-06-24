@@ -1,22 +1,22 @@
 import { Lock, Music4 } from "lucide-react";
 import { FormEvent, useState } from "react";
-import { MyMusicLibrary } from "@/Music/Library/MusicLibrary";
-import { isAuthenticatable } from "@/Music/Library/Authenticatable";
 import { toast } from "react-toastify";
+import { VercelAPI } from "../api/VercelAPI";
+import { useNavigate } from "react-router-dom";
 
-export function Login({ onAuthenticate }: { onAuthenticate: () => void }) {
+export function Login() {
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
   const onLogin = (e: FormEvent) => {
     e.preventDefault();
-    if (isAuthenticatable(MyMusicLibrary)) {
-      MyMusicLibrary.authenticate(password).then((response) => {
-        if (response.success) {
-          onAuthenticate();
-        } else {
-          addError(response.error);
-        }
-      });
-    }
+    VercelAPI.loginWithPassword(password).then((loginResponse) => {
+      if (loginResponse.success) {
+        console.log("Login success");
+        navigate("/");
+      } else {
+        addError(loginResponse.error);
+      }
+    });
   };
   const addError = (
     error = "Something went wrong, please try again later."
