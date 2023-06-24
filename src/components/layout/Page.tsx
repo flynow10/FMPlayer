@@ -1,9 +1,9 @@
 import { NavigationMethod, PlayByID } from "./Main";
-import FileSearch from "./pages/upload/FileSearch";
-import AlbumList from "./pages/AlbumList";
-import SongList from "./pages/SongList";
-import GenreList from "./pages/GenreList";
-import FileUpload from "./pages/upload/FileUpload";
+import FileSearch from "@/src/components/pages/upload/FileSearch";
+import AlbumList from "@/src/components/pages/AlbumList";
+import SongList from "@/src/components/pages/SongList";
+import GenreList from "@/src/components/pages/GenreList";
+import FileUpload from "@/src/components/pages/upload/FileUpload";
 
 type PageProps = {
   location: string;

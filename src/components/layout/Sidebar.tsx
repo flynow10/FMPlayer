@@ -1,4 +1,4 @@
-import { Location } from "./Main";
+import { Location } from "@/src/components/layout/Main";
 
 export type SidebarProps = {
   location: Location;

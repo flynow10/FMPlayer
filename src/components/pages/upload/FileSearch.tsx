@@ -1,10 +1,10 @@
 import { useState } from "react";
-import YoutubeSearch from "./YoutubeSearch";
-import { isUrl, isYoutubeUrl } from "@/src/utils/urlUtils";
-import FileDrop from "./FileDrop";
-import { NavigationMethod, NavigationType } from "@/src/components/Main";
-import { PageType } from "../../Page";
-import { FileUploadType } from "./FileUpload";
+import YoutubeSearch from "@/src/components/pages/upload/YoutubeSearch";
+import { isUrl, isYoutubeUrl } from "@/src/utils/UrlUtils";
+import FileDrop from "@/src/components/pages/upload/FileDrop";
+import { NavigationMethod, NavigationType } from "@/src/components/layout/Main";
+import { PageType } from "@/src/components/layout/Page";
+import { FileUploadType } from "@/src/components/pages/upload/FileUpload";
 
 type FileSearchProps = {
   onNavigate: NavigationMethod;

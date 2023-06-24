@@ -4,7 +4,7 @@ import {
   VideoSnippet,
   YoutubeAPI,
 } from "@/src/api/YoutubeAPI";
-import { isYoutubeUrl, splitOutUrls } from "@/src/utils/urlUtils";
+import { isYoutubeUrl, splitOutUrls } from "@/src/utils/UrlUtils";
 import { DownloadCloud, ExternalLink } from "lucide-react";
 import { useState } from "react";
 import YoutubeSearchForm from "./YoutubeSearchForm";

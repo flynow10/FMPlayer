@@ -8,9 +8,9 @@ import {
   stringToBytes,
   tarHeaderChecksumMatches,
   uint32SyncSafeToken,
-} from "./utils";
-import { extensions, mimeTypes } from "./supported";
-import { CheckOptions, FileTypeResult } from "./types";
+} from "./Utils";
+import { extensions, mimeTypes } from "./Supported";
+import { CheckOptions, FileTypeResult } from "./Types";
 import { fromBuffer } from "./Tokenizer";
 import { ITokenizer } from "./Tokenizer/ITokenizer";
 import { EndOfStreamError } from "./Tokenizer/EndOfStreamError";

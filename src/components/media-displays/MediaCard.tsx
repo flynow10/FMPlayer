@@ -1,7 +1,12 @@
-import { NavigationMethod, NavigationType, PlayByID } from "../Main";
+import {
+  NavigationMethod,
+  NavigationType,
+  PlayByID,
+} from "@/src/components/layout/Main";
 import { Play } from "lucide-react";
-import { PageType } from "../Page";
+import { PageType } from "@/src/components/layout/Page";
 import { MediaType } from "@/src/utils/types";
+import placeholder from "@/src/assets/imgs/square-placeholder.jpg";
 
 export type MediaCardProps = {
   id: string;
@@ -35,9 +40,7 @@ export function MediaCard(props: MediaCardProps) {
           }}
         >
           <img
-            src={
-              /* album.coverUrl ? album.coverUrl :  */ "./square-placeholder.jpg"
-            }
+            src={/* album.coverUrl ? album.coverUrl :  */ placeholder}
             className="w-full h-full group-hover:blur transition-[filter]"
           />
           <Play

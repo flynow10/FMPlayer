@@ -1,4 +1,4 @@
-import { BufferEncoding } from "./types";
+import { BufferEncoding } from "./Types";
 
 export function stringToBytes(string: string) {
   return [...string].map((character) => character.charCodeAt(0));
