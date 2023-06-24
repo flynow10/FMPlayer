@@ -1,12 +1,11 @@
 import { defineConfig } from "vite";
-import { chunkSplitPlugin } from "vite-plugin-chunk-split";
 
 import react from "@vitejs/plugin-react";
 import path from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react(), chunkSplitPlugin()],
+  plugins: [react()],
   define: {
     __APP_ENV__: JSON.stringify(
       process.env.VITE_VERCEL_ENV ?? process.env.VERCEL_ENV
@@ -27,5 +26,22 @@ export default defineConfig({
         replacement: path.resolve(__dirname, "src", "Music"),
       },
     ],
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: (id: string) => {
+          if (
+            id.includes("node_modules") &&
+            id.match(/\.(css|scss|sass|less)$/) === null
+          ) {
+            if (id.includes("react")) {
+              return "react-vendor";
+            }
+            return "vendor";
+          }
+        },
+      },
+    },
   },
 });
