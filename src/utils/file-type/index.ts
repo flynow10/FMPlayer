@@ -1,1 +1,1 @@
-export { fileTypeFromBuffer, fileTypeFromBlob } from "./FileType";
+export { fileTypeFromBuffer, fileTypeFromBlob } from "./file-type";

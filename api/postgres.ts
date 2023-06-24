@@ -6,13 +6,13 @@ import {
   SongListOptions,
   SongSortFields,
   SongWithAlbum,
-} from "../api-lib/_postgres-types.js";
+} from "../api-lib/postgres-types.js";
 import {
   getPaginationOptions,
   getPrismaSelectPaginationOptions,
   printRequestType,
-} from "../api-lib/_api-utils.js";
-import { prismaClient } from "../api-lib/_data-clients.js";
+} from "../api-lib/api-utils.js";
+import { prismaClient } from "../api-lib/data-clients.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "GET") {

@@ -1,7 +1,7 @@
-import { Action } from "./Action";
-import { EndLoopAction, LoopAction } from "./LoopAction";
-import { NumberAction } from "./NumberAction";
-import { PlaySongAction } from "./PlaySongAction";
+import { Action } from "./action";
+import { EndLoopAction, LoopAction } from "./loop-action";
+import { NumberAction } from "./number-action";
+import { PlaySongAction } from "./play-song-action";
 
 export enum ActionType {
   PlaySong,

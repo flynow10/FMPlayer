@@ -1,6 +1,5 @@
-import { AbstractTokenizer } from "./AbstractTokenizer";
-import { EndOfStreamError } from "./EndOfStreamError";
-import { IReadChunkOptions } from "./ITokenizer";
+import { AbstractTokenizer } from "./abstract-tokenizer";
+import { EndOfStreamError } from "./end-of-stream-error";
 
 export class BufferTokenizer extends AbstractTokenizer {
   private uint8Array: Uint8Array;
@@ -20,7 +19,10 @@ export class BufferTokenizer extends AbstractTokenizer {
    * @param options - Read behaviour options
    * @returns {Promise<number>}
    */
-  async readBuffer(uint8Array: Uint8Array, options: IReadChunkOptions) {
+  async readBuffer(
+    uint8Array: Uint8Array,
+    options: FileType.IReadChunkOptions
+  ) {
     if (options && options.position) {
       if (options.position < this.position) {
         throw new Error(
@@ -39,7 +41,10 @@ export class BufferTokenizer extends AbstractTokenizer {
    * @param options - Read behaviour options
    * @returns {Promise<number>}
    */
-  async peekBuffer(uint8Array: Uint8Array, options: IReadChunkOptions) {
+  async peekBuffer(
+    uint8Array: Uint8Array,
+    options: FileType.IReadChunkOptions
+  ) {
     const normOptions = this.normalizeOptions(uint8Array, options);
     const bytes2read = Math.min(
       this.uint8Array.length - normOptions.position,

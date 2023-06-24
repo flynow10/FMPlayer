@@ -1,4 +1,4 @@
-import { getEnvVar, getVercelEnvironment } from "./_constants.js";
+import { getEnvVar, getVercelEnvironment } from "./constants.js";
 import { S3Client } from "@aws-sdk/client-s3";
 import { PrismaClient } from "@prisma/client";
 

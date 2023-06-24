@@ -6,9 +6,9 @@ import {
   GenreMediaResponse,
   SongListOptions,
   SongWithAlbum,
-} from "@/api-lib/_postgres-types";
+} from "@/api-lib/postgres-types";
 import { PresignedPost } from "@aws-sdk/s3-presigned-post";
-import { ApiEndpoint, VercelAPI } from "@/src/api/VercelAPI";
+import { ApiEndpoint, VercelAPI } from "@/src/api/vercel-API";
 
 class PostgresMusicLibrary {
   public async getSong(id: string): Promise<SongWithAlbum | undefined> {

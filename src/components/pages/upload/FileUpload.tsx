@@ -1,6 +1,6 @@
-import { UploadFileBody } from "api-lib/_upload-types";
-import { fetchFile } from "@/src/utils/FetchFile";
-import { useAsyncLoad } from "@/src/hooks/useAsyncLoad";
+import { UploadFileBody } from "@/api-lib/upload-types";
+import { fetchFile } from "@/src/utils/fetch-file";
+import { useAsyncLoad } from "@/src/hooks/use-async-load";
 import { fileTypeFromBuffer } from "@/src/utils/file-type";
 import * as jsmediatags from "jsmediatags";
 import { v4 as uuid } from "uuid";

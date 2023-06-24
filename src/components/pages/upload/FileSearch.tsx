@@ -1,6 +1,6 @@
 import { useState } from "react";
 import YoutubeSearch from "@/src/components/pages/upload/YoutubeSearch";
-import { isUrl, isYoutubeUrl } from "@/src/utils/UrlUtils";
+import { isUrl, isYoutubeUrl } from "@/src/utils/url-utils";
 import FileDrop from "@/src/components/pages/upload/FileDrop";
 import { NavigationMethod, NavigationType } from "@/src/components/layout/Main";
 import { PageType } from "@/src/components/layout/Page";

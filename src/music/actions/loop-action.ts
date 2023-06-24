@@ -1,5 +1,5 @@
-import { Action } from "./Action";
-import { ActionStub, ActionType } from "./ActionTypes";
+import { Action } from "./action";
+import { ActionStub, ActionType } from "./action-types";
 
 export class LoopAction extends Action {
   constructor() {

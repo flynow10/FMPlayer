@@ -1,9 +1,9 @@
-import { Action } from "@/src/music/actions/Action";
-import { ActionType } from "@/src/music/actions/ActionTypes";
-import { LoopAction } from "@/src/music/actions/LoopAction";
-import { NumberAction } from "@/src/music/actions/NumberAction";
-import { PlaySongAction } from "@/src/music/actions/PlaySongAction";
-import { ActionSongPair } from "./Playlist";
+import { Action } from "@/src/music/actions/action";
+import { ActionType } from "@/src/music/actions/action-types";
+import { LoopAction } from "@/src/music/actions/loop-action";
+import { NumberAction } from "@/src/music/actions/number-action";
+import { PlaySongAction } from "@/src/music/actions/play-song-action";
+import { ActionSongPair } from "./playlist";
 
 export class PlaylistParser {
   public actionList: Action[] = [];

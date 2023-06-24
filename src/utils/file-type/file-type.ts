@@ -8,12 +8,10 @@ import {
   stringToBytes,
   tarHeaderChecksumMatches,
   uint32SyncSafeToken,
-} from "./Utils";
-import { extensions, mimeTypes } from "./Supported";
-import { CheckOptions, FileTypeResult } from "./Types";
+} from "./utils";
+import { extensions, mimeTypes } from "./supported";
 import { fromBuffer } from "./Tokenizer";
-import { ITokenizer } from "./Tokenizer/ITokenizer";
-import { EndOfStreamError } from "./Tokenizer/EndOfStreamError";
+import { EndOfStreamError } from "./Tokenizer/end-of-stream-error";
 
 const minimumBytes = 4100; // A fair amount of file-types are detectable within this range.
 
@@ -38,7 +36,11 @@ export async function fileTypeFromBlob(blob: Blob) {
   return fileTypeFromBuffer(new Uint8Array(buffer));
 }
 
-function _check(buffer: Uint8Array, headers: number[], options?: CheckOptions) {
+function _check(
+  buffer: Uint8Array,
+  headers: number[],
+  options?: FileType.CheckOptions
+) {
   options = {
     offset: 0,
     ...options,
@@ -59,7 +61,7 @@ function _check(buffer: Uint8Array, headers: number[], options?: CheckOptions) {
   return true;
 }
 
-export async function fileTypeFromTokenizer(tokenizer: ITokenizer) {
+export async function fileTypeFromTokenizer(tokenizer: FileType.ITokenizer) {
   try {
     return new FileTypeParser().parse(tokenizer);
   } catch (error) {
@@ -70,17 +72,19 @@ export async function fileTypeFromTokenizer(tokenizer: ITokenizer) {
 }
 
 class FileTypeParser {
-  private tokenizer!: ITokenizer;
+  private tokenizer!: FileType.ITokenizer;
   private buffer: Uint8Array = new Uint8Array(minimumBytes);
-  check(header: number[], options?: CheckOptions) {
+  check(header: number[], options?: FileType.CheckOptions) {
     return _check(this.buffer, header, options);
   }
 
-  checkString(header: string, options?: CheckOptions) {
+  checkString(header: string, options?: FileType.CheckOptions) {
     return this.check(stringToBytes(header), options);
   }
 
-  async parse(tokenizer: ITokenizer): Promise<FileTypeResult | undefined> {
+  async parse(
+    tokenizer: FileType.ITokenizer
+  ): Promise<FileType.FileTypeResult | undefined> {
     this.buffer = new Uint8Array(minimumBytes);
 
     // Keep reading until EOF if the file size is unknown.
@@ -1670,7 +1674,9 @@ class FileTypeParser {
     }
   }
 
-  async readTiffTag(bigEndian: boolean): Promise<FileTypeResult | undefined> {
+  async readTiffTag(
+    bigEndian: boolean
+  ): Promise<FileType.FileTypeResult | undefined> {
     const tagId = await this.tokenizer.readToken(
       bigEndian ? Token.UINT16_BE : Token.UINT16_LE
     );
@@ -1690,7 +1696,9 @@ class FileTypeParser {
     }
   }
 
-  async readTiffIFD(bigEndian: boolean): Promise<FileTypeResult | undefined> {
+  async readTiffIFD(
+    bigEndian: boolean
+  ): Promise<FileType.FileTypeResult | undefined> {
     const numberOfTags = await this.tokenizer.readToken(
       bigEndian ? Token.UINT16_BE : Token.UINT16_LE
     );
@@ -1704,7 +1712,7 @@ class FileTypeParser {
 
   async readTiffHeader(
     bigEndian: boolean
-  ): Promise<FileTypeResult | undefined> {
+  ): Promise<FileType.FileTypeResult | undefined> {
     const version = (bigEndian ? Token.UINT16_BE : Token.UINT16_LE).get(
       this.buffer,
       2

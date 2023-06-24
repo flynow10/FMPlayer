@@ -1,7 +1,7 @@
 import { Lock, Music4 } from "lucide-react";
 import { FormEvent, useState } from "react";
 import { toast } from "react-toastify";
-import { VercelAPI } from "@/src/api/VercelAPI";
+import { VercelAPI } from "@/src/api/vercel-API";
 import { useNavigate } from "react-router-dom";
 
 export function Login() {
