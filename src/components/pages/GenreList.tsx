@@ -1,13 +1,13 @@
 import { useAsyncLoad } from "@/src/utils/useAsyncLoad";
 import { NavigationMethod, PlayByID } from "../Main";
-import { MyMusicLibrary } from "@/src/Music/Library/MusicLibrary";
+import { MyMusicLibrary } from "@/src/music/library/MusicLibrary";
 import { FullCover } from "./LoadingPages";
 import { GenreMediaResponse } from "api-lib/_postgres-types";
 import {
   MediaCard,
   MediaCardSize,
-} from "@/src/components/MediaDisplays/MediaCard";
-import { MediaCarousel } from "@/src/components/MediaDisplays/MediaCarousel";
+} from "@/src/components/media-displays/MediaCard";
+import { MediaCarousel } from "@/src/components/media-displays/MediaCarousel";
 import { MediaType } from "@/src/utils/types";
 
 export type GenreListProps = {

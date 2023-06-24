@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { MyMusicLibrary } from "@/Music/Library/MusicLibrary";
+import { MyMusicLibrary } from "@/src/music/library/MusicLibrary";
 
 export function useAudioPlayer(id: string | null, onSongEnded?: () => void) {
   const audioTag = useRef(new Audio());

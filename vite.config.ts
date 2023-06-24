@@ -21,10 +21,6 @@ export default defineConfig({
         find: "@/api-lib",
         replacement: path.resolve(__dirname, "api-lib"),
       },
-      {
-        find: "@/Music",
-        replacement: path.resolve(__dirname, "src", "Music"),
-      },
     ],
   },
   build: {

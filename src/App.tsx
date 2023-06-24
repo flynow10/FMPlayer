@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { Audio, RepeatMode } from "@/src/components/Audio";
-import { MyMusicLibrary } from "@/Music/Library/MusicLibrary";
-import { Playlist } from "@/Music/Playlists/Playlist";
+import { MyMusicLibrary } from "@/src/music/library/MusicLibrary";
+import { Playlist } from "@/src/music/playlists/Playlist";
 import AudioControlPlaceholder from "@/src/components/AudioControlPlaceholder";
-import { useAudioPlayer } from "@/Music/useAudioPlayer";
+import { useAudioPlayer } from "@/src/music/useAudioPlayer";
 import Main, { Location } from "./components/Main";
 import Sidebar from "./components/Sidebar";
-import { PlaySongAction } from "./Music/Actions/PlaySongAction";
+import { PlaySongAction } from "@/src/music/actions/PlaySongAction";
 import { MediaType } from "./utils/types";
-import { PlaylistHelper } from "./Music/Utils/PlaylistHelper";
+import { PlaylistHelper } from "@/src/music/utils/PlaylistHelper";
 import { useLoaderData } from "react-router-dom";
 
 function App() {

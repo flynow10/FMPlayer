@@ -8,7 +8,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { MyMusicLibrary } from "@/Music/Library/MusicLibrary";
+import { MyMusicLibrary } from "@/src/music/library/MusicLibrary";
 import { Song } from "@prisma/client";
 import { useAsyncLoad } from "../utils/useAsyncLoad";
 

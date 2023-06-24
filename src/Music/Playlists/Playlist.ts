@@ -1,5 +1,5 @@
 import { v4 as uuid } from "uuid";
-import { Action } from "@/Music/Actions/Action";
+import { Action } from "@/src/music/actions/Action";
 import { MediaType } from "@/src/utils/types";
 import { PlaylistParser } from "./PlaylistParser";
 
