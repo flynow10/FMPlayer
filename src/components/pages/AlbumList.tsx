@@ -1,16 +1,12 @@
-import { MyMusicLibrary } from "@/src/Music/Library/MusicLibrary";
-import { NavigationMethod, PlayByID } from "../Main";
-import { MediaType } from "@/src/utils/types";
-import { useAsyncLoad } from "@/src/utils/useAsyncLoad";
-import { FullCover } from "./LoadingPages";
-import {
-  MediaCard,
-  MediaCardSize,
-} from "@/src/components/MediaDisplays/MediaCard";
+import { MyMusicLibrary } from "@/src/music/library/music-library";
+import { useAsyncLoad } from "@/src/hooks/use-async-load";
+import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
+import { MediaCard } from "@/src/components/media-displays/MediaCard";
+import { Pages } from "@/src/types/pages";
 
 export type AlbumListProps = {
-  onPlayMedia: PlayByID;
-  onNavigate: NavigationMethod;
+  onPlayMedia: Pages.PlayByID;
+  onNavigate: Pages.NavigationMethod;
 };
 
 export default function AlbumList(props: AlbumListProps) {
@@ -21,9 +17,11 @@ export default function AlbumList(props: AlbumListProps) {
     [],
     []
   );
+
   if (!loaded) {
     return <FullCover />;
   }
+
   return (
     <div className="grid grid-cols-5 gap-x-8 overflow-auto p-10">
       {albumList.map((album) => (
@@ -31,8 +29,8 @@ export default function AlbumList(props: AlbumListProps) {
           key={album.id}
           id={album.id}
           title={album.title}
-          size={MediaCardSize.Medium}
-          mediaType={MediaType.Album}
+          size={"medium"}
+          mediaType={"album"}
           onNavigate={props.onNavigate}
           onPlayMedia={props.onPlayMedia}
         />

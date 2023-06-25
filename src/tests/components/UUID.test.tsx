@@ -1,4 +1,4 @@
-import { UUID } from "@/src/components/UUID";
+import { UUID } from "@/src/components/utils/UUID";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 

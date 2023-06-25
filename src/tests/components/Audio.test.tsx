@@ -1,10 +1,10 @@
-import { Audio } from "@/src/components/Audio";
+import { Audio } from "@/src/components/layout/Audio";
 import { Song } from "@prisma/client";
 import { waitFor } from "@testing-library/react";
 import { render } from "@testing-library/react";
 import { v4 } from "uuid";
 
-jest.mock("@/Music/Library/MusicLibrary", () => ({
+jest.mock("@/src/music/library/music-library", () => ({
   MyMusicLibrary: {
     getSong: jest.fn((id: string): Promise<Song> => {
       return new Promise((r) =>

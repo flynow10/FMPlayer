@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { getEnvVar } from "../api-lib/_constants.js";
+import { getEnvVar } from "../api-lib/constants.js";
 import Ably from "ably";
 
 const ABLY_ROOT_KEY = getEnvVar("ABLY_ROOT_KEY");
@@ -29,6 +29,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "GET") {
     return res.status(405).json({ error: "Method not allowed" });
   }
+
   try {
     const token = await getAblyToken();
     res.status(200).json(token);

@@ -8,7 +8,6 @@ const config: Config = {
   moduleNameMapper: {
     "^@/src/(.*)$": "<rootDir>/src/$1",
     "^@/api-lib/(.*)$": "<rootDir>/api-lib/$1",
-    "^@/Music/(.*)$": "<rootDir>/src/Music/$1",
   },
   collectCoverage: false,
   // collectCoverageFrom: ["./src/**/*.(ts|tsx|js|jsx)"],
