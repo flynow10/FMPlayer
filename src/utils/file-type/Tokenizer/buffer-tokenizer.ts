@@ -1,3 +1,4 @@
+import { FileType } from "@/src/types";
 import { AbstractTokenizer } from "./abstract-tokenizer";
 import { EndOfStreamError } from "./end-of-stream-error";
 
@@ -29,8 +30,10 @@ export class BufferTokenizer extends AbstractTokenizer {
           "`options.position` must be equal or greater than `tokenizer.position`"
         );
       }
+
       this.position = options.position;
     }
+
     const bytesRead = await this.peekBuffer(uint8Array, options);
     this.position += bytesRead;
     return bytesRead;
@@ -50,6 +53,7 @@ export class BufferTokenizer extends AbstractTokenizer {
       this.uint8Array.length - normOptions.position,
       normOptions.length
     );
+
     if (!normOptions.mayBeLess && bytes2read < normOptions.length) {
       throw new EndOfStreamError();
     } else {

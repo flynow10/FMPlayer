@@ -1,7 +1,7 @@
 import { v4 as uuid } from "uuid";
 import { Action } from "@/src/music/actions/action";
-import { MediaType } from "@/src/utils/types";
 import { PlaylistParser } from "./playlist-parser";
+import { Music } from "@/src/types/music";
 
 export type ActionSongPair = { songId: string; actionId: string };
 
@@ -46,6 +46,7 @@ export class Playlist {
     } else if (typeof arg === "number") {
       this._actionList.splice(arg, 1);
     }
+
     this.regenerateSongList();
     return this;
   }
@@ -54,8 +55,8 @@ export class Playlist {
     return this._actionList.length === 0;
   }
 
-  public getMediaType(): MediaType {
-    return MediaType.Playlist;
+  public getMediaType(): Music.MediaType {
+    return "playlist";
   }
 
   public static Blank() {

@@ -1,5 +1,5 @@
+import { Music } from "@/src/types/music";
 import { Action } from "./action";
-import { ActionStub, ActionType } from "./action-types";
 
 export class PlaySongAction extends Action {
   public songId: string;
@@ -9,14 +9,14 @@ export class PlaySongAction extends Action {
     this.songId = songId;
   }
 
-  public toStub(): ActionStub {
+  public toStub(): Music.ActionStub {
     return {
-      type: ActionType.PlaySong,
+      type: "play song",
       data: this.songId,
     };
   }
 
-  public type(): ActionType {
-    return ActionType.PlaySong;
+  public type(): Music.ActionType {
+    return "play song";
   }
 }

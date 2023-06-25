@@ -11,10 +11,8 @@ import {
 import { MyMusicLibrary } from "@/src/music/library/music-library";
 import { Song } from "@prisma/client";
 import { useAsyncLoad } from "@/src/hooks/use-async-load";
+import { Music } from "@/src/types/music";
 
-export type RepeatMode = "none" | "one" | "all";
-export type AudioEvent = () => void;
-export type SongEndBehavior = "stop" | "play";
 export type AudioProps = {
   id: string | null;
   loaded: boolean;
@@ -22,12 +20,12 @@ export type AudioProps = {
   percentLoaded: number;
   currentTime: number;
   duration: number;
-  repeatMode: RepeatMode;
-  onTogglePlay?: AudioEvent;
-  onNext?: AudioEvent;
-  onPrevious?: AudioEvent;
-  onRepeatModeChange?: AudioEvent;
-  onStartSeek?: AudioEvent;
+  repeatMode: Music.RepeatMode;
+  onTogglePlay?: Music.AudioEvent;
+  onNext?: Music.AudioEvent;
+  onPrevious?: Music.AudioEvent;
+  onRepeatModeChange?: Music.AudioEvent;
+  onStartSeek?: Music.AudioEvent;
   onSeekChange?: (time: number) => void;
   onStopSeek?: (time: number) => void;
 };
@@ -61,8 +59,10 @@ export function Audio(props: AudioProps) {
         const percentage = seekLocation / max;
         return percentage * props.duration;
       }
+
       return NaN;
     };
+
     const onSeekMove = (e: MouseEvent) => {
       if (seeking) {
         props.onSeekChange?.(calculateTime(e));
@@ -78,6 +78,7 @@ export function Audio(props: AudioProps) {
 
     window.addEventListener("mousemove", onSeekMove);
     window.addEventListener("mouseup", onSeekUp);
+
     return () => {
       window.removeEventListener("mousemove", onSeekMove);
       window.removeEventListener("mouseup", onSeekUp);

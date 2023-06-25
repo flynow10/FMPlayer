@@ -1,35 +1,35 @@
-import { Location } from "@/src/components/layout/Main";
+import { Pages } from "@/src/types/pages";
 
 export type SidebarProps = {
-  location: Location;
+  location: Pages.Location;
   isSearching: boolean;
-  onSelectTab?: (location: Location) => void;
+  onSelectTab?: (location: Pages.Location) => void;
   onSearch?: (search: string) => void;
 };
 
 export default function Sidebar(props: SidebarProps) {
-  const notDisabled = [
-    Location.Album,
-    Location.Song,
-    // Location.Playlist,
-    Location.Import,
-    Location.Genre,
+  const notDisabled: Pages.Location[] = [
+    "Albums",
+    "Songs",
+    // Pages.Location.Playlist,
+    "Import Media",
+    "Genres",
   ];
-  const libraryButtons: Location[] = [
-    Location.Recent,
-    Location.Artist,
-    Location.Album,
-    Location.Song,
-    Location.Playlist,
-    Location.Genre,
-  ];
-
-  const managementButtons: Location[] = [
-    Location.Import,
-    Location.EditPlaylist,
+  const libraryButtons: Pages.Location[] = [
+    "Recently Added",
+    "Artists",
+    "Albums",
+    "Songs",
+    "Playlists",
+    "Genres",
   ];
 
-  const createNavigationLink = (location: Location) => (
+  const managementButtons: Pages.Location[] = [
+    "Import Media",
+    "Edit Playlists",
+  ];
+
+  const createNavigationLink = (location: Pages.Location) => (
     <button
       role="button"
       className={
@@ -59,6 +59,7 @@ export default function Sidebar(props: SidebarProps) {
           className="border-2 rounded-md my-2 px-2"
           onFocus={(target) => {
             const value = target.currentTarget.value;
+
             if (value !== "") {
               props.onSearch?.(value);
             }

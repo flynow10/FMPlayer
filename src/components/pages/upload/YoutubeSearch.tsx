@@ -1,13 +1,9 @@
-import {
-  Thumbnail,
-  ThumbnailDetails,
-  VideoSnippet,
-  YoutubeAPI,
-} from "@/src/api/youtube-API";
+import { YoutubeAPI } from "@/src/api/youtube-API";
 import { isYoutubeUrl, splitOutUrls } from "@/src/utils/url-utils";
 import { DownloadCloud, ExternalLink } from "lucide-react";
 import { useState } from "react";
 import YoutubeSearchForm from "./YoutubeSearchForm";
+import { API } from "@/src/types/api";
 
 type YoutubeSearchProps = {
   onClickDownload: (videoId: string) => void;
@@ -15,13 +11,15 @@ type YoutubeSearchProps = {
 
 export default function YoutubeSearch(props: YoutubeSearchProps) {
   const [resultList, setResultList] = useState<
-    { snippet: VideoSnippet; id: string }[]
+    { snippet: API.Youtube.VideoSnippet; id: string }[]
   >([]);
 
   const onSearch = async (searchText: string) => {
     const videoId = await isYoutubeUrl(searchText);
+
     if (typeof videoId === "string") {
       const videoResult = await YoutubeAPI.video(videoId);
+
       if (videoResult) {
         setResultList(
           videoResult.items.map((video) => ({
@@ -32,11 +30,14 @@ export default function YoutubeSearch(props: YoutubeSearchProps) {
       }
     } else {
       const searchResult = await YoutubeAPI.search(searchText);
+
       if (searchResult) {
         const results = [];
+
         for (let i = 0; i < searchResult.items.length; i++) {
           const searchVideoId = searchResult.items[i].id.videoId;
           const videoResult = await YoutubeAPI.video(searchVideoId);
+
           if (videoResult) {
             results.push(
               ...videoResult.items.map((video) => ({
@@ -46,10 +47,12 @@ export default function YoutubeSearch(props: YoutubeSearchProps) {
             );
           }
         }
+
         setResultList([...results]);
       }
     }
   };
+
   return (
     <>
       <YoutubeSearchForm onSearch={onSearch} />
@@ -70,24 +73,25 @@ export default function YoutubeSearch(props: YoutubeSearchProps) {
 }
 
 type YoutubeSearchResultProps = {
-  videoSnippet: VideoSnippet;
+  videoSnippet: API.Youtube.VideoSnippet;
   videoId: string;
   onClickDownLoad: (videoId: string) => void;
 };
 
 function YoutubeResult(props: YoutubeSearchResultProps) {
-  const thumbnailOrder: (keyof ThumbnailDetails)[] = [
+  const thumbnailOrder: (keyof API.Youtube.ThumbnailDetails)[] = [
     "default",
     "medium",
     "high",
     "standard",
     "maxres",
   ];
-  const thumbnail = thumbnailOrder.reduce<Thumbnail | undefined>(
+  const thumbnail = thumbnailOrder.reduce<API.Youtube.Thumbnail | undefined>(
     (value, key) => {
       if (props.videoSnippet.thumbnails[key] !== undefined) {
         value = props.videoSnippet.thumbnails[key];
       }
+
       return value;
     },
     undefined

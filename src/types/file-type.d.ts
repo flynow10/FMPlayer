@@ -1,4 +1,4 @@
-declare namespace FileType {
+export namespace FileType {
   export type FileExtension =
     | "jpg"
     | "png"

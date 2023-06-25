@@ -1,18 +1,11 @@
 import { VercelRequest, VercelResponse } from "@vercel/node";
 import {
-  AlbumListOptions,
-  AlbumSortFields,
-  GenreListResponse,
-  SongListOptions,
-  SongSortFields,
-  SongWithAlbum,
-} from "../api-lib/postgres-types.js";
-import {
   getPaginationOptions,
   getPrismaSelectPaginationOptions,
   printRequestType,
 } from "../api-lib/api-utils.js";
 import { prismaClient } from "../api-lib/data-clients.js";
+import { PostgresRequest } from "@/src/types/postgres-request.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "GET") {
@@ -39,14 +32,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return;
       }
 
-      const song: SongWithAlbum | null = await prismaClient.song.findUnique({
-        where: {
-          id,
-        },
-        include: {
-          album: true,
-        },
-      });
+      const song: PostgresRequest.SongWithAlbum | null =
+        await prismaClient.song.findUnique({
+          where: {
+            id,
+          },
+          include: {
+            album: true,
+          },
+        });
 
       if (!song) {
         res.status(404).json("Song not found");
@@ -82,9 +76,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     case "getAlbumList": {
       const { sortBy } = req.query;
-      const options: AlbumListOptions = {
+      const options: PostgresRequest.AlbumListOptions = {
         ...getPaginationOptions(req),
-        sortBy: sortBy ? (sortBy as AlbumSortFields) : "title",
+        sortBy: sortBy ? (sortBy as PostgresRequest.AlbumSortFields) : "title",
       };
 
       const selectQuery = getPrismaSelectPaginationOptions(options, "title");
@@ -102,9 +96,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     case "getSongList": {
       const { sortBy } = req.query;
-      const options: SongListOptions = {
+      const options: PostgresRequest.SongListOptions = {
         ...getPaginationOptions(req),
-        sortBy: sortBy ? (sortBy as SongSortFields) : "title",
+        sortBy: sortBy ? (sortBy as PostgresRequest.SongSortFields) : "title",
       };
 
       const selectQuery = getPrismaSelectPaginationOptions(options, "title");
@@ -171,7 +165,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         await prismaClient.$queryRaw<
           { genre: string; song_count: bigint; album_count: bigint }[]
         >`select s1.genre, s1.count as song_count, coalesce(s2.count, 0) as album_count from (select genre, COUNT(*) from "Song" group by genre) s1 left join (select genre, COUNT(*) from "Album" group by genre) s2 on (s1.genre = s2.genre) union select s1.genre, coalesce(s2.count, 0) as song_count, s1.count as album_count from (select genre, COUNT(*) from "Album" group by genre) s1 left join (select genre, COUNT(*) from "Song" group by genre) s2 on (s1.genre = s2.genre) order by genre asc;`
-      ).map<GenreListResponse>((obj) => ({
+      ).map<PostgresRequest.GenreListResponse>((obj) => ({
         genre: obj.genre,
         song_count: Number(obj.song_count),
         album_count: Number(obj.album_count),

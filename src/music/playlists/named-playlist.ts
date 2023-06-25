@@ -1,11 +1,12 @@
-import { ActionStub, createFromStub } from "@/src/music/actions/action-types";
+import { createFromStub } from "@/src/music/actions/create-from-stub";
 import { Playlist } from "./playlist";
+import { Music } from "@/src/types/music";
 
 export interface PlaylistJson {
   id: string;
   title: string;
   coverUrl?: string;
-  actionList: ActionStub[];
+  actionList: Music.ActionStub[];
 }
 
 export class NamedPlaylist extends Playlist {

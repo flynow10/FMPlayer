@@ -1,28 +1,25 @@
 import { Album, Song } from "@prisma/client";
-import {
-  AlbumListOptions,
-  AlbumWithSongs,
-  GenreListResponse,
-  GenreMediaResponse,
-  SongListOptions,
-  SongWithAlbum,
-} from "@/api-lib/postgres-types";
 import { PresignedPost } from "@aws-sdk/s3-presigned-post";
-import { ApiEndpoint, VercelAPI } from "@/src/api/vercel-API";
+import { Endpoint, VercelAPI } from "@/src/api/vercel-API";
+import { PostgresRequest } from "@/src/types/postgres-request";
 
 class PostgresMusicLibrary {
-  public async getSong(id: string): Promise<SongWithAlbum | undefined> {
+  public async getSong(
+    id: string
+  ): Promise<PostgresRequest.SongWithAlbum | undefined> {
     return VercelAPI.makeRequest(
-      ApiEndpoint.POSTGRES,
+      Endpoint.POSTGRES,
       "getSong",
       { id },
       undefined
     );
   }
 
-  public async getAlbum(id: string): Promise<AlbumWithSongs | undefined> {
+  public async getAlbum(
+    id: string
+  ): Promise<PostgresRequest.AlbumWithSongs | undefined> {
     return VercelAPI.makeRequest(
-      ApiEndpoint.POSTGRES,
+      Endpoint.POSTGRES,
       "getAlbum",
       { id },
       undefined
@@ -30,34 +27,31 @@ class PostgresMusicLibrary {
   }
 
   public async getSongList(
-    options: Partial<SongListOptions> = {}
+    options: Partial<PostgresRequest.SongListOptions> = {}
   ): Promise<Song[]> {
-    return VercelAPI.makeRequest(
-      ApiEndpoint.POSTGRES,
-      "getSongList",
-      options,
-      []
-    );
+    return VercelAPI.makeRequest(Endpoint.POSTGRES, "getSongList", options, []);
   }
 
   public async getAlbumList(
-    options: Partial<AlbumListOptions> = {}
+    options: Partial<PostgresRequest.AlbumListOptions> = {}
   ): Promise<Album[]> {
     return VercelAPI.makeRequest(
-      ApiEndpoint.POSTGRES,
+      Endpoint.POSTGRES,
       "getAlbumList",
       options,
       []
     );
   }
 
-  public async getGenreList(): Promise<GenreListResponse[]> {
-    return VercelAPI.makeRequest(ApiEndpoint.POSTGRES, "getGenreList", {}, []);
+  public async getGenreList(): Promise<PostgresRequest.GenreListResponse[]> {
+    return VercelAPI.makeRequest(Endpoint.POSTGRES, "getGenreList", {}, []);
   }
 
-  public async getGenreMedia(genre: string): Promise<GenreMediaResponse> {
+  public async getGenreMedia(
+    genre: string
+  ): Promise<PostgresRequest.GenreMediaResponse> {
     return VercelAPI.makeRequest(
-      ApiEndpoint.POSTGRES,
+      Endpoint.POSTGRES,
       "getGenreMedia",
       { genre },
       {
@@ -74,7 +68,7 @@ class PostgresMusicLibrary {
     file: Blob
   ): Promise<void> {
     const presignedUrl: PresignedPost = await VercelAPI.makeRequest(
-      ApiEndpoint.AWS,
+      Endpoint.AWS,
       "presigned-post",
       {
         fileName: `${fileName}.${fileType}`,
@@ -99,7 +93,7 @@ class PostgresMusicLibrary {
   public async getMusicFileUrl(id: string): Promise<string | undefined> {
     const url = (
       await VercelAPI.makeRequest<{ url: string }>(
-        ApiEndpoint.AWS,
+        Endpoint.AWS,
         "songUrl",
         { id },
         { url: "" }

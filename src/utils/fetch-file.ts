@@ -2,6 +2,7 @@
 const readFromBlobOrFile = (blob: File | Blob): Promise<ArrayBuffer> =>
   new Promise((resolve, reject) => {
     const fileReader = new FileReader();
+
     fileReader.onload = () => {
       if (fileReader.result !== null && typeof fileReader.result !== "string") {
         resolve(fileReader.result);
@@ -9,17 +10,20 @@ const readFromBlobOrFile = (blob: File | Blob): Promise<ArrayBuffer> =>
         reject(Error('File could not be read! Error="result was null"'));
       }
     };
+
     fileReader.onerror = ({ target }) => {
       if (target !== null) {
         reject(Error(`File could not be read! Error="${target.error}"`));
       }
     };
+
     fileReader.readAsArrayBuffer(blob);
   });
 
 // eslint-disable-next-line
 export const fetchFile = async (_data: string | Buffer | File | Blob) => {
   let data: ArrayBufferLike | ArrayLike<number>;
+
   if (typeof _data === "undefined") {
     return new Uint8Array();
   }
