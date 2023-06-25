@@ -25,8 +25,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       res.status(200).json("Test");
       return;
     }
+
     case "getSong": {
       const { id } = req.query;
+
       if (typeof id !== "string") {
         res.status(400).json("Invalid id");
         return;
@@ -53,6 +55,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     case "getAlbum": {
       const { id } = req.query;
+
       if (typeof id !== "string") {
         res.status(400).json("Invalid id");
         return;
@@ -66,10 +69,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           songs: true,
         },
       });
+
       if (!album) {
         res.status(404).json("Album not found");
         return;
       }
+
       res.status(200).json(album);
       return;
     }
@@ -110,15 +115,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         console.error(e);
         res.status(400).json("Something went wrong when querying the database");
       }
+
       return;
     }
 
     case "getGenreMedia": {
       const { genre } = req.query;
+
       if (typeof genre !== "string") {
         res.status(400).json("Invalid genre");
         return;
       }
+
       const paginationOptions = getPaginationOptions(req);
       const options = {
         ...paginationOptions,

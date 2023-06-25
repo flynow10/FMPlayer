@@ -27,25 +27,33 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         res.status(400).json("Missing file");
         return;
       }
+
       if (req.body.metadata === undefined) {
         res.status(400).json("Missing metadata");
         return;
       }
+
       const { file, metadata }: PostgresRequest.UploadFileBody = req.body;
+
       if (file.ext.match(/^([0-9A-z]{1,4})$/) === null) {
         res.status(400).json("Invalid file type");
         return;
       }
+
       const id = uuid();
+
       if (metadata.title === undefined) {
         metadata.title = `Untitled ${id.substring(0, 8)}`;
       }
+
       if (typeof metadata.artists === "string") {
         metadata.artists = [metadata.artists];
       }
+
       if (typeof metadata.featuring === "string") {
         metadata.featuring = [metadata.featuring];
       }
+
       const song = await prismaClient.song.create({
         data: {
           id: id,
@@ -67,12 +75,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       res.status(200).json({ id, song, post });
       return;
     }
+
     case "conversion-complete": {
       const { id } = req.body;
+
       if (typeof id !== "string" || id === "") {
         res.status(400).json("Missing id");
         return;
       }
+
       const song = await prismaClient.song.update({
         where: {
           id,
@@ -84,6 +95,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       res.status(200).json(song);
       return;
     }
+
     default:
       res.status(400).json("Invalid type");
   }

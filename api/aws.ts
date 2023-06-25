@@ -28,13 +28,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         res.status(200).json({ url: `/static/songs/${id}.ogg` });
         return;
       }
+
       if (typeof id !== "string" || id === "") {
         res.status(400).json("Missing song ID!");
         return;
       }
+
       res.status(200).json({ url: await getSongUrl(id) });
       break;
     }
+
     default: {
       res.status(400).json("Invalid type");
       return;
@@ -53,11 +56,17 @@ const maxTimeMarginMS = maxTimeMarginS * 1000;
 
 async function getSongUrl(songId: string) {
   if (urlCache.has(songId)) {
-    const { time, url } = urlCache.get(songId)!;
-    if (time > Date.now() + maxTimeMarginMS) {
-      return url;
+    const cacheGet = urlCache.get(songId);
+
+    if (cacheGet) {
+      const { time, url } = cacheGet;
+
+      if (time > Date.now() + maxTimeMarginMS) {
+        return url;
+      }
     }
   }
+
   const command = new GetObjectCommand({
     Bucket: S3_SONGS_BUCKET,
     Key: getS3SongKey(songId),

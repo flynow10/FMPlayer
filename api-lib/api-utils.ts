@@ -33,6 +33,7 @@ export const getPrismaSelectPaginationOptions = (
   const skip = (page - 1) * limit;
   const take = limit;
   let orderBy;
+
   if (sortBy !== defaultSort) {
     orderBy = [
       {
