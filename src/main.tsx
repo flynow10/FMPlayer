@@ -35,11 +35,6 @@ const router = createBrowserRouter([
       return defer({
         youtubeAPILoadedPromise,
         lambdaConnectionStatusPromise,
-        timeout: new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(undefined);
-          }, 5000);
-        }),
       });
     },
   },
