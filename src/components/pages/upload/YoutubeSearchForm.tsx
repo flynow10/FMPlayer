@@ -13,16 +13,19 @@ export default function YoutubeSearchForm(props: {
 
   useEffect(() => {
     let active = true;
+
     (async () => {
       if (searchText === "") {
         setSuggestions([]);
       } else {
         const response = await YoutubeAPI.searchSuggestions(searchText);
+
         if (active) {
           setSuggestions(response.suggestions);
         }
       }
     })();
+
     return () => {
       active = false;
     };
@@ -34,6 +37,7 @@ export default function YoutubeSearchForm(props: {
       new RegExp(`^${searchText}`)
     );
     let suggestionText;
+
     if (
       suggestionSplitBySearch.length === 2 &&
       suggestionSplitBySearch[0] === ""
@@ -60,6 +64,7 @@ export default function YoutubeSearchForm(props: {
         </span>
       );
     }
+
     return (
       <button
         key={index}
@@ -93,6 +98,7 @@ export default function YoutubeSearchForm(props: {
           suggestionIndex !== -1 ? suggestions[suggestionIndex] : searchText;
         props.onSearch(currentValue);
         setSuggestionIndex(-1);
+
         if (currentValue !== searchText) {
           setSearchText(currentValue);
         }
@@ -115,18 +121,23 @@ export default function YoutubeSearchForm(props: {
               case "ArrowDown": {
                 event.preventDefault();
                 let newIndex = suggestionIndex + 1;
+
                 if (newIndex >= suggestions.length) {
                   newIndex = -1;
                 }
+
                 setSuggestionIndex(newIndex);
                 break;
               }
+
               case "ArrowUp": {
                 event.preventDefault();
                 let newIndex = suggestionIndex - 1;
+
                 if (newIndex <= -2) {
                   newIndex = suggestions.length - 1;
                 }
+
                 setSuggestionIndex(newIndex);
                 break;
               }

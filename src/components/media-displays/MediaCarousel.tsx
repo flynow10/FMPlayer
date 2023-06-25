@@ -92,6 +92,7 @@ type CarouselButtonProps = {
   carouselRef: HTMLDivElement | null;
   direction: ButtonDirection;
 };
+
 function CarouselButton(props: CarouselButtonProps) {
   const [state, setState] = useState(ButtonState.Hidden);
 
@@ -113,6 +114,7 @@ function CarouselButton(props: CarouselButtonProps) {
     const onScroll = () => {
       let update = false;
       const currentShouldButtonShown = shouldButtonShow();
+
       if (
         currentShouldButtonShown &&
         [ButtonState.FadeOut, ButtonState.Hidden].includes(state)
@@ -120,6 +122,7 @@ function CarouselButton(props: CarouselButtonProps) {
         update = true;
         setState(ButtonState.FadeIn);
       }
+
       if (
         !currentShouldButtonShown &&
         [ButtonState.FadeIn, ButtonState.Shown].includes(state)
@@ -127,6 +130,7 @@ function CarouselButton(props: CarouselButtonProps) {
         update = true;
         setState(ButtonState.FadeOut);
       }
+
       if (update) {
         setTimeout(() => {
           setState((currentState) => {
@@ -141,8 +145,10 @@ function CarouselButton(props: CarouselButtonProps) {
         }, 150);
       }
     };
+
     if (props.carouselRef) {
       props.carouselRef.addEventListener("scroll", onScroll);
+
       return () => {
         props.carouselRef?.removeEventListener("scroll", onScroll);
       };
@@ -160,6 +166,7 @@ function CarouselButton(props: CarouselButtonProps) {
         }
       );
       intersectionObserver.observe(props.carouselRef);
+
       return () => {
         intersectionObserver.disconnect();
       };

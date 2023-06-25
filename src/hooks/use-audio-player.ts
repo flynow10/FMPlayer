@@ -17,8 +17,10 @@ export function useAudioPlayer(id: string | null, onSongEnded?: () => void) {
     if (!audioTag.current.paused) {
       audioTag.current.pause();
     }
+
     setSeeking(true);
     audioTag.current.currentTime = time;
+
     if (end && playing) {
       setSeeking(false);
       audioTag.current.play();
@@ -37,7 +39,9 @@ export function useAudioPlayer(id: string | null, onSongEnded?: () => void) {
       });
       mediaSourceNode.current.connect(ctx.destination);
     }
+
     setPlaying(true);
+
     if (loaded) {
       audioTag.current.play();
     }
@@ -55,15 +59,18 @@ export function useAudioPlayer(id: string | null, onSongEnded?: () => void) {
   useEffect(() => {
     let active = true;
     const audioRef = audioTag.current;
+
     if (id !== null) {
       (async () => {
         const url = await MyMusicLibrary.getMusicFileUrl(id);
+
         if (url !== undefined && active) {
           audioRef.src = url;
           audioRef.load();
         }
       })();
     }
+
     return () => {
       active = false;
       setLoaded(false);
@@ -76,9 +83,11 @@ export function useAudioPlayer(id: string | null, onSongEnded?: () => void) {
 
   useEffect(() => {
     const audioRef = audioTag.current;
+
     if (onSongEnded) {
       audioRef.addEventListener("ended", onSongEnded);
     }
+
     return () => {
       if (onSongEnded) {
         audioRef.removeEventListener("ended", onSongEnded);
@@ -88,12 +97,15 @@ export function useAudioPlayer(id: string | null, onSongEnded?: () => void) {
 
   useEffect(() => {
     const audioRef = audioTag.current;
+
     const canPlayThroughCallback = () => {
       setLoaded(true);
+
       if (playing && !seeking) {
         audioRef.play();
       }
     };
+
     const progressCallback = () => {
       const buffered = audioRef.buffered;
 
@@ -101,15 +113,19 @@ export function useAudioPlayer(id: string | null, onSongEnded?: () => void) {
         setPercentLoaded((100 * buffered.end(0)) / audioRef.duration);
       }
     };
+
     const timeUpdateCallback = () => {
       setCurrentTime(audioRef.currentTime);
+
       if (!isNaN(audioRef.duration)) {
         setDuration(audioRef.duration);
       }
     };
+
     audioRef.addEventListener("canplaythrough", canPlayThroughCallback);
     audioRef.addEventListener("progress", progressCallback);
     audioRef.addEventListener("timeupdate", timeUpdateCallback);
+
     return () => {
       audioRef.removeEventListener("canplaythrough", canPlayThroughCallback);
       audioRef.removeEventListener("progress", progressCallback);

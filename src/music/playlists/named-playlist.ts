@@ -20,11 +20,13 @@ export class NamedPlaylist extends Playlist {
 
   public static fromData(playlistData: PlaylistJson): NamedPlaylist {
     const playlist = new NamedPlaylist();
+
     if ("actionList" in playlistData) {
       playlist.addAction(
         ...playlistData.actionList.map((a) => createFromStub(a))
       );
     }
+
     delete (playlistData as any).actionList; // eslint-disable-line @typescript-eslint/no-explicit-any
     return Object.assign(playlist, playlistData);
   }
