@@ -1,7 +1,8 @@
 import { MyMusicLibrary } from "@/src/music/library/music-library";
 import { useAsyncLoad } from "@/src/hooks/use-async-load";
 import { ChevronDown, ChevronUp, Play } from "lucide-react";
-import { Blur, FullCover } from "@/src/components/pages/LoadingPages";
+import { Blur } from "@/src/components/utils/loading-pages/Blur";
+import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
 import { useState } from "react";
 import { Song } from "@prisma/client";
 import { Pages } from "@/src/types/pages";

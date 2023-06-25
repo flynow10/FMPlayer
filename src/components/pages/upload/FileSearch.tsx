@@ -1,5 +1,5 @@
 import { useState } from "react";
-import YoutubeSearch from "@/src/components/pages/upload/YoutubeSearch";
+import YoutubeSearch from "@/src/components/pages/upload/youtube-search/YoutubeSearch";
 import { isUrl, isYoutubeUrl } from "@/src/utils/url-utils";
 import FileDrop from "@/src/components/pages/upload/FileDrop";
 import { Pages } from "@/src/types/pages";

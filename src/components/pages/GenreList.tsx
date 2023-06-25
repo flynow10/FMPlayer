@@ -1,6 +1,6 @@
 import { useAsyncLoad } from "@/src/hooks/use-async-load";
 import { MyMusicLibrary } from "@/src/music/library/music-library";
-import { FullCover } from "@/src/components/pages/LoadingPages";
+import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
 import { MediaCard } from "@/src/components/media-displays/MediaCard";
 import { MediaCarousel } from "@/src/components/media-displays/MediaCarousel";
 import { PostgresRequest } from "@/src/types/postgres-request";

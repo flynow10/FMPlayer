@@ -93,6 +93,7 @@ type CarouselButtonProps = {
   direction: ButtonDirection;
 };
 
+// eslint-disable-next-line react/no-multi-comp
 function CarouselButton(props: CarouselButtonProps) {
   const [state, setState] = useState(ButtonState.Hidden);
 

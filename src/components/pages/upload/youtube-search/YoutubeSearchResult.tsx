@@ -1,76 +1,6 @@
-import { YoutubeAPI } from "@/src/api/youtube-API";
-import { isYoutubeUrl, splitOutUrls } from "@/src/utils/url-utils";
-import { DownloadCloud, ExternalLink } from "lucide-react";
-import { useState } from "react";
-import YoutubeSearchForm from "./YoutubeSearchForm";
 import { API } from "@/src/types/api";
-
-type YoutubeSearchProps = {
-  onClickDownload: (videoId: string) => void;
-};
-
-export default function YoutubeSearch(props: YoutubeSearchProps) {
-  const [resultList, setResultList] = useState<
-    { snippet: API.Youtube.VideoSnippet; id: string }[]
-  >([]);
-
-  const onSearch = async (searchText: string) => {
-    const videoId = await isYoutubeUrl(searchText);
-
-    if (typeof videoId === "string") {
-      const videoResult = await YoutubeAPI.video(videoId);
-
-      if (videoResult) {
-        setResultList(
-          videoResult.items.map((video) => ({
-            snippet: video.snippet,
-            id: video.id,
-          }))
-        );
-      }
-    } else {
-      const searchResult = await YoutubeAPI.search(searchText);
-
-      if (searchResult) {
-        const results = [];
-
-        for (let i = 0; i < searchResult.items.length; i++) {
-          const searchVideoId = searchResult.items[i].id.videoId;
-          const videoResult = await YoutubeAPI.video(searchVideoId);
-
-          if (videoResult) {
-            results.push(
-              ...videoResult.items.map((video) => ({
-                snippet: video.snippet,
-                id: video.id,
-              }))
-            );
-          }
-        }
-
-        setResultList([...results]);
-      }
-    }
-  };
-
-  return (
-    <>
-      <YoutubeSearchForm onSearch={onSearch} />
-      <div className="youtube-results flex flex-col overflow-auto h-full pr-4">
-        {resultList.map((result, index) => {
-          return (
-            <YoutubeResult
-              key={index}
-              videoSnippet={result.snippet}
-              videoId={result.id}
-              onClickDownLoad={props.onClickDownload}
-            />
-          );
-        })}
-      </div>
-    </>
-  );
-}
+import { splitOutUrls } from "@/src/utils/url-utils";
+import { DownloadCloud, ExternalLink } from "lucide-react";
 
 type YoutubeSearchResultProps = {
   videoSnippet: API.Youtube.VideoSnippet;
@@ -78,7 +8,7 @@ type YoutubeSearchResultProps = {
   onClickDownLoad: (videoId: string) => void;
 };
 
-function YoutubeResult(props: YoutubeSearchResultProps) {
+export function YoutubeSearchResult(props: YoutubeSearchResultProps) {
   const thumbnailOrder: (keyof API.Youtube.ThumbnailDetails)[] = [
     "default",
     "medium",

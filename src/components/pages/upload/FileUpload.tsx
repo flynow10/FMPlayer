@@ -4,7 +4,7 @@ import { fileTypeFromBuffer } from "@/src/utils/file-type";
 import * as jsmediatags from "jsmediatags";
 import { v4 as uuid } from "uuid";
 import { useState } from "react";
-import { FullCover } from "@/src/components/pages/LoadingPages";
+import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
 import classNames from "classnames";
 import { CheckSquare, Square } from "lucide-react";
 import { PostgresRequest } from "@/src/types/postgres-request";
