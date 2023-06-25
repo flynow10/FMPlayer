@@ -9,7 +9,7 @@
     "build": "tsc && vite build",
     "lint": "yarn lint:js; yarn lint:style",
     "lint:fix": "yarn lint:jsfix; yarn lint:stylefix",
-    "lint:js": "eslint ./src",
+    "lint:js": "eslint ./src ./api ./api-lib",
     "lint:jsfix": "yarn lint:js --fix",
     "lint:style": "stylelint \"./src/**/*.(css|sass|scss)\" --customSyntax postcss-scss",
     "lint:stylefix": "yarn lint:style --fix",
