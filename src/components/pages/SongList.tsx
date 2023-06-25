@@ -1,23 +1,23 @@
-import { MyMusicLibrary } from "@/src/Music/Library/MusicLibrary";
-import { useAsyncLoad } from "@/src/utils/useAsyncLoad";
-import { NavigationMethod, PlayByID } from "../Main";
-import { MediaType } from "@/src/utils/types";
+import { MyMusicLibrary } from "@/src/music/library/music-library";
+import { useAsyncLoad } from "@/src/hooks/use-async-load";
 import { ChevronDown, ChevronUp, Play } from "lucide-react";
-import { Blur, FullCover } from "./LoadingPages";
+import { Blur } from "@/src/components/utils/loading-pages/Blur";
+import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
 import { useState } from "react";
-import { SongSortFields, SortType } from "api-lib/_postgres-types";
 import { Song } from "@prisma/client";
+import { Pages } from "@/src/types/pages";
+import { PostgresRequest } from "@/src/types/postgres-request";
 
 export type SongListProps = {
-  onPlayMedia: PlayByID;
-  onNavigate: NavigationMethod;
+  onPlayMedia: Pages.PlayByID;
+  onNavigate: Pages.NavigationMethod;
 };
 
 type Column = {
   name: string;
 } & (
   | {
-      prop: SongSortFields;
+      prop: PostgresRequest.SongSortFields;
       sortable: true;
     }
   | {
@@ -45,14 +45,15 @@ const columns: Column[] = [
 ];
 
 export default function SongList(props: SongListProps) {
-  const [sortBy, setSortBy] = useState<SongSortFields>("title");
-  const [sort, setSort] = useState<SortType>("asc");
+  const [sortBy, setSortBy] = useState<PostgresRequest.SongSortFields>("title");
+  const [sort, setSort] = useState<PostgresRequest.SortType>("asc");
   const [songList, loaded] = useAsyncLoad(
     () => MyMusicLibrary.getSongList({ sortDirection: sort, sortBy }),
     [],
     [sortBy, sort]
   );
-  const onSort = (prop: SongSortFields) => {
+
+  const onSort = (prop: PostgresRequest.SongSortFields) => {
     if (sortBy === prop) {
       setSort((value) => (value === "desc" ? "asc" : "desc"));
     } else {
@@ -60,9 +61,11 @@ export default function SongList(props: SongListProps) {
       setSort("asc");
     }
   };
+
   if (songList.length === 0 && !loaded) {
     return <FullCover />;
   }
+
   return (
     <>
       <div className="mx-8">
@@ -101,19 +104,22 @@ export default function SongList(props: SongListProps) {
                   role="button"
                   className="p-2"
                   onClick={() => {
-                    props.onPlayMedia(song.id, MediaType.Song);
+                    props.onPlayMedia(song.id, "song");
                   }}
                 >
                   <Play />
                 </td>
                 {columns.map((column) => {
                   let value = song[column.prop];
+
                   if (value instanceof Date) {
                     value = value.toISOString();
                   }
+
                   if (value instanceof Array) {
                     value = value.join(", ");
                   }
+
                   return (
                     <td className="p-1" key={column.name}>
                       {value}

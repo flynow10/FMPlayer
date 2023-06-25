@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/proxy/:path*",
+      "destination": "https://suggestqueries.google.com/:path*"
+    }
+  ]
+}

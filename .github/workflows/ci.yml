@@ -21,7 +21,7 @@ jobs:
           node-version: 18.x
           cache: "yarn"
       - run: yarn install --frozen-lockfile
-      - run: yarn test
+      - run: yarn test:coverage
       - name: Codecov
         uses: codecov/codecov-action@v3
         with:
