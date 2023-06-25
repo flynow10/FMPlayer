@@ -2,7 +2,6 @@ import { useState } from "react";
 import YoutubeSearch from "@/src/components/pages/upload/YoutubeSearch";
 import { isUrl, isYoutubeUrl } from "@/src/utils/url-utils";
 import FileDrop from "@/src/components/pages/upload/FileDrop";
-import { FileUploadType } from "@/src/components/pages/upload/FileUpload";
 import { Pages } from "@/src/types/pages";
 
 type FileSearchProps = {
@@ -30,7 +29,7 @@ export default function FileSearch(props: FileSearchProps) {
               props.onNavigate("new", {
                 type: "file upload",
                 data: {
-                  uploadType: FileUploadType.File,
+                  uploadType: "file",
                   files,
                 },
               });
@@ -71,7 +70,7 @@ export default function FileSearch(props: FileSearchProps) {
                 props.onNavigate("new", {
                   type: "file upload",
                   data: {
-                    uploadType: FileUploadType.Url,
+                    uploadType: "url",
                     url: urlText,
                   },
                 });
