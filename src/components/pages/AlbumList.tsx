@@ -1,6 +1,6 @@
 import { MyMusicLibrary } from "@/src/music/library/music-library";
 import { useAsyncLoad } from "@/src/hooks/use-async-load";
-import { FullCover } from "@/src/components/pages/LoadingPages";
+import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
 import { MediaCard } from "@/src/components/media-displays/MediaCard";
 import { Pages } from "@/src/types/pages";
 

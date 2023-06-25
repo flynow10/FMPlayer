@@ -30,7 +30,8 @@
       { "blankLine": "always", "prev": "block", "next": "*" },
       { "blankLine": "always", "prev": "*", "next": "block-like" },
       { "blankLine": "always", "prev": "block-like", "next": "*" }
-    ]
+    ],
+    "react/no-multi-comp": ["warn"]
   },
   "settings": {
     "react": {

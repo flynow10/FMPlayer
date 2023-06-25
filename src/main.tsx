@@ -15,7 +15,7 @@ import { Login } from "@/src/components/auth/Login";
 import { YoutubeAPI } from "@/src/api/youtube-API";
 import { VercelAPI } from "@/src/api/vercel-API";
 import { LambdaStatus } from "@/src/api/ably-client";
-import { FullCover } from "@/src/components/pages/LoadingPages";
+import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
 
 import "react-toastify/dist/ReactToastify.min.css";
 import "@/src/assets/sass/index.scss";
