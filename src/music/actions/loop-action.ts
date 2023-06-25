@@ -1,32 +1,32 @@
+import { Music } from "@/src/types/music";
 import { Action } from "./action";
-import { ActionStub, ActionType } from "./action-types";
 
 export class LoopAction extends Action {
   constructor() {
     super();
   }
 
-  public toStub(): ActionStub {
+  public toStub(): Music.ActionStub {
     return {
-      type: ActionType.Loop,
+      type: "loop",
       data: "",
     };
   }
 
-  public type(): ActionType {
-    return ActionType.Loop;
+  public type(): Music.ActionType {
+    return "loop";
   }
 }
 
 export class EndLoopAction extends Action {
-  public toStub(): ActionStub {
+  public toStub(): Music.ActionStub {
     return {
-      type: ActionType.EndLoop,
+      type: "end loop",
       data: "",
     };
   }
 
-  public type(): ActionType {
-    return ActionType.EndLoop;
+  public type(): Music.ActionType {
+    return "end loop";
   }
 }

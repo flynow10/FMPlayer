@@ -1,22 +1,20 @@
 import { useAsyncLoad } from "@/src/hooks/use-async-load";
-import { NavigationMethod, PlayByID } from "@/src/components/layout/Main";
 import { MyMusicLibrary } from "@/src/music/library/music-library";
 import { FullCover } from "@/src/components/pages/LoadingPages";
-import { GenreMediaResponse } from "@/api-lib/postgres-types";
-import {
-  MediaCard,
-  MediaCardSize,
-} from "@/src/components/media-displays/MediaCard";
+import { MediaCard } from "@/src/components/media-displays/MediaCard";
 import { MediaCarousel } from "@/src/components/media-displays/MediaCarousel";
-import { MediaType } from "@/src/utils/types";
+import { PostgresRequest } from "@/src/types/postgres-request";
+import { Pages } from "@/src/types/pages";
 
 export type GenreListProps = {
-  onPlayMedia: PlayByID;
-  onNavigate: NavigationMethod;
+  onPlayMedia: Pages.PlayByID;
+  onNavigate: Pages.NavigationMethod;
 };
 
 export default function GenreList(props: GenreListProps) {
-  const [genreMedia, loaded] = useAsyncLoad<GenreMediaResponse[]>(
+  const [genreMedia, loaded] = useAsyncLoad<
+    PostgresRequest.GenreMediaResponse[]
+  >(
     async () => {
       const genreList = await MyMusicLibrary.getGenreList();
       return Promise.all(
@@ -28,9 +26,11 @@ export default function GenreList(props: GenreListProps) {
     [],
     []
   );
+
   if (!loaded) {
     return <FullCover />;
   }
+
   return (
     <div>
       {genreMedia.map((genreInfo) => {
@@ -49,9 +49,9 @@ export default function GenreList(props: GenreListProps) {
                       <MediaCard
                         key={album.id}
                         id={album.id}
-                        mediaType={MediaType.Album}
+                        mediaType={"album"}
                         title={album.title}
-                        size={MediaCardSize.Medium}
+                        size={"medium"}
                         onPlayMedia={props.onPlayMedia}
                         onNavigate={props.onNavigate}
                       />
@@ -69,8 +69,8 @@ export default function GenreList(props: GenreListProps) {
                       <MediaCard
                         key={song.id}
                         id={song.id}
-                        mediaType={MediaType.Song}
-                        size={MediaCardSize.Medium}
+                        mediaType={"song"}
+                        size={"medium"}
                         title={song.title}
                         onPlayMedia={props.onPlayMedia}
                         onNavigate={props.onNavigate}

@@ -1,4 +1,3 @@
-import { UploadFileBody } from "@/api-lib/upload-types";
 import { fetchFile } from "@/src/utils/fetch-file";
 import { useAsyncLoad } from "@/src/hooks/use-async-load";
 import { fileTypeFromBuffer } from "@/src/utils/file-type";
@@ -8,38 +7,33 @@ import { useState } from "react";
 import { FullCover } from "@/src/components/pages/LoadingPages";
 import classNames from "classnames";
 import { CheckSquare, Square } from "lucide-react";
+import { PostgresRequest } from "@/src/types/postgres-request";
+import { Pages } from "@/src/types/pages";
 
 export type FileUploadProps = {
-  data:
-    | {
-        uploadType: FileUploadType.Url;
-        url: string;
-      }
-    | {
-        uploadType: FileUploadType.File;
-        files: File[];
-      };
+  data: {
+    uploadType: Pages.Upload.FileUploadType;
+    url?: string;
+    files?: File[];
+  };
 };
-
-export enum FileUploadType {
-  File,
-  Url,
-}
 
 export type PreUploadSong = {
   tempId: string;
   checked: boolean;
   data: Uint8Array;
-} & UploadFileBody;
+} & PostgresRequest.UploadFileBody;
 
 export default function FileUpload(props: FileUploadProps) {
   const [files, loaded, setFiles] = useAsyncLoad<PreUploadSong[]>(
     async () => {
       const songFromData = async (data: Uint8Array): Promise<PreUploadSong> => {
         const fileType = await fileTypeFromBuffer(data);
+
         if (fileType === undefined) {
           throw new Error("Failed to extract file type from uploaded data");
         }
+
         return {
           tempId: uuid(),
           checked: false,
@@ -48,8 +42,13 @@ export default function FileUpload(props: FileUploadProps) {
           metadata: {},
         };
       };
+
       switch (props.data.uploadType) {
-        case FileUploadType.File: {
+        case "file": {
+          if (props.data.files === undefined) {
+            throw new Error("Files missing from file upload");
+          }
+
           return Promise.all(
             props.data.files.map(async (file) => {
               const data = await songFromData(await fetchFile(file));
@@ -65,7 +64,12 @@ export default function FileUpload(props: FileUploadProps) {
             })
           );
         }
-        case FileUploadType.Url: {
+
+        case "url": {
+          if (props.data.url === undefined) {
+            throw new Error("Url missing from url upload");
+          }
+
           return [await songFromData(await fetchFile(props.data.url))];
         }
       }
@@ -89,21 +93,25 @@ export default function FileUpload(props: FileUploadProps) {
       let startIndex = prev.findIndex((findFile) => {
         return findFile.tempId === lastSelectedFile;
       });
+
       if (!event.shiftKey || startIndex === -1) {
         // Normal select / same file selected with shift
         filesToFlip.push(file.tempId);
       } else {
         // Swap if selecting up instead of down
         let endIndex = fileIndex;
+
         if (startIndex > endIndex) {
           const temp = startIndex;
           startIndex = endIndex;
           endIndex = temp;
         }
+
         for (let i = startIndex; i <= endIndex; i++) {
           filesToFlip.push(prev[i].tempId);
         }
       }
+
       return prev.map((mapFile) => {
         // Keep other files the same
         if (!filesToFlip.includes(mapFile.tempId)) return mapFile;
@@ -115,9 +123,11 @@ export default function FileUpload(props: FileUploadProps) {
     });
     setLastSelectedFile(file.tempId);
   };
+
   if (!loaded) {
     return <FullCover />;
   }
+
   return (
     <div className="grid grid-rows-1 grid-cols-10 h-full">
       <div className="flex flex-col col-span-3 h-full">

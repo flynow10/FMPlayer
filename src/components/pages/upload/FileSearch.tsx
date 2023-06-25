@@ -2,12 +2,11 @@ import { useState } from "react";
 import YoutubeSearch from "@/src/components/pages/upload/YoutubeSearch";
 import { isUrl, isYoutubeUrl } from "@/src/utils/url-utils";
 import FileDrop from "@/src/components/pages/upload/FileDrop";
-import { NavigationMethod, NavigationType } from "@/src/components/layout/Main";
-import { PageType } from "@/src/components/layout/Page";
 import { FileUploadType } from "@/src/components/pages/upload/FileUpload";
+import { Pages } from "@/src/types/pages";
 
 type FileSearchProps = {
-  onNavigate: NavigationMethod;
+  onNavigate: Pages.NavigationMethod;
 };
 
 export default function FileSearch(props: FileSearchProps) {
@@ -28,8 +27,8 @@ export default function FileSearch(props: FileSearchProps) {
           <h1 className="text-xl pt-4 pb-2 border-b-2">From Computer</h1>
           <FileDrop
             onReceiveFiles={(files) => {
-              props.onNavigate(NavigationType.New, {
-                type: PageType.FileUpload,
+              props.onNavigate("new", {
+                type: "file upload",
                 data: {
                   uploadType: FileUploadType.File,
                   files,
@@ -69,8 +68,8 @@ export default function FileSearch(props: FileSearchProps) {
               className="border-l-0 rounded-l-none btn success"
               disabled={!isUrl(urlText) || isTextYoutubeUrl}
               onClick={() => {
-                props.onNavigate(NavigationType.New, {
-                  type: PageType.FileUpload,
+                props.onNavigate("new", {
+                  type: "file upload",
                   data: {
                     uploadType: FileUploadType.Url,
                     url: urlText,

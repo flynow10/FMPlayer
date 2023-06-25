@@ -1,31 +1,20 @@
-import { NavigationMethod, PlayByID } from "./Main";
 import FileSearch from "@/src/components/pages/upload/FileSearch";
 import AlbumList from "@/src/components/pages/AlbumList";
 import SongList from "@/src/components/pages/SongList";
 import GenreList from "@/src/components/pages/GenreList";
 import FileUpload from "@/src/components/pages/upload/FileUpload";
+import { Pages } from "@/src/types/pages";
 
 type PageProps = {
   location: string;
   currentLocation: string;
   index: number;
   locationPageCount: number;
-  type: PageType;
+  type: Pages.PageType;
   data: any; // eslint-disable-line @typescript-eslint/no-explicit-any
-  onNavigate: NavigationMethod;
-  onPlayMedia: PlayByID;
+  onNavigate: Pages.NavigationMethod;
+  onPlayMedia: Pages.PlayByID;
 };
-
-export enum PageType {
-  SearchResults,
-  AlbumList,
-  SongList,
-  PlaylistList,
-  AlbumDisplay,
-  FileSearch,
-  GenreList,
-  FileUpload,
-}
 
 export default function Page(props: PageProps) {
   const isHidden =
@@ -38,13 +27,15 @@ export default function Page(props: PageProps) {
       <div className="h-full overflow-auto relative">
         {(() => {
           switch (props.type) {
-            case PageType.FileSearch: {
+            case "file search": {
               return <FileSearch onNavigate={props.onNavigate} />;
             }
-            case PageType.FileUpload: {
+
+            case "file upload": {
               return <FileUpload data={props.data} />;
             }
-            case PageType.AlbumList: {
+
+            case "album list": {
               return (
                 <AlbumList
                   onPlayMedia={props.onPlayMedia}
@@ -52,7 +43,8 @@ export default function Page(props: PageProps) {
                 />
               );
             }
-            case PageType.SongList: {
+
+            case "song list": {
               return (
                 <SongList
                   onPlayMedia={props.onPlayMedia}
@@ -60,7 +52,8 @@ export default function Page(props: PageProps) {
                 />
               );
             }
-            case PageType.GenreList: {
+
+            case "genre list": {
               return (
                 <GenreList
                   onPlayMedia={props.onPlayMedia}
@@ -68,6 +61,7 @@ export default function Page(props: PageProps) {
                 />
               );
             }
+
             default: {
               return `Page Missing! Type: ${props.type}`;
             }

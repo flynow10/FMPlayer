@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 export function Login() {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+
   const onLogin = (e: FormEvent) => {
     e.preventDefault();
     VercelAPI.loginWithPassword(password).then((loginResponse) => {
@@ -18,11 +19,13 @@ export function Login() {
       }
     });
   };
+
   const addError = (
     error = "Something went wrong, please try again later."
   ) => {
     toast.error(error);
   };
+
   return (
     <>
       <div className="flex justify-center items-center h-full">

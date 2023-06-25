@@ -1,3 +1,5 @@
+import { FileType } from "@/src/types";
+
 export function stringToBytes(string: string) {
   return [...string].map((character) => character.charCodeAt(0));
 }
@@ -14,6 +16,7 @@ export function tarHeaderChecksumMatches(buffer: Uint8Array, offset = 0) {
     slowToString(buffer, "utf-8", 148, 154).replace(/\0.*$/, "").trim(),
     8
   ); // Read sum in header
+
   if (Number.isNaN(readSum)) {
     return false;
   }
@@ -64,6 +67,7 @@ export function slowToString(
   if (start === undefined || start < 0) {
     start = 0;
   }
+
   // Return early if start > this.length. Done here to prevent potential uint32
   // coercion fail below.
   if (start > buffer.length) {
@@ -109,6 +113,7 @@ const MAX_ARGUMENTS_LENGTH = 0x1000;
 
 function decodeCodePointsArray(codePoints: number[]) {
   const len = codePoints.length;
+
   if (len <= MAX_ARGUMENTS_LENGTH) {
     return String.fromCharCode(...codePoints); // avoid extra slice()
   }
@@ -116,11 +121,13 @@ function decodeCodePointsArray(codePoints: number[]) {
   // Decode in chunks to avoid "call stack size exceeded".
   let res = "";
   let i = 0;
+
   while (i < len) {
     res += String.fromCharCode(
       ...codePoints.slice(i, (i += MAX_ARGUMENTS_LENGTH))
     );
   }
+
   return res;
 }
 
@@ -129,6 +136,7 @@ function utf8Slice(buf: Uint8Array, start: number, end: number) {
   const res = [];
 
   let i = start;
+
   while (i < end) {
     const firstByte = buf[i];
     let codePoint = null;
@@ -143,24 +151,30 @@ function utf8Slice(buf: Uint8Array, start: number, end: number) {
           if (firstByte < 0x80) {
             codePoint = firstByte;
           }
+
           break;
         case 2:
           secondByte = buf[i + 1];
+
           if ((secondByte & 0xc0) === 0x80) {
             tempCodePoint = ((firstByte & 0x1f) << 0x6) | (secondByte & 0x3f);
+
             if (tempCodePoint > 0x7f) {
               codePoint = tempCodePoint;
             }
           }
+
           break;
         case 3:
           secondByte = buf[i + 1];
           thirdByte = buf[i + 2];
+
           if ((secondByte & 0xc0) === 0x80 && (thirdByte & 0xc0) === 0x80) {
             tempCodePoint =
               ((firstByte & 0xf) << 0xc) |
               ((secondByte & 0x3f) << 0x6) |
               (thirdByte & 0x3f);
+
             if (
               tempCodePoint > 0x7ff &&
               (tempCodePoint < 0xd800 || tempCodePoint > 0xdfff)
@@ -168,11 +182,14 @@ function utf8Slice(buf: Uint8Array, start: number, end: number) {
               codePoint = tempCodePoint;
             }
           }
+
           break;
+
         case 4:
           secondByte = buf[i + 1];
           thirdByte = buf[i + 2];
           fourthByte = buf[i + 3];
+
           if (
             (secondByte & 0xc0) === 0x80 &&
             (thirdByte & 0xc0) === 0x80 &&
@@ -183,6 +200,7 @@ function utf8Slice(buf: Uint8Array, start: number, end: number) {
               ((secondByte & 0x3f) << 0xc) |
               ((thirdByte & 0x3f) << 0x6) |
               (fourthByte & 0x3f);
+
             if (tempCodePoint > 0xffff && tempCodePoint < 0x110000) {
               codePoint = tempCodePoint;
             }
@@ -216,6 +234,7 @@ function asciiSlice(buf: Uint8Array, start: number, end: number) {
   for (let i = start; i < end; ++i) {
     ret += String.fromCharCode(buf[i] & 0x7f);
   }
+
   return ret;
 }
 
@@ -226,6 +245,7 @@ function latin1Slice(buf: Uint8Array, start: number, end: number) {
   for (let i = start; i < end; ++i) {
     ret += String.fromCharCode(buf[i]);
   }
+
   return ret;
 }
 
@@ -247,7 +267,9 @@ export function bufferIndexOf(
   } else if (byteOffset < -0x80000000) {
     byteOffset = -0x80000000;
   }
+
   byteOffset = +byteOffset; // Coerce to Number.
+
   if (Number.isNaN(byteOffset)) {
     // byteOffset: it it's undefined, null, NaN, "foo", etc, search whole buffer
     byteOffset = 0;
@@ -255,6 +277,7 @@ export function bufferIndexOf(
 
   // Normalize byteOffset: negative offsets start from the end of the buffer
   if (byteOffset < 0) byteOffset = buffer.length + byteOffset;
+
   if (byteOffset >= buffer.length) {
     return -1;
   } else if (byteOffset < 0) {
@@ -272,12 +295,15 @@ export function bufferIndexOf(
     if (val.length === 0) {
       return -1;
     }
+
     return arrayIndexOf(buffer, val, byteOffset);
   } else if (typeof val === "number") {
     val = val & 0xff; // Search for a byte value [0-255]
+
     if (typeof Uint8Array.prototype.indexOf === "function") {
       return Uint8Array.prototype.indexOf.call(buffer, val, byteOffset);
     }
+
     return arrayIndexOf(buffer, [val], byteOffset);
   }
 
@@ -311,6 +337,7 @@ function byteLength(string: string, encoding: string) {
 
   // Use a for loop to avoid recursion
   let loweredCase = false;
+
   for (;;) {
     switch (encoding) {
       case "ascii":
@@ -334,6 +361,7 @@ function byteLength(string: string, encoding: string) {
         if (loweredCase) {
           return -1;
         }
+
         encoding = ("" + encoding).toLowerCase();
         loweredCase = true;
     }
@@ -358,6 +386,7 @@ function write(buffer: Uint8Array, string: string, encoding: string) {
   if (!encoding) encoding = "utf8";
 
   let loweredCase = false;
+
   for (;;) {
     switch (encoding) {
       case "hex":
@@ -402,10 +431,12 @@ function hexWrite(
 ) {
   offset = Number(offset) || 0;
   const remaining = buf.length - offset;
+
   if (!length) {
     length = remaining;
   } else {
     length = Number(length);
+
     if (length > remaining) {
       length = remaining;
     }
@@ -416,12 +447,15 @@ function hexWrite(
   if (length > strLen / 2) {
     length = strLen / 2;
   }
+
   let i;
+
   for (i = 0; i < length; ++i) {
     const parsed = parseInt(string.substr(i * 2, 2), 16);
     if (Number.isNaN(parsed)) return i;
     buf[offset + i] = parsed;
   }
+
   return i;
 }
 
@@ -432,10 +466,12 @@ function blitBuffer(
   length: number
 ) {
   let i;
+
   for (i = 0; i < length; ++i) {
     if (i + offset >= dst.length || i >= src.length) break;
     dst[i + offset] = src[i];
   }
+
   return i;
 }
 
@@ -546,6 +582,7 @@ function arrayIndexOf(
 
   let i;
   let foundIndex = -1;
+
   for (i = byteOffset; i < arrLength; i++) {
     if (read(arr, i) === read(val, foundIndex === -1 ? 0 : i - foundIndex)) {
       if (foundIndex === -1) foundIndex = i;
@@ -574,12 +611,14 @@ export function readUIntBE(
 ) {
   offset = offset >>> 0;
   byteLength = byteLength >>> 0;
+
   if (!noAssert) {
     checkOffset(offset, byteLength, buffer.length);
   }
 
   let val = buffer[offset + --byteLength];
   let mul = 1;
+
   while (byteLength > 0 && (mul *= 0x100)) {
     val += buffer[offset + --byteLength] * mul;
   }

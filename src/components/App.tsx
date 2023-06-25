@@ -1,21 +1,22 @@
 import { useState } from "react";
-import { Audio, RepeatMode } from "@/src/components/layout/Audio";
+import { Audio } from "@/src/components/layout/Audio";
 import { MyMusicLibrary } from "@/src/music/library/music-library";
 import { Playlist } from "@/src/music/playlists/playlist";
 import AudioControlPlaceholder from "@/src/components/layout/AudioControlPlaceholder";
 import { useAudioPlayer } from "@/src/hooks/use-audio-player";
-import Main, { Location } from "@/src/components/layout/Main";
+import Main from "@/src/components/layout/Main";
 import Sidebar from "@/src/components/layout/Sidebar";
 import { PlaySongAction } from "@/src/music/actions/play-song-action";
-import { MediaType } from "@/src/utils/types";
 import { PlaylistHelper } from "@/src/music/utils/playlist-helper";
+import { Music } from "@/src/types/music";
+import { Pages } from "@/src/types/pages";
 // import { useLoaderData } from "react-router-dom";
 
 export default function App() {
   const [queue, setQueue] = useState<Playlist>(new Playlist());
   const [currentSongIndex, setCurrentSongIndex] = useState(0);
-  const [repeatMode, setRepeatMode] = useState<RepeatMode>("none");
-  const [location, setLocation] = useState<Location>(Location.Album);
+  const [repeatMode, setRepeatMode] = useState<Music.RepeatMode>("none");
+  const [location, setLocation] = useState<Pages.Location>("Albums");
   const [searchString, setSearchString] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   // const data = useLoaderData();
@@ -35,6 +36,7 @@ export default function App() {
     setQueue(playlist);
     audioPlayer.startPlayback();
   };
+
   const togglePlayback = () => {
     if (!audioPlayer.playing) {
       audioPlayer.startPlayback();
@@ -42,6 +44,7 @@ export default function App() {
       audioPlayer.pausePlayback();
     }
   };
+
   const previousSong = () => {
     // REMOVE MAGIC NUMBER (eventually :) )
     if (audioPlayer.currentTime > 3 || repeatMode === "one") {
@@ -49,6 +52,7 @@ export default function App() {
       audioPlayer.startPlayback();
       return;
     }
+
     if (currentSongIndex > 0) {
       setCurrentSongIndex(currentSongIndex - 1);
     } else if (repeatMode === "all") {
@@ -58,22 +62,27 @@ export default function App() {
       audioPlayer.startPlayback();
     }
   };
+
   const nextSong = (isManual = false) => {
     if (repeatMode === "one" && !isManual) {
       audioPlayer.resetPlayback();
       audioPlayer.startPlayback();
       return;
     }
+
     if (currentSongIndex < queue.songList.length - 1) {
       setCurrentSongIndex(currentSongIndex + 1);
     } else {
       setCurrentSongIndex(0);
+
       if (repeatMode === "none") {
         audioPlayer.pausePlayback();
       }
+
       audioPlayer.resetPlayback();
     }
   };
+
   const audioComponent = (
     <div className="audio-controls px-20 py-4 border-t-2">
       {queue.isBlank() ? (
@@ -89,7 +98,7 @@ export default function App() {
           onTogglePlay={togglePlayback}
           repeatMode={repeatMode}
           onRepeatModeChange={() => {
-            const modes: RepeatMode[] = ["none", "all", "one"];
+            const modes: Music.RepeatMode[] = ["none", "all", "one"];
             setRepeatMode(
               modes[(modes.indexOf(repeatMode) + 1) % modes.length]
             );
@@ -121,6 +130,7 @@ export default function App() {
           } else {
             setIsSearching(true);
           }
+
           setSearchString(newSearch);
         }}
       />
@@ -130,27 +140,34 @@ export default function App() {
         isSearching={isSearching}
         onPlayMedia={async (id, type) => {
           let playlist;
+
           switch (type) {
-            case MediaType.Album: {
+            case "album": {
               const album = await MyMusicLibrary.getAlbum(id);
+
               if (album) {
                 playlist = PlaylistHelper.getPlaylistFromAlbum(album);
               }
+
               break;
             }
-            case MediaType.Song: {
+
+            case "song": {
               const song = await MyMusicLibrary.getSong(id);
+
               if (song) {
                 playlist = new Playlist().addAction(
                   new PlaySongAction(song.id)
                 );
               }
+
               break;
             }
-            // case MediaType.Playlist:
+            // case "playlist":
             //   playlist = MyMusicLibrary.getPlaylist(id);
             //   break;
           }
+
           if (playlist) {
             setQueue(playlist);
             setCurrentSongIndex(0);

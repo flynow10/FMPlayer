@@ -1,3 +1,4 @@
+import { API } from "@/src/types/api";
 import { Realtime, Types } from "ably";
 
 class AblyChannelWrapper {
@@ -64,20 +65,20 @@ export class AblyClient {
     this.uploadStatusChannel.subscribe(callback);
   }
 
-  public async connect(): Promise<AblyConnectionStatus> {
+  public async connect(): Promise<API.Ably.ConnectionStatus> {
     this.client.connect();
     return new Promise((resolve) => {
-      let status = AblyConnectionStatus.Pending;
+      let status: API.Ably.ConnectionStatus = "pending";
       this.client.connection.once("connected", () => {
-        if (status === AblyConnectionStatus.Pending) {
-          status = AblyConnectionStatus.Connected;
+        if (status === "pending") {
+          status = "connected";
           console.log("Ably connected");
           resolve(status);
         }
       });
       setTimeout(() => {
-        if (status === AblyConnectionStatus.Pending) {
-          status = AblyConnectionStatus.Timeout;
+        if (status === "pending") {
+          status = "timeout";
           this.client.close();
           resolve(status);
         }
@@ -87,10 +88,3 @@ export class AblyClient {
 }
 
 export const LambdaStatus = new AblyClient();
-
-export enum AblyConnectionStatus {
-  Pending,
-  Connected,
-  Timeout,
-  Failed,
-}

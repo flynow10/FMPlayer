@@ -1,43 +1,30 @@
-import { MediaType } from "@/src/utils/types";
 import { UUID } from "@/src/components/utils/UUID";
 import { ReactNode, useState } from "react";
-import Page, { PageType } from "@/src/components/layout/Page";
+import Page from "@/src/components/layout/Page";
 import { ChevronLeft } from "lucide-react";
 import classNames from "classnames";
+import { Pages } from "@/src/types/pages";
 
 export type MainProps = {
-  onPlayMedia?: PlayByID;
-  location: Location;
+  onPlayMedia?: Pages.PlayByID;
+  location: Pages.Location;
   searchString: string;
   isSearching: boolean;
 };
 
-export enum Location {
-  Recent = "Recently Added",
-  Album = "Albums",
-  Artist = "Artists",
-  Song = "Songs",
-  Playlist = "Playlists",
-  Genre = "Genres",
-  Import = "Import Media",
-  EditPlaylist = "Edit Playlists",
-}
-
-type PageStore = {
-  type: PageType;
-  data?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
-};
-
 export default function Main(props: MainProps) {
-  const [tabs, updateTabs] = useState(() => {
-    const pagesObject: { [key: string]: PageStore[] } = {};
-    pagesObject["Search"] = [{ type: PageType.SearchResults }];
-    pagesObject[Location.Album] = [{ type: PageType.AlbumList }];
-    pagesObject[Location.Song] = [{ type: PageType.SongList }];
-    pagesObject[Location.Playlist] = [{ type: PageType.PlaylistList }];
-    pagesObject[Location.Genre] = [{ type: PageType.GenreList }];
-    pagesObject[Location.Import] = [{ type: PageType.FileSearch }];
-    return pagesObject;
+  const [tabs, updateTabs] = useState<
+    Record<Pages.Location | "Search", Pages.PageStore[]>
+  >({
+    Search: [{ type: "search results" }],
+    Albums: [{ type: "album list" }],
+    Songs: [{ type: "song list" }],
+    Playlists: [{ type: "playlist list" }],
+    Genres: [{ type: "genre list" }],
+    "Import Media": [{ type: "file search" }],
+    Artists: [{ type: "album display" }], // no page created yet
+    "Edit Playlists": [{ type: "album display" }], // no page created yet
+    "Recently Added": [{ type: "album display" }], // no page created yet
   });
 
   const pageTitle = props.isSearching
@@ -46,17 +33,22 @@ export default function Main(props: MainProps) {
 
   const pageElements: ReactNode[] = [];
 
-  const onNavigate = (navigateType: NavigationType, pageData?: PageStore) => {
-    if (navigateType === NavigationType.New) {
+  const onNavigate = (
+    navigateType: Pages.NavigationType,
+    pageData?: Pages.PageStore
+  ) => {
+    if (navigateType === "new") {
       if (!pageData) {
         throw new Error("Page Data missing from new page");
       }
+
       updateTabs({
         ...tabs,
         [props.location]: [...tabs[props.location], pageData],
       });
     }
-    if (navigateType === NavigationType.Back) {
+
+    if (navigateType === "back") {
       if (tabs[props.location].length > 1) {
         updateTabs({
           ...tabs,
@@ -105,7 +97,7 @@ export default function Main(props: MainProps) {
             )}
             disabled={tabs[props.location].length === 1}
             onClick={() => {
-              onNavigate(NavigationType.Back);
+              onNavigate("back");
             }}
           >
             <ChevronLeft />
@@ -117,14 +109,4 @@ export default function Main(props: MainProps) {
       {pageElements}
     </div>
   );
-}
-
-export type PlayByID = (id: string, type: MediaType) => void;
-export type NavigationMethod = (
-  navigateType: NavigationType,
-  pageData?: PageStore
-) => void;
-export enum NavigationType {
-  New,
-  Back,
 }

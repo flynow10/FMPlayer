@@ -1,3 +1,4 @@
+import { FileType } from "@/src/types";
 import { slowToString } from "../utils";
 
 function dv<Array extends Uint8Array = Uint8Array>(array: Array) {

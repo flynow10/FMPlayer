@@ -1,36 +1,24 @@
-import {
-  NavigationMethod,
-  NavigationType,
-  PlayByID,
-} from "@/src/components/layout/Main";
 import { Play } from "lucide-react";
-import { PageType } from "@/src/components/layout/Page";
-import { MediaType } from "@/src/utils/types";
 import placeholder from "@/src/assets/imgs/square-placeholder.jpg";
+import { Music } from "@/src/types/music";
+import { Pages } from "@/src/types/pages";
 
 export type MediaCardProps = {
   id: string;
   title: string;
-  mediaType: MediaType;
-  size?: MediaCardSize;
-  onPlayMedia: PlayByID;
-  onNavigate: NavigationMethod;
+  mediaType: Music.MediaType;
+  size?: Pages.MediaCardSize;
+  onPlayMedia: Pages.PlayByID;
+  onNavigate: Pages.NavigationMethod;
 };
 
-export enum MediaCardSize {
-  Small,
-  Medium,
-  Large,
-}
-
 export function MediaCard(props: MediaCardProps) {
-  const size = props.size || MediaCardSize.Small;
-  if (size !== MediaCardSize.Small) {
+  const size = props.size || "small";
+
+  if (size !== "small") {
     return (
       <div
-        className={
-          "flex flex-col" + (size === MediaCardSize.Large ? " w-96" : " w-52")
-        }
+        className={"flex flex-col" + (size === "large" ? " w-96" : " w-52")}
         role="button"
       >
         <div
@@ -52,8 +40,8 @@ export function MediaCard(props: MediaCardProps) {
           className="h-12 mt-1 overflow-ellipsis overflow-clip break-words hover:underline"
           role="link"
           onClick={() => {
-            props.onNavigate(NavigationType.New, {
-              type: PageType.AlbumDisplay,
+            props.onNavigate("new", {
+              type: "album display",
               data: props.id,
             });
           }}

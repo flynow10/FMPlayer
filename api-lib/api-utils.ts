@@ -1,6 +1,6 @@
 import { VercelRequest } from "@vercel/node";
-import { PaginationOptions, SortType } from "./postgres-types.js";
 import { DEFAULT_PAGE_LIMIT } from "./constants.js";
+import { PostgresRequest } from "@/src/types/postgres-request.js";
 
 export const printRequestType = (endpoint: string, type: string) => {
   // const formattedRequestName = type
@@ -13,10 +13,12 @@ export const printRequestType = (endpoint: string, type: string) => {
 
 export const getPaginationOptions = (req: VercelRequest) => {
   const { page, limit, sortBy, sortDirection } = req.query;
-  const options: PaginationOptions = {
+  const options: PostgresRequest.PaginationOptions = {
     page: page ? parseInt(page as string) : 1,
     limit: limit ? parseInt(limit as string) : DEFAULT_PAGE_LIMIT,
-    sortDirection: sortDirection ? (sortDirection as SortType) : "asc",
+    sortDirection: sortDirection
+      ? (sortDirection as PostgresRequest.SortType)
+      : "asc",
     sortBy: sortBy ? (sortBy as string) : "title",
   };
 
@@ -24,7 +26,7 @@ export const getPaginationOptions = (req: VercelRequest) => {
 };
 
 export const getPrismaSelectPaginationOptions = (
-  paginationOptions: PaginationOptions,
+  paginationOptions: PostgresRequest.PaginationOptions,
   defaultSort: string
 ) => {
   const { page, limit, sortDirection, sortBy } = paginationOptions;

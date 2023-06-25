@@ -4,7 +4,7 @@ import { getEnvVar } from "../api-lib/constants.js";
 import { VercelRequest, VercelResponse } from "@vercel/node";
 import { prismaClient, s3Client } from "../api-lib/data-clients.js";
 import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
-import type { UploadFileBody } from "../api-lib/upload-types.js";
+import { PostgresRequest } from "@/src/types/postgres-request.js";
 
 const S3_SONG_CONVERSION_BUCKET = getEnvVar("S3_SONG_CONVERSION_BUCKET");
 
@@ -31,7 +31,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         res.status(400).json("Missing metadata");
         return;
       }
-      const { file, metadata }: UploadFileBody = req.body;
+      const { file, metadata }: PostgresRequest.UploadFileBody = req.body;
       if (file.ext.match(/^([0-9A-z]{1,4})$/) === null) {
         res.status(400).json("Invalid file type");
         return;

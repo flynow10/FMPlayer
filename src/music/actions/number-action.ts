@@ -1,5 +1,5 @@
+import { Music } from "@/src/types/music";
 import { Action } from "./action";
-import { ActionStub, ActionType } from "./action-types";
 
 export class NumberAction extends Action {
   public value: number;
@@ -9,11 +9,11 @@ export class NumberAction extends Action {
     this.value = value;
   }
 
-  public toStub(): ActionStub {
-    return { type: ActionType.Number, data: this.value.toString() };
+  public toStub(): Music.ActionStub {
+    return { type: "number", data: this.value.toString() };
   }
 
-  public type(): ActionType {
-    return ActionType.Number;
+  public type(): Music.ActionType {
+    return "number";
   }
 }

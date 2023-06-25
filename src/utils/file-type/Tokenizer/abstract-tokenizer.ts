@@ -1,3 +1,4 @@
+import { FileType } from "@/src/types";
 import { EndOfStreamError } from "./end-of-stream-error";
 
 export abstract class AbstractTokenizer implements FileType.ITokenizer {
@@ -91,11 +92,13 @@ export abstract class AbstractTokenizer implements FileType.ITokenizer {
   async ignore(length: number) {
     if (this.fileInfo.size !== undefined) {
       const bytesLeft = this.fileInfo.size - this.position;
+
       if (length > bytesLeft) {
         this.position += bytesLeft;
         return bytesLeft;
       }
     }
+
     this.position += length;
     return length;
   }
@@ -115,6 +118,7 @@ export abstract class AbstractTokenizer implements FileType.ITokenizer {
         "`options.position` must be equal or greater than `tokenizer.position`"
       );
     }
+
     if (options) {
       return {
         mayBeLess: options.mayBeLess === true,
@@ -125,6 +129,7 @@ export abstract class AbstractTokenizer implements FileType.ITokenizer {
         position: options.position ? options.position : this.position,
       };
     }
+
     return {
       mayBeLess: false,
       offset: 0,

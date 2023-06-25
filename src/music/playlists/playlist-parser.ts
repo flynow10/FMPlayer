@@ -1,9 +1,9 @@
 import { Action } from "@/src/music/actions/action";
-import { ActionType } from "@/src/music/actions/action-types";
 import { LoopAction } from "@/src/music/actions/loop-action";
 import { NumberAction } from "@/src/music/actions/number-action";
 import { PlaySongAction } from "@/src/music/actions/play-song-action";
 import { ActionSongPair } from "./playlist";
+import { Music } from "@/src/types/music";
 
 export class PlaylistParser {
   public actionList: Action[] = [];
@@ -26,10 +26,14 @@ export class PlaylistParser {
     return this.block();
   }
 
-  isTokenType<T extends Action>(action: Action, type: ActionType): action is T {
+  isTokenType<T extends Action>(
+    action: Action,
+    type: Music.ActionType
+  ): action is T {
     if (action.type() === type) {
       return true;
     }
+
     return false;
   }
 
@@ -37,6 +41,7 @@ export class PlaylistParser {
     if (this.currentAction > this.actionList.length - 1) {
       return null;
     }
+
     return this.actionList[this.currentAction];
   }
 
@@ -49,55 +54,69 @@ export class PlaylistParser {
   block(): Block {
     const block = new Block();
     let nextToken = this.getCurrentToken();
+
     if (nextToken === null) {
       return block;
     }
-    const endBlockTokens = [ActionType.EndCondition, ActionType.EndLoop];
+
+    const endBlockTokens: Music.ActionType[] = ["end loop", "end condition"];
+
     while (!endBlockTokens.includes(nextToken.type())) {
       switch (nextToken.type()) {
-        case ActionType.PlaySong: {
+        case "play song": {
           block.nodes.push(this.playSong());
           break;
         }
-        case ActionType.Loop: {
+
+        case "loop": {
           block.nodes.push(this.loop());
           break;
         }
+
         default: {
           throw this.TOKEN_MISMATCH;
         }
       }
+
       nextToken = this.getCurrentToken();
+
       if (nextToken === null) {
         return block;
       }
     }
+
     this.stepNextToken();
     return block;
   }
 
   loop(): Loop {
     const loopToken = this.stepNextToken()!; // eslint-disable-line @typescript-eslint/no-non-null-assertion
-    if (!this.isTokenType<LoopAction>(loopToken, ActionType.Loop)) {
+
+    if (!this.isTokenType<LoopAction>(loopToken, "loop")) {
       throw this.TOKEN_MISMATCH;
     }
+
     const number = this.number();
     return new Loop(number, this.block());
   }
 
   number(): NumberNode {
     const numberToken = this.stepNextToken()!; // eslint-disable-line @typescript-eslint/no-non-null-assertion
-    if (!this.isTokenType<NumberAction>(numberToken, ActionType.Number)) {
+
+    if (!this.isTokenType<NumberAction>(numberToken, "number")) {
       throw this.TOKEN_MISMATCH;
     }
+
     return new NumberNode(numberToken.value);
   }
 
   playSong(): PlaySong {
     const token = this.stepNextToken()!; // eslint-disable-line @typescript-eslint/no-non-null-assertion
-    if (!this.isTokenType<PlaySongAction>(token, ActionType.PlaySong)) {
+
+    if (!this.isTokenType<PlaySongAction>(token, "play song")) {
       throw this.TOKEN_MISMATCH;
     }
+
     return new PlaySong(PlaySongType.SongId, token.songId, token.id);
   }
 }

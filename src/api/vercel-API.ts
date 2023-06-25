@@ -1,29 +1,23 @@
-export type LoginResponse =
-  | { success: true }
-  | {
-      success: false;
-      error?: string;
-    };
-export enum ApiEndpoint {
-  POSTGRES = "/api/postgres",
-  AWS = "/api/aws",
-  UPLOAD = "/api/upload",
-}
+import { API } from "@/src/types/api";
 
 export const VercelAPI = {
   isLoggedIn: async () => {
     try {
       const heartbeatResponse = await (await fetch("/api/heartbeat")).json();
+
       if (typeof heartbeatResponse === "string") {
         return true;
       }
     } catch (e) {
       console.error(e);
     }
+
     return false;
   },
 
-  loginWithPassword: async (password: string): Promise<LoginResponse> => {
+  loginWithPassword: async (
+    password: string
+  ): Promise<API.Vercel.LoginResponse> => {
     const utf8 = new TextEncoder().encode(password);
     const hashBuffer = await crypto.subtle.digest("SHA-256", utf8);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
@@ -33,9 +27,9 @@ export const VercelAPI = {
     return await VercelAPI.loginWithHash(hashHex);
   },
 
-  loginWithHash: async (hash: string): Promise<LoginResponse> => {
+  loginWithHash: async (hash: string): Promise<API.Vercel.LoginResponse> => {
     try {
-      const responseJson: LoginResponse = await (
+      const responseJson: API.Vercel.LoginResponse = await (
         await fetch(`/api/login`, {
           method: "POST",
           body: JSON.stringify({ hash }),
@@ -44,9 +38,11 @@ export const VercelAPI = {
           },
         })
       ).json();
+
       if (!responseJson.success) {
         console.warn(responseJson.error);
       }
+
       return responseJson;
     } catch (e) {
       return {
@@ -57,7 +53,7 @@ export const VercelAPI = {
   },
 
   makeRequest: async <T>(
-    endpoint: ApiEndpoint,
+    endpoint: Endpoint,
     type: string,
     options: object,
     defaultResponse?: T
@@ -67,20 +63,26 @@ export const VercelAPI = {
       ...options,
     })}`;
     const response = await fetch(requestUrl);
+
     if (response.status === 401) {
       window.location.href = "/login";
       throw new Error(
         `Failed to make call to ${requestUrl} because the user was logged out`
       );
     }
+
     const responseJson: object | string = await response.json();
+
     if (typeof responseJson === "string") {
       console.warn(responseJson);
+
       if (defaultResponse === undefined) {
         throw new Error(`Failed to make call to ${requestUrl}`);
       }
+
       return defaultResponse;
     }
+
     return responseJson as T;
   },
 
@@ -92,6 +94,7 @@ export const VercelAPI = {
         } else if (!Array.isArray(val[1])) {
           obj[val[0]] = val[1];
         }
+
         return obj;
       }, {} as Record<string, string>)
     );
@@ -103,3 +106,9 @@ export const VercelAPI = {
     return urlSearchParams.toString();
   },
 };
+
+export enum Endpoint {
+  POSTGRES = "/api/postgres",
+  AWS = "/api/aws",
+  UPLOAD = "/api/upload",
+}

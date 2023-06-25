@@ -12,6 +12,7 @@ import {
 import { extensions, mimeTypes } from "./supported";
 import { fromBuffer } from "./Tokenizer";
 import { EndOfStreamError } from "./Tokenizer/end-of-stream-error";
+import { FileType } from "@/src/types";
 
 const minimumBytes = 4100; // A fair amount of file-types are detectable within this range.
 
@@ -206,6 +207,7 @@ class FileTypeParser {
     if (this.checkString("ID3")) {
       await tokenizer.ignore(6); // Skip ID3 header until the header size
       const id3HeaderLength = await tokenizer.readToken(uint32SyncSafeToken);
+
       if (tokenizer.position + id3HeaderLength > tokenizer.fileInfo.size) {
         // Guess file type based on ID3 header for backward compatibility
         return {
@@ -339,6 +341,7 @@ class FileTypeParser {
             zipHeader.filename.endsWith(".xml")
           ) {
             const type = zipHeader.filename.split("/")[0];
+
             switch (type) {
               case "_rels":
                 break;
@@ -547,6 +550,7 @@ class FileTypeParser {
       const brandMajor = slowToString(this.buffer, "binary", 8, 12)
         .replace("\0", " ")
         .trim();
+
       switch (brandMajor) {
         case "avif":
         case "avis":
@@ -711,6 +715,7 @@ class FileTypeParser {
     // TIFF, little-endian type
     if (this.check([0x49, 0x49])) {
       const fileType = await this.readTiffHeader(false);
+
       if (fileType) {
         return fileType;
       }
@@ -719,6 +724,7 @@ class FileTypeParser {
     // TIFF, big-endian type
     if (this.check([0x4d, 0x4d])) {
       const fileType = await this.readTiffHeader(true);
+
       if (fileType) {
         return fileType;
       }
@@ -730,6 +736,7 @@ class FileTypeParser {
         mime: "audio/ape",
       };
     }
+
     async function readField() {
       const msb = await tokenizer.peekNumber(Token.UINT8);
       let mask = 0x80;
@@ -760,6 +767,7 @@ class FileTypeParser {
     async function readChildren(children: number) {
       while (children > 0) {
         const element = await readElement();
+
         if (element.id === 0x42_82) {
           const rawValue = await tokenizer.readToken(
             new Token.StringType(element.len, "utf-8")
@@ -1024,6 +1032,7 @@ class FileTypeParser {
 
     if (this.checkString("AC")) {
       const version = slowToString(this.buffer, "binary", 2, 6);
+
       if (
         version.match("^d*") &&
         parseInt(version) >= 1000 &&
@@ -1057,6 +1066,7 @@ class FileTypeParser {
       const string = await tokenizer.readToken(
         new Token.StringType(13, "ascii")
       );
+
       if (string === "debian-binary") {
         return {
           ext: "deb",
@@ -1072,6 +1082,7 @@ class FileTypeParser {
 
     if (this.checkString("**ACE", { offset: 7 })) {
       await tokenizer.peekBuffer(this.buffer, { length: 14, mayBeLess: true });
+
       if (this.checkString("**", { offset: 12 })) {
         return {
           ext: "ace",
@@ -1102,6 +1113,7 @@ class FileTypeParser {
 
       do {
         const chunk = await readChunkHeader();
+
         if (chunk.length < 0) {
           return; // Invalid chunk length
         }
@@ -1192,15 +1204,18 @@ class FileTypeParser {
         size: Number(await tokenizer.readToken(Token.UINT64_LE)),
       };
     }
+
     // ASF_Header_Object first 80 bytes
     if (
       this.check([0x30, 0x26, 0xb2, 0x75, 0x8e, 0x66, 0xcf, 0x11, 0xa6, 0xd9])
     ) {
       await tokenizer.ignore(30);
+
       // Search for header should be in first 1KB of file.
       while (tokenizer.position + 24 < tokenizer.fileInfo.size) {
         const header = await readHeader();
         let payload = header.size - 24;
+
         if (
           _check(
             header.id,
@@ -1311,6 +1326,7 @@ class FileTypeParser {
 
       await tokenizer.ignore(20);
       const type = await tokenizer.readToken(new Token.StringType(4, "ascii"));
+
       switch (type) {
         case "jp2 ":
           return {
@@ -1458,10 +1474,12 @@ class FileTypeParser {
     if (this.check([0x04, 0x00, 0x00, 0x00]) && this.buffer.length >= 16) {
       // Rough & quick check Pickle/ASAR
       const jsonSize = readUInt32LE(this.buffer, 12);
+
       if (jsonSize > 12 && this.buffer.length >= jsonSize + 16) {
         try {
           const header = this.buffer.slice(16, jsonSize + 16).toString();
           const json = JSON.parse(header);
+
           // Check if Pickle is ASAR
           if (json.files) {
             // Final check, assuring Pickle/ASAR format
@@ -1681,6 +1699,7 @@ class FileTypeParser {
       bigEndian ? Token.UINT16_BE : Token.UINT16_LE
     );
     this.tokenizer.ignore(10);
+
     switch (tagId) {
       case 50_341:
         return {
@@ -1702,8 +1721,10 @@ class FileTypeParser {
     const numberOfTags = await this.tokenizer.readToken(
       bigEndian ? Token.UINT16_BE : Token.UINT16_LE
     );
+
     for (let n = 0; n < numberOfTags; ++n) {
       const fileType = await this.readTiffTag(bigEndian);
+
       if (fileType) {
         return fileType;
       }

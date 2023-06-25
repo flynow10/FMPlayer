@@ -29,6 +29,7 @@ const router = createBrowserRouter([
       if (!(await VercelAPI.isLoggedIn())) {
         return redirect("/login");
       }
+
       const youtubeAPILoadedPromise = YoutubeAPI.load();
       const lambdaConnectionStatusPromise = LambdaStatus.connect();
       return defer({
@@ -48,9 +49,11 @@ const router = createBrowserRouter([
   },
 ]);
 const root = document.getElementById("root");
+
 if (!root) {
   throw new Error("Catastrophic Failure! Failed to load application!");
 }
+
 ReactDOM.createRoot(root).render(
   <React.StrictMode>
     <RouterProvider router={router} />
