@@ -1,4 +1,4 @@
-import { FileType } from "@/src/types";
+import { FileType } from "@/src/types/file-type";
 
 export function stringToBytes(string: string) {
   return [...string].map((character) => character.charCodeAt(0));
