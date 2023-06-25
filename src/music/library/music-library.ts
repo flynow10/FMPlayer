@@ -75,9 +75,11 @@ class PostgresMusicLibrary {
       }
     );
     const formData = new FormData();
+
     for (const [key, value] of Object.entries(presignedUrl.fields)) {
       formData.append(key, value);
     }
+
     formData.append("file", file);
     console.log(
       await fetch(presignedUrl.url, {

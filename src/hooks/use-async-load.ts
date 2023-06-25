@@ -12,12 +12,14 @@ export function useAsyncLoad<T>(
     let active = true;
     setLoaded(false);
     internalLoad();
+
     return () => {
       active = false;
     };
 
     async function internalLoad() {
       const newData = await load();
+
       if (active) {
         setLoaded(true);
         setData(newData);

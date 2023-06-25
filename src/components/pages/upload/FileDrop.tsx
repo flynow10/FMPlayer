@@ -19,8 +19,10 @@ export default function FileDrop(props: FileDropProps) {
     const drop = (e: DragEvent) => {
       e.preventDefault();
     };
+
     window.addEventListener("drop", drop);
     window.addEventListener("dragover", drop);
+
     return () => {
       window.removeEventListener("drop", drop);
       window.removeEventListener("dragover", drop);
@@ -44,10 +46,12 @@ export default function FileDrop(props: FileDropProps) {
 
   const onDrop = (event: ReactDragEvent<HTMLDivElement>) => {
     event.preventDefault();
+
     if (!isValidDrop(event.dataTransfer)) {
       showInvalidFile();
       return;
     }
+
     setDropZoneState(DropZoneState.NoFile);
     const files = getFiles(event.dataTransfer);
     props.onReceiveFiles(files);
@@ -55,10 +59,12 @@ export default function FileDrop(props: FileDropProps) {
 
   const getFiles = (dataTransfer: DataTransfer): File[] => {
     const files: File[] = [];
+
     if (dataTransfer.items) {
       [...dataTransfer.items].forEach((item) => {
         if (item.kind === "file") {
           const file = item.getAsFile();
+
           if (file) {
             files.push(file);
           }
@@ -70,6 +76,7 @@ export default function FileDrop(props: FileDropProps) {
         files.push(file);
       });
     }
+
     return files;
   };
 
@@ -81,6 +88,7 @@ export default function FileDrop(props: FileDropProps) {
     input.addEventListener("change", () => {
       if (input.files && input.files.length > 0) {
         const filesArray = Array.from(input.files);
+
         if (filesArray.every((file) => isValidFile(file))) {
           props.onReceiveFiles(filesArray);
           setDropZoneState(DropZoneState.NoFile);
