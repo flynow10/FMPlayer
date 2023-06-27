@@ -1,20 +1,38 @@
 import { YoutubeAPI } from "@/src/api/youtube-API";
 import { isYoutubeUrl } from "@/src/utils/url-utils";
 import { useState } from "react";
-import YoutubeSearchForm from "./YoutubeSearchForm";
 import { API } from "@/src/types/api";
 import { YoutubeSearchResult } from "@/src/components/pages/upload/youtube-search/YoutubeSearchResult";
+import SuggestionInput from "@/src/components/utils/SuggestionInput";
+import { useAsyncLoad } from "@/src/hooks/use-async-load";
+import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
 
 type YoutubeSearchProps = {
   onClickDownload: (videoId: string) => void;
 };
 
 export default function YoutubeSearch(props: YoutubeSearchProps) {
+  const [searchText, setSearchText] = useState("");
+  const [suggestions, loaded] = useAsyncLoad(
+    async () => {
+      if (searchText === "") {
+        return [];
+      } else {
+        return (await YoutubeAPI.searchSuggestions(searchText)).suggestions;
+      }
+    },
+    [],
+    [searchText]
+  );
+
   const [resultList, setResultList] = useState<
     { snippet: API.Youtube.VideoSnippet; id: string }[]
   >([]);
+  const [loadingResults, setLoadingResults] = useState(false);
 
   const onSearch = async (searchText: string) => {
+    setResultList([]);
+    setLoadingResults(true);
     const videoId = await isYoutubeUrl(searchText);
 
     if (typeof videoId === "string") {
@@ -51,12 +69,24 @@ export default function YoutubeSearch(props: YoutubeSearchProps) {
         setResultList([...results]);
       }
     }
+
+    setLoadingResults(false);
   };
 
   return (
     <>
-      <YoutubeSearchForm onSearch={onSearch} />
+      <SuggestionInput
+        text={searchText}
+        onChangeText={setSearchText}
+        suggestions={loaded || suggestions.length !== 0 ? suggestions : null}
+        onSearch={onSearch}
+        options={{
+          boldTypedInput: true,
+          hasSearchButton: true,
+        }}
+      />
       <div className="youtube-results flex flex-col overflow-auto h-full pr-4">
+        {loadingResults && resultList.length === 0 && <FullCover />}
         {resultList.map((result, index) => {
           return (
             <YoutubeSearchResult
