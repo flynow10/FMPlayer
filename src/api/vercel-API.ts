@@ -52,12 +52,12 @@ export const VercelAPI = {
     }
   },
 
-  makeRequest: async <T>(
+  async makeRequest<T>(
     endpoint: Endpoint,
     type: string,
     options: object,
     defaultResponse?: T
-  ): Promise<T> => {
+  ): Promise<T> {
     const requestUrl = `${endpoint}?${VercelAPI.optionsToUrl({
       type,
       ...options,

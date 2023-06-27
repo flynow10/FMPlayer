@@ -62,6 +62,10 @@ class PostgresMusicLibrary {
     );
   }
 
+  public async getArtistlist(): Promise<PostgresRequest.ArtistListResponse[]> {
+    return VercelAPI.makeRequest(Endpoint.POSTGRES, "getArtistList", {}, []);
+  }
+
   private async uploadFileToConvert(
     fileName: string,
     fileType: string,
