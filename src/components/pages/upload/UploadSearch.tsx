@@ -4,11 +4,11 @@ import { isUrl, isYoutubeUrl } from "@/src/utils/url-utils";
 import FileDrop from "@/src/components/pages/upload/FileDrop";
 import { Pages } from "@/src/types/pages";
 
-type FileSearchProps = {
+type UploadSearchProps = {
   onNavigate: Pages.NavigationMethod;
 };
 
-export default function FileSearch(props: FileSearchProps) {
+export default function UploadSearch(props: UploadSearchProps) {
   const [urlText, setUrlText] = useState("");
   const [isTextYoutubeUrl, setIsTextYoutubeUrl] = useState(false);
   return (

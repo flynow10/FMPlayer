@@ -1,3 +1,9 @@
+import { PreUploadSong } from "@/src/components/pages/upload/FileUpload";
+import { PostgresRequest } from "@/src/types/postgres-request";
+import { fileTypeFromBuffer } from "@/src/utils/file-type";
+import { getTags, pullMetaDataFromTags } from "@/src/utils/media-tags";
+import { v4 as uuid } from "uuid";
+
 // https://github.com/ffmpegwasm/ffmpeg.wasm/blob/master/src/browser/fetchFile.js
 const readFromBlobOrFile = (blob: File | Blob): Promise<ArrayBuffer> =>
   new Promise((resolve, reject) => {
@@ -48,4 +54,32 @@ export const fetchFile = async (_data: string | Buffer | File | Blob) => {
   }
 
   return new Uint8Array(data);
+};
+
+export const getPreUploadSongFromData = async (
+  data: Uint8Array,
+  fileName = "Untitled Song"
+): Promise<PreUploadSong> => {
+  const fileType = await fileTypeFromBuffer(data);
+  const tags = await getTags(data);
+  let metadata: PostgresRequest.SongMetadata = {};
+
+  if (tags !== null) {
+    metadata = pullMetaDataFromTags(tags);
+  }
+
+  if (metadata.title === undefined) {
+    metadata.title = fileName;
+  }
+
+  if (fileType === undefined) {
+    throw new Error("Failed to extract file type from uploaded data");
+  }
+
+  return {
+    tempId: uuid(),
+    data,
+    file: fileType,
+    metadata,
+  };
 };

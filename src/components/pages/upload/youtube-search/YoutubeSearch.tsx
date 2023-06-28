@@ -83,6 +83,7 @@ export default function YoutubeSearch(props: YoutubeSearchProps) {
         options={{
           boldTypedInput: true,
           hasSearchButton: true,
+          placeholder: "Search by Keyword | Paste URL",
         }}
       />
       <div className="youtube-results flex flex-col overflow-auto h-full pr-4">

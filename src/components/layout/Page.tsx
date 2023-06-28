@@ -1,4 +1,4 @@
-import FileSearch from "@/src/components/pages/upload/FileSearch";
+import UploadSearch from "@/src/components/pages/upload/UploadSearch";
 import AlbumList from "@/src/components/pages/AlbumList";
 import SongList from "@/src/components/pages/SongList";
 import GenreList from "@/src/components/pages/GenreList";
@@ -28,7 +28,7 @@ export default function Page(props: PageProps) {
         {(() => {
           switch (props.type) {
             case "file search": {
-              return <FileSearch onNavigate={props.onNavigate} />;
+              return <UploadSearch onNavigate={props.onNavigate} />;
             }
 
             case "file upload": {

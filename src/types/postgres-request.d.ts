@@ -40,8 +40,8 @@ export namespace PostgresRequest {
 
   export type GenreListResponse = {
     genre: string;
-    song_count: number;
-    album_count: number;
+    songCount: number;
+    albumCount: number;
   };
 
   export type GenreMediaResponse = {
@@ -49,16 +49,16 @@ export namespace PostgresRequest {
     songs: Song[];
     albums: Album[];
   };
+
+  export type ArtistListResponse = {
+    artist: string;
+    songCount: number;
+    albumCount: number;
+  };
+
   export type UploadFileBody = {
     file: FileType.FileTypeResult;
-    metadata: Metadata;
+    metadata: SongMetadata;
   };
-  export type Metadata = {
-    title?: string;
-    genre?: string;
-    artists?: string[] | string;
-    featuring?: string[] | string;
-    albumId?: string;
-    trackNumber?: number;
-  };
+  export type SongMetadata = Partial<Song>;
 }
