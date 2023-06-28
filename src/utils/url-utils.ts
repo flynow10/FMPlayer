@@ -69,3 +69,16 @@ export function isUrl(url: string) {
 
   return true;
 }
+
+export function getFileNameFromUrl(url: string): string | undefined {
+  const undecodedFileName = url
+    .split("/")
+    .pop()
+    ?.match(/^((?:[A-z0-9\-_~!$&'()*,+;=:@]|(?:%[0-9a-fA-F]{2}))*)/)?.[0];
+
+  if (undecodedFileName === undefined) {
+    return undefined;
+  }
+
+  return decodeURI(undecodedFileName);
+}

@@ -6,7 +6,7 @@ import { useRef, useState } from "react";
 type SuggestionInputProps = {
   text: string;
   suggestions: string[] | null;
-  onChangeText?: (newText: string) => void;
+  onChangeText: (newText: string) => void;
   onSearch?: (text: string) => void;
   options?: Partial<SuggestionInputOptions>;
 };
@@ -14,16 +14,25 @@ type SuggestionInputProps = {
 type SuggestionInputOptions = {
   hasSearchButton: boolean;
   boldTypedInput: boolean;
+  placeholder: string;
+  customInputClasses?: string;
+  blurOnSubmit: boolean;
+  widthClass: string;
 };
 
 export default function SuggestionInput(props: SuggestionInputProps) {
   const [inputFocused, setInputFocused] = useState(false);
   const [suggestionIndex, setSuggestionIndex] = useState(-1);
+  const [hasHoveredOverButton, setHasHoveredOverButton] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const optionsWithDefaults: SuggestionInputOptions = {
-    hasSearchButton: props.options?.hasSearchButton || false,
-    boldTypedInput: props.options?.boldTypedInput || false,
+    hasSearchButton: props.options?.hasSearchButton ?? false,
+    boldTypedInput: props.options?.boldTypedInput ?? false,
+    placeholder: props.options?.placeholder ?? "",
+    customInputClasses: props.options?.customInputClasses,
+    blurOnSubmit: props.options?.blurOnSubmit ?? true,
+    widthClass: props.options?.widthClass ?? "w-full",
   };
   const suggestions = props.suggestions || [];
   const isLoading = props.suggestions === null;
@@ -77,17 +86,19 @@ export default function SuggestionInput(props: SuggestionInputProps) {
         key={index}
         type="button"
         onMouseOver={() => {
-          setSuggestionIndex(-1);
+          setHasHoveredOverButton(true);
         }}
         onMouseDown={() => {
-          props.onSearch?.(suggestion);
           props.onChangeText?.(suggestion);
+          props.onSearch?.(suggestion);
           setInputFocused(false);
           setSuggestionIndex(-1);
         }}
         className={
           "flex flex-row py-1 hover:bg-gray-300" +
-          (index === suggestionIndex ? " bg-gray-300" : "")
+          (index === suggestionIndex && !hasHoveredOverButton
+            ? " bg-gray-300"
+            : "")
         }
       >
         {optionsWithDefaults.hasSearchButton && (
@@ -102,86 +113,108 @@ export default function SuggestionInput(props: SuggestionInputProps) {
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        inputRef.current?.blur();
+
+        if (optionsWithDefaults.blurOnSubmit) {
+          inputRef.current?.blur();
+        }
+
         const currentValue =
           suggestionIndex !== -1 ? suggestions[suggestionIndex] : props.text;
-        props.onSearch?.(currentValue);
         setSuggestionIndex(-1);
 
         if (currentValue !== props.text) {
           props.onChangeText?.(currentValue);
         }
+
+        props.onSearch?.(currentValue);
       }}
-      className="search-box w-full flex flex-row my-3"
+      className="search-box grow flex flex-row relative"
     >
-      <div className="grow relative">
-        <input
-          className="w-full p-2 border-y-2 border-l-2 rounded-l-lg outline-none focus-within:shadow-[0_0_3px_rgb(0,0,0,0.2)]"
-          value={
-            suggestionIndex !== -1 ? suggestions[suggestionIndex] : props.text
-          }
-          placeholder="Search by Keyword | Paste URL"
-          onChange={(event) => {
-            setSuggestionIndex(-1);
-            props.onChangeText?.(event.currentTarget.value);
-          }}
-          onKeyDown={(event) => {
-            switch (event.key) {
-              case "ArrowDown": {
-                event.preventDefault();
-                let newIndex = suggestionIndex + 1;
-
-                if (newIndex >= suggestions.length) {
-                  newIndex = -1;
-                }
-
-                setSuggestionIndex(newIndex);
-                break;
-              }
-
-              case "ArrowUp": {
-                event.preventDefault();
-                let newIndex = suggestionIndex - 1;
-
-                if (newIndex <= -2) {
-                  newIndex = suggestions.length - 1;
-                }
-
-                setSuggestionIndex(newIndex);
-                break;
-              }
-            }
-          }}
-          onFocus={() => {
-            setInputFocused(true);
-          }}
-          onBlur={() => {
-            setInputFocused(false);
-          }}
-          ref={inputRef}
-        />
-        <div
-          className={classNames(
-            {
-              hidden: !showDropdown,
-              "h-10": isLoading,
-            },
-            "absolute",
-            "bottom-0",
+      <input
+        className={
+          optionsWithDefaults.customInputClasses ??
+          classNames(
+            optionsWithDefaults.widthClass,
             "p-2",
-            "translate-y-full",
-            "w-full",
-            "bg-white",
-            "z-20",
-            "rounded-md",
-            "overflow-hidden",
-            "shadow-[0_0_3px_rgb(0,0,0,0.2)]",
-            "flex",
-            "flex-col"
-          )}
-        >
-          {isLoading ? <FullCover /> : suggestionButtons}
-        </div>
+            {
+              "border-r-0": optionsWithDefaults.hasSearchButton,
+              "rounded-r-none": optionsWithDefaults.hasSearchButton,
+            },
+            "border-2",
+            "rounded-lg",
+            "outline-none",
+            "focus-within:shadow-[0_0_3px_rgb(0,0,0,0.2)]"
+          )
+        }
+        value={
+          suggestionIndex !== -1 ? suggestions[suggestionIndex] : props.text
+        }
+        placeholder={optionsWithDefaults.placeholder}
+        onChange={(event) => {
+          setSuggestionIndex(-1);
+          props.onChangeText?.(event.currentTarget.value);
+        }}
+        onKeyDown={(event) => {
+          switch (event.key) {
+            case "ArrowDown": {
+              event.preventDefault();
+              let newIndex = (hasHoveredOverButton ? -1 : suggestionIndex) + 1;
+
+              if (newIndex >= suggestions.length) {
+                newIndex = -1;
+              }
+
+              setSuggestionIndex(newIndex);
+              break;
+            }
+
+            case "ArrowUp": {
+              event.preventDefault();
+              let newIndex = (hasHoveredOverButton ? -1 : suggestionIndex) - 1;
+
+              if (newIndex <= -2) {
+                newIndex = suggestions.length - 1;
+              }
+
+              setSuggestionIndex(newIndex);
+              break;
+            }
+          }
+
+          setHasHoveredOverButton(false);
+        }}
+        onFocus={() => {
+          setInputFocused(true);
+        }}
+        onBlur={(e) => {
+          setInputFocused(false);
+          setHasHoveredOverButton(false);
+          setSuggestionIndex(-1);
+          props.onChangeText?.(e.target.value);
+        }}
+        ref={inputRef}
+      />
+      <div
+        className={classNames(
+          {
+            hidden: !showDropdown,
+            "h-10": isLoading,
+          },
+          "absolute",
+          "bottom-0",
+          "p-2",
+          "translate-y-full",
+          "w-fit",
+          "bg-white",
+          "z-20",
+          "rounded-md",
+          "overflow-hidden",
+          "shadow-[0_0_3px_rgb(0,0,0,0.2)]",
+          "flex",
+          "flex-col"
+        )}
+      >
+        {isLoading ? <FullCover /> : suggestionButtons}
       </div>
       {optionsWithDefaults.hasSearchButton && (
         <button className="border-l-0 rounded-l-none btn success">

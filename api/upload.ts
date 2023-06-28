@@ -5,6 +5,7 @@ import { VercelRequest, VercelResponse } from "@vercel/node";
 import { prismaClient, s3Client } from "../api-lib/data-clients.js";
 import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
 import { PostgresRequest } from "@/src/types/postgres-request.js";
+import { Prisma } from "@prisma/client";
 
 const S3_SONG_CONVERSION_BUCKET = getEnvVar("S3_SONG_CONVERSION_BUCKET");
 
@@ -54,6 +55,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         metadata.featuring = [metadata.featuring];
       }
 
+      let album: Prisma.AlbumCreateNestedOneWithoutSongsInput | undefined =
+        undefined;
+
+      if (metadata.albumId !== undefined && metadata.albumId !== null) {
+        album = {
+          connect: {
+            id: metadata.albumId,
+          },
+        };
+      }
+
       const song = await prismaClient.song.create({
         data: {
           id: id,
@@ -61,7 +73,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           genre: metadata.genre,
           artists: metadata.artists,
           featuring: metadata.featuring,
-          albumId: metadata.albumId,
+          album,
           trackNumber: metadata.trackNumber,
         },
       });
