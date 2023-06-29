@@ -1,6 +1,5 @@
-import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
 import classNames from "classnames";
-import { Search } from "lucide-react";
+import { Loader2, Search } from "lucide-react";
 import { useRef, useState } from "react";
 
 type SuggestionInputProps = {
@@ -128,7 +127,11 @@ export default function SuggestionInput(props: SuggestionInputProps) {
 
         props.onSearch?.(currentValue);
       }}
-      className="search-box grow flex flex-row relative"
+      className={
+        (optionsWithDefaults.customInputClasses === undefined
+          ? optionsWithDefaults.widthClass
+          : "") + " search-box grow flex flex-row relative"
+      }
     >
       <input
         className={
@@ -204,7 +207,7 @@ export default function SuggestionInput(props: SuggestionInputProps) {
           "bottom-0",
           "p-2",
           "translate-y-full",
-          "w-fit",
+          "w-full",
           "bg-white",
           "z-20",
           "rounded-md",
@@ -214,7 +217,13 @@ export default function SuggestionInput(props: SuggestionInputProps) {
           "flex-col"
         )}
       >
-        {isLoading ? <FullCover /> : suggestionButtons}
+        {isLoading ? (
+          <div>
+            <Loader2 className="animate-spin" />
+          </div>
+        ) : (
+          suggestionButtons
+        )}
       </div>
       {optionsWithDefaults.hasSearchButton && (
         <button className="border-l-0 rounded-l-none btn success">

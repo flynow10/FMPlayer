@@ -6,7 +6,7 @@ import { MediaCarousel } from "@/src/components/media-displays/MediaCarousel";
 import { PostgresRequest } from "@/src/types/postgres-request";
 import { Pages } from "@/src/types/pages";
 
-export type GenreListProps = {
+type GenreListProps = {
   onPlayMedia: Pages.PlayByID;
   onNavigate: Pages.NavigationMethod;
 };

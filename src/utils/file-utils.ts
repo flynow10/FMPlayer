@@ -1,7 +1,6 @@
-import { PreUploadSong } from "@/src/components/pages/upload/FileUpload";
-import { PostgresRequest } from "@/src/types/postgres-request";
+import { Music } from "@/src/types/music";
 import { fileTypeFromBuffer } from "@/src/utils/file-type";
-import { getTags, pullMetaDataFromTags } from "@/src/utils/media-tags";
+import { getTags, pullMetadataFromTags } from "@/src/utils/media-tags";
 import { v4 as uuid } from "uuid";
 
 // https://github.com/ffmpegwasm/ffmpeg.wasm/blob/master/src/browser/fetchFile.js
@@ -58,18 +57,23 @@ export const fetchFile = async (_data: string | Buffer | File | Blob) => {
 
 export const getPreUploadSongFromData = async (
   data: Uint8Array,
-  fileName = "Untitled Song"
-): Promise<PreUploadSong> => {
+  defaultFileName = "Untitled Song"
+): Promise<Music.Files.EditableFile> => {
   const fileType = await fileTypeFromBuffer(data);
   const tags = await getTags(data);
-  let metadata: PostgresRequest.SongMetadata = {};
+  let metadata: Music.Files.EditableMetadata = {
+    id: uuid(),
+    title: defaultFileName,
+    artists: [],
+    featuring: [],
+    genre: "",
+    albumId: null,
+    audioUploaded: null,
+    trackNumber: 0,
+  };
 
   if (tags !== null) {
-    metadata = pullMetaDataFromTags(tags);
-  }
-
-  if (metadata.title === undefined) {
-    metadata.title = fileName;
+    metadata = Object.assign({}, metadata, pullMetadataFromTags(tags));
   }
 
   if (fileType === undefined) {
@@ -77,9 +81,10 @@ export const getPreUploadSongFromData = async (
   }
 
   return {
-    tempId: uuid(),
-    data,
-    file: fileType,
+    audioData: {
+      buffer: data,
+      fileType,
+    },
     metadata,
   };
 };

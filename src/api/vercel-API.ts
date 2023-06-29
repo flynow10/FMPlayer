@@ -52,22 +52,24 @@ export const VercelAPI = {
     }
   },
 
-  async makeRequest<T>(
+  async makeRequest<T, O = object>(
     endpoint: Endpoint,
     type: string,
-    options: object,
+    body: O,
     defaultResponse?: T
   ): Promise<T> {
-    const requestUrl = `${endpoint}?${VercelAPI.optionsToUrl({
-      type,
-      ...options,
-    })}`;
-    const response = await fetch(requestUrl);
+    let response: Response;
+
+    if (endpoint === Endpoint.UPLOAD) {
+      response = await VercelAPI._makePOSTRequest(endpoint, type, body);
+    } else {
+      response = await VercelAPI._makeGETRequest(endpoint, type, body);
+    }
 
     if (response.status === 401) {
       window.location.href = "/login";
       throw new Error(
-        `Failed to make call to ${requestUrl} because the user was logged out`
+        `Failed to make call to "${endpoint}?type=${type}" because the user was logged out`
       );
     }
 
@@ -77,13 +79,43 @@ export const VercelAPI = {
       console.warn(responseJson);
 
       if (defaultResponse === undefined) {
-        throw new Error(`Failed to make call to ${requestUrl}`);
+        throw new Error(`Failed to make call to "${endpoint}?type=${type}"`);
       }
 
       return defaultResponse;
     }
 
     return responseJson as T;
+  },
+  async _makeGETRequest<O>(
+    endpoint: Endpoint,
+    type: string,
+    query: O
+  ): Promise<Response> {
+    const requestUrl = `${endpoint}?${VercelAPI.optionsToUrl({
+      type,
+      ...query,
+    })}`;
+    return fetch(requestUrl, {
+      method: "GET",
+    });
+  },
+
+  async _makePOSTRequest<O>(
+    endpoint: Endpoint,
+    type: string,
+    body: O
+  ): Promise<Response> {
+    const requestUrl = `${endpoint}?${VercelAPI.optionsToUrl({
+      type,
+    })}`;
+    return fetch(requestUrl, {
+      method: "POST",
+      body: JSON.stringify(body),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
   },
 
   optionsToUrl(options: object): string {

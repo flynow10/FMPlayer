@@ -1,4 +1,3 @@
-import { v4 as uuid } from "uuid";
 import { printRequestType } from "../api-lib/api-utils.js";
 import { getEnvVar } from "../api-lib/constants.js";
 import { VercelRequest, VercelResponse } from "@vercel/node";
@@ -23,7 +22,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   printRequestType("upload", req.query.type);
 
   switch (req.query.type) {
-    case "upload-file": {
+    case "uploadFile": {
       if (req.body.file === undefined) {
         res.status(400).json("Missing file");
         return;
@@ -41,20 +40,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return;
       }
 
-      const id = uuid();
-
-      if (metadata.title === undefined) {
-        metadata.title = `Untitled ${id.substring(0, 8)}`;
-      }
-
-      if (typeof metadata.artists === "string") {
-        metadata.artists = [metadata.artists];
-      }
-
-      if (typeof metadata.featuring === "string") {
-        metadata.featuring = [metadata.featuring];
-      }
-
       let album: Prisma.AlbumCreateNestedOneWithoutSongsInput | undefined =
         undefined;
 
@@ -68,7 +53,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       const song = await prismaClient.song.create({
         data: {
-          id: id,
+          id: metadata.id,
           title: metadata.title,
           genre: metadata.genre,
           artists: metadata.artists,
@@ -78,17 +63,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         },
       });
 
-      const key = `${id}.${file.ext}`;
+      const key = `${metadata.id}.${file.ext}`;
 
       const post = await createPresignedPost(s3Client, {
         Bucket: S3_SONG_CONVERSION_BUCKET,
         Key: key,
       });
-      res.status(200).json({ id, song, post });
+      res.status(200).json({ song, post });
       return;
     }
 
-    case "conversion-complete": {
+    case "conversionComplete": {
       const { id } = req.body;
 
       if (typeof id !== "string" || id === "") {

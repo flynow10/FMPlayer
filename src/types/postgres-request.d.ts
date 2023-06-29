@@ -1,6 +1,9 @@
+import { FileType } from "@/src/types/file-type";
+import { Music } from "@/src/types/music";
+import { PresignedPost } from "@aws-sdk/s3-presigned-post";
+import { Album, Song } from "@prisma/client";
+
 export namespace PostgresRequest {
-  type Song = import("@prisma/client").Song;
-  type Album = import("@prisma/client").Album;
   export type SortType = "asc" | "desc";
   export type SongSortFields =
     | "title"
@@ -58,7 +61,12 @@ export namespace PostgresRequest {
 
   export type UploadFileBody = {
     file: FileType.FileTypeResult;
-    metadata: SongMetadata;
+    metadata: Music.Files.EditableMetadata;
   };
-  export type SongMetadata = Partial<Song>;
+
+  export type UploadFileResponse = {
+    id: string;
+    song: Song;
+    post: PresignedPost;
+  };
 }

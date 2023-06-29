@@ -1,7 +1,7 @@
 import { Album, Song } from "@prisma/client";
-import { PresignedPost } from "@aws-sdk/s3-presigned-post";
 import { Endpoint, VercelAPI } from "@/src/api/vercel-API";
 import { PostgresRequest } from "@/src/types/postgres-request";
+import { Music } from "@/src/types/music";
 
 class PostgresMusicLibrary {
   public async getSong(
@@ -63,37 +63,23 @@ class PostgresMusicLibrary {
   }
 
   public async getArtistList(): Promise<PostgresRequest.ArtistListResponse[]> {
-    return VercelAPI.makeRequest(Endpoint.POSTGRES, "getArtistList", {}, []);
+    return VercelAPI.makeRequest<PostgresRequest.ArtistListResponse[]>(
+      Endpoint.POSTGRES,
+      "getArtistList",
+      {},
+      []
+    );
   }
 
-  private async uploadFileToConvert(
-    fileName: string,
-    fileType: string,
-    file: Blob
-  ): Promise<void> {
-    const presignedUrl: PresignedPost = await VercelAPI.makeRequest(
-      Endpoint.AWS,
-      "presigned-post",
-      {
-        fileName: `${fileName}.${fileType}`,
-      }
-    );
-    const formData = new FormData();
-
-    for (const [key, value] of Object.entries(presignedUrl.fields)) {
-      formData.append(key, value);
-    }
-
-    formData.append("file", file);
-    console.log(
-      await fetch(presignedUrl.url, {
-        method: "POST",
-        body: formData,
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      })
-    );
+  public async uploadFile(file: Music.Files.EditableFile): Promise<Song> {
+    const uploadResult = await VercelAPI.makeRequest<
+      PostgresRequest.UploadFileResponse,
+      PostgresRequest.UploadFileBody
+    >(Endpoint.UPLOAD, "uploadFile", {
+      file: file.audioData.fileType,
+      metadata: file.metadata,
+    });
+    return uploadResult.song;
   }
 
   public async getMusicFileUrl(id: string): Promise<string | undefined> {

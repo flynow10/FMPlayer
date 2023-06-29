@@ -1,6 +1,6 @@
 import { Pages } from "@/src/types/pages";
 
-export type SidebarProps = {
+type SidebarProps = {
   location: Pages.Location;
   isSearching: boolean;
   onSelectTab?: (location: Pages.Location) => void;
