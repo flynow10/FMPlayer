@@ -1,20 +1,21 @@
-import { PreUploadSong } from "@/src/components/pages/upload/FileUpload";
+import BufferAudioPlayer from "@/src/components/utils/BufferAudioPlayer";
 import MultiSuggestionInput from "@/src/components/utils/MultiSuggestionInput";
 import SuggestionInput from "@/src/components/utils/SuggestionInput";
+import { FileContext } from "@/src/contexts/FileContext";
 import { useAsyncLoad } from "@/src/hooks/use-async-load";
 import { MyMusicLibrary } from "@/src/music/library/music-library";
-import { Upload } from "@/src/types/upload";
+import { Music } from "@/src/types/music";
+import { Pages } from "@/src/types/pages";
 import { pickSuggestions } from "@/src/utils/string-utils";
-import { useState } from "react";
+import { useContext, useState } from "react";
 
 type MetadataEditorProps = {
-  files: PreUploadSong[];
-  currentFileId: string;
-  setFileMetadata: Upload.SetFileMetadataFunction;
+  otherFiles?: Music.Files.EditableFile[];
+  setFileMetadata: Pages.Upload.SetFileMetadataFunction;
 };
 
 export default function MetadataEditor(props: MetadataEditorProps) {
-  const file = props.files.find((f) => f.tempId === props.currentFileId);
+  const file = useContext(FileContext);
   const [genres, genresLoaded] = useAsyncLoad<string[]>(
     async () => {
       const genreList = await MyMusicLibrary.getGenreList();
@@ -35,14 +36,16 @@ export default function MetadataEditor(props: MetadataEditorProps) {
   );
   const [currentArtistText, setCurrentArtistText] = useState("");
   const [currentFeaturingText, setCurrentFeaturingText] = useState("");
+  const [showDebugJson, setShowDebugJson] = useState(false);
 
   if (file) {
-    const otherUploadGenres = props.files
-      .filter(
-        (f) =>
-          f.metadata.genre !== undefined && f.tempId !== props.currentFileId
-      )
-      .map((f) => f.metadata.genre ?? "");
+    const otherUploadGenres =
+      props.otherFiles
+        ?.filter(
+          (f) =>
+            f.metadata.genre !== undefined && f.metadata.id === file.metadata.id
+        )
+        .map((f) => f.metadata.genre ?? "") ?? [];
 
     const uniqueGenres = genres
       .concat(otherUploadGenres)
@@ -54,13 +57,15 @@ export default function MetadataEditor(props: MetadataEditorProps) {
         return arr;
       }, []);
 
-    const otherUploadArtists = props.files
-      .filter(
-        (f) =>
-          f.metadata.artists !== undefined && f.tempId !== props.currentFileId
-      )
-      .map((f) => f.metadata.artists ?? [])
-      .flat();
+    const otherUploadArtists =
+      props.otherFiles
+        ?.filter(
+          (f) =>
+            f.metadata.artists !== undefined &&
+            f.metadata.id !== file.metadata.id
+        )
+        .map((f) => f.metadata.artists ?? [])
+        .flat() ?? [];
 
     const uniqueArtists = libraryArtists
       .concat(otherUploadArtists)
@@ -73,11 +78,35 @@ export default function MetadataEditor(props: MetadataEditorProps) {
       }, []);
     file.metadata;
     return (
-      <>
+      <div className="gap-2 flex flex-col">
+        <h3
+          key={file.metadata.id + "-Title"}
+          className="text-xl relative box-border"
+        >
+          <input
+            className="peer w-full focus:opacity-100 bg-transparent opacity-0 outline-none p-2"
+            defaultValue={file.metadata.title}
+            placeholder={file.metadata.title}
+            onChange={(e) => {
+              props.setFileMetadata(
+                file.metadata.id,
+                "title",
+                e.target.value || "Untitled Song"
+              );
+            }}
+          />
+          <span className="whitespace-pre peer-focus:text-transparent inline absolute left-0 top-0 -z-10 outline  outline-gray-200 outline-2 box-border rounded-lg p-2">
+            {file.metadata.title}
+          </span>
+        </h3>
+        <BufferAudioPlayer
+          key={file.metadata.id + "-AudioPlayer"}
+          data={file.audioData.buffer}
+        />
         <div className="flex flex-col">
-          <label htmlFor="artists">Artists</label>
+          <label>Artists</label>
           <MultiSuggestionInput
-            key={file.tempId + "-Artists"}
+            key={file.metadata.id + "-Artists"}
             selectedStrings={file.metadata.artists ?? []}
             onChange={setCurrentArtistText}
             suggestions={
@@ -92,7 +121,7 @@ export default function MetadataEditor(props: MetadataEditorProps) {
                 : null
             }
             setSelectedStrings={(artists) => {
-              props.setFileMetadata(file.tempId, "artists", artists);
+              props.setFileMetadata(file.metadata.id, "artists", artists);
             }}
             options={{
               placeholder: "Artists",
@@ -101,9 +130,9 @@ export default function MetadataEditor(props: MetadataEditorProps) {
           />
         </div>
         <div className="flex flex-col">
-          <label htmlFor="featuring">Featuring</label>
+          <label>Featuring</label>
           <MultiSuggestionInput
-            key={file.tempId + "-Featuring"}
+            key={file.metadata.id + "-Featuring"}
             selectedStrings={file.metadata.featuring ?? []}
             onChange={setCurrentFeaturingText}
             suggestions={
@@ -118,7 +147,7 @@ export default function MetadataEditor(props: MetadataEditorProps) {
                 : null
             }
             setSelectedStrings={(featuring) => {
-              props.setFileMetadata(file.tempId, "featuring", featuring);
+              props.setFileMetadata(file.metadata.id, "featuring", featuring);
             }}
             options={{
               placeholder: "Featuring",
@@ -127,12 +156,12 @@ export default function MetadataEditor(props: MetadataEditorProps) {
           />
         </div>
         <div className="flex flex-col">
-          <label htmlFor="genre">Genre</label>
+          <label>Genre</label>
           <SuggestionInput
-            key={file.tempId + "-Genre"}
+            key={file.metadata.id + "-Genre"}
             text={file.metadata.genre ?? ""}
             onChangeText={(genre) => {
-              props.setFileMetadata(file.tempId, "genre", genre);
+              props.setFileMetadata(file.metadata.id, "genre", genre);
             }}
             suggestions={
               genresLoaded
@@ -141,13 +170,42 @@ export default function MetadataEditor(props: MetadataEditorProps) {
             }
             options={{
               placeholder: "Genre",
-              widthClass: "max-w-fit",
+              widthClass: "w-fit",
             }}
           />
         </div>
-      </>
+        <div>
+          <button
+            onClick={() => {
+              setShowDebugJson(!showDebugJson);
+            }}
+            className="btn bg-gray-300 active:bg-gray-500"
+          >
+            Show Debug
+          </button>
+
+          <p
+            className={
+              "whitespace-pre-wrap " + (showDebugJson ? "block" : "hidden")
+            }
+          >
+            {JSON.stringify(
+              {
+                fileType: file.audioData.fileType,
+                metadata: file.metadata,
+              },
+              null,
+              2
+            )}
+          </p>
+        </div>
+      </div>
     );
   } else {
-    return <></>;
+    return (
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+        Click on a file to edit its metadata
+      </div>
+    );
   }
 }

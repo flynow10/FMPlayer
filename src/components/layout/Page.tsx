@@ -32,7 +32,9 @@ export default function Page(props: PageProps) {
             }
 
             case "file upload": {
-              return <FileUpload data={props.data} />;
+              return (
+                <FileUpload data={props.data} onNavigate={props.onNavigate} />
+              );
             }
 
             case "album list": {

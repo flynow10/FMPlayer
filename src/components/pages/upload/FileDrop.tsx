@@ -1,7 +1,7 @@
 import { Download } from "lucide-react";
 import { DragEvent as ReactDragEvent, useEffect, useState } from "react";
 
-export type FileDropProps = {
+type FileDropProps = {
   onReceiveFiles: (files: File[]) => void;
 };
 

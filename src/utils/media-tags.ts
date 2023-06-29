@@ -1,4 +1,4 @@
-import { PostgresRequest } from "@/src/types/postgres-request";
+import { Music } from "@/src/types/music";
 import * as jsmediatags from "jsmediatags";
 import { TagType } from "jsmediatags/types";
 
@@ -15,13 +15,17 @@ export const getTags = (data: Blob | Uint8Array) =>
     });
   });
 
-export const pullMetaDataFromTags = (
+export const pullMetadataFromTags = (
   tags: TagType
-): PostgresRequest.SongMetadata => {
-  const metadata: PostgresRequest.SongMetadata = {
+): Partial<Music.Files.EditableMetadata> => {
+  const metadata: Partial<Music.Files.EditableMetadata> = {
     title: tags.tags.title,
     genre: tags.tags.genre,
   };
+
+  if (tags.tags.title) {
+    metadata.title === "title";
+  }
 
   if (tags.tags.track) {
     const trackNumber: number = parseInt(tags.tags.track);

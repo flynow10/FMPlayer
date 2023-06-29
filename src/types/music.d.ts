@@ -1,4 +1,20 @@
+import { FileType } from "@/src/types/file-type";
+import { Song } from "@prisma/client";
+
 export namespace Music {
+  export namespace Files {
+    export type EditableFile = {
+      audioData: AudioData;
+      metadata: EditableMetadata;
+    };
+    export type AudioData = {
+      fileType: FileType.FileTypeResult;
+      buffer: Uint8Array;
+    };
+
+    export type EditableMetadata = Omit<Song, "modifiedOn" | "createdOn">;
+  }
+
   export type ActionType =
     | "play song"
     | "number"
