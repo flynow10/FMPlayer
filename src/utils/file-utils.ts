@@ -55,10 +55,10 @@ export const fetchFile = async (_data: string | Buffer | File | Blob) => {
   return new Uint8Array(data);
 };
 
-export const getPreUploadSongFromData = async (
+export const getPreUploadFileFromData = async (
   data: Uint8Array,
   defaultFileName = "Untitled Song"
-): Promise<Music.Files.EditableFile> => {
+): Promise<Music.Files.PreUploadFile> => {
   const fileType = await fileTypeFromBuffer(data);
   const tags = await getTags(data);
   let metadata: Music.Files.EditableMetadata = {

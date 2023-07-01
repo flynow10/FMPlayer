@@ -6,7 +6,7 @@ import { Check, CheckSquare, Loader2, MinusSquare, Square } from "lucide-react";
 import { useContext, useState } from "react";
 
 type FileListProps = {
-  files: Music.Files.EditableFile[];
+  files: Music.Files.PreUploadFile[];
   selectedFiles: string[];
   ableToSelect: boolean;
   fileStatuses: Pages.Upload.FileStatus[];

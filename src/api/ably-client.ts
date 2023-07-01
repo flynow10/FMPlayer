@@ -1,5 +1,6 @@
 import { API } from "@/src/types/api";
 import { Realtime, Types } from "ably";
+import { Id, ToastOptions, toast } from "react-toastify";
 
 class AblyChannelWrapper {
   private readonly channel: Types.RealtimeChannelPromise;
@@ -41,6 +42,7 @@ export class AblyClient {
   private readonly client: Types.RealtimePromise;
   private readonly uploadStatusChannel: AblyChannelWrapper;
   private static readonly CONNETION_TIMEOUT = 10000;
+  private toastIds: { [key: string]: Id } = {};
 
   constructor() {
     this.client = new Realtime.Promise({
@@ -57,7 +59,41 @@ export class AblyClient {
 
   private tempInitChannels() {
     this.uploadStatusChannel.subscribe((message) => {
-      console.log("Received upload status message", message);
+      if (message.name === "status") {
+        const {
+          file_name: name,
+          status,
+        }: { file_name: string; status: string } = message.data;
+        let toastMessage = "",
+          toastOptions: ToastOptions = {};
+
+        switch (status) {
+          case "started conversion": {
+            toastMessage = `AWS Conversion has started for ${name}`;
+            toastOptions = { type: "info", autoClose: false };
+            break;
+          }
+
+          case "conversion complete": {
+            toastMessage = `AWS Conversion completed successfully for ${name}`;
+            toastOptions = {
+              type: "success",
+              autoClose: 5000,
+              isLoading: false,
+            };
+            break;
+          }
+        }
+
+        if (this.toastIds[name] && toast.isActive(this.toastIds[name])) {
+          toast.update(this.toastIds[name], {
+            render: toastMessage,
+            ...toastOptions,
+          });
+        } else {
+          this.toastIds[name] = toast.loading(toastMessage, toastOptions);
+        }
+      }
     });
   }
 

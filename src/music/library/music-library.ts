@@ -2,6 +2,7 @@ import { Album, Song } from "@prisma/client";
 import { Endpoint, VercelAPI } from "@/src/api/vercel-API";
 import { PostgresRequest } from "@/src/types/postgres-request";
 import { Music } from "@/src/types/music";
+import { PresignedPost } from "@aws-sdk/s3-presigned-post";
 
 class PostgresMusicLibrary {
   public async getSong(
@@ -71,7 +72,7 @@ class PostgresMusicLibrary {
     );
   }
 
-  public async uploadFile(file: Music.Files.EditableFile): Promise<Song> {
+  public async uploadFile(file: Music.Files.PreUploadFile): Promise<Song> {
     const uploadResult = await VercelAPI.makeRequest<
       PostgresRequest.UploadFileResponse,
       PostgresRequest.UploadFileBody
@@ -79,7 +80,20 @@ class PostgresMusicLibrary {
       file: file.audioData.fileType,
       metadata: file.metadata,
     });
+    this.sendS3Post(uploadResult.post, file.audioData);
     return uploadResult.song;
+  }
+
+  private async sendS3Post(post: PresignedPost, body: Music.Files.AudioData) {
+    const form = new FormData();
+    Object.entries(post.fields).forEach(([field, value]) => {
+      form.append(field, value);
+    });
+    form.append("file", new Blob([body.buffer], { type: body.fileType.mime }));
+    await fetch(post.url, {
+      body: form,
+      method: "POST",
+    });
   }
 
   public async getMusicFileUrl(id: string): Promise<string | undefined> {
