@@ -34,7 +34,7 @@ export default function FileDrop(props: FileDropProps) {
   };
 
   const isValidFile = (file: File): boolean => {
-    return file.size > 0 && file.type.indexOf("audio") !== -1;
+    return file.size > 0;
   };
 
   const showInvalidFile = () => {
