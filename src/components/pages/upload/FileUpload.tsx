@@ -1,7 +1,4 @@
-import {
-  fetchFile,
-  getPreUploadSongFromData as getEditableFileFromData,
-} from "@/src/utils/file-utils";
+import { fetchFile, getPreUploadFileFromData } from "@/src/utils/file-utils";
 import { useAsyncLoad } from "@/src/hooks/use-async-load";
 import { useCallback, useState } from "react";
 import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
@@ -26,10 +23,10 @@ type FileUploadProps = {
 
 export default function FileUpload(props: FileUploadProps) {
   const [files, filesLoaded, setFiles] = useAsyncLoad<
-    Music.Files.EditableFile[]
+    Music.Files.PreUploadFile[]
   >(
     async () => {
-      let files: Music.Files.EditableFile[] = [];
+      let files: Music.Files.PreUploadFile[] = [];
 
       switch (props.data.uploadType) {
         case "file": {
@@ -40,7 +37,8 @@ export default function FileUpload(props: FileUploadProps) {
           files = await Promise.all(
             props.data.files.map(async (file) => {
               const fileName = file.name.replace(/\.[^/.]+$/, "");
-              return await getEditableFileFromData(
+              console.log(fileName);
+              return await getPreUploadFileFromData(
                 await fetchFile(file),
                 fileName
               );
@@ -56,7 +54,7 @@ export default function FileUpload(props: FileUploadProps) {
 
           const fileName = getFileNameFromUrl(props.data.url);
           files = [
-            await getEditableFileFromData(
+            await getPreUploadFileFromData(
               await fetchFile(props.data.url),
               fileName
             ),

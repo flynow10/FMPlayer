@@ -3,8 +3,10 @@ import { Song } from "@prisma/client";
 
 export namespace Music {
   export namespace Files {
-    export type EditableFile = {
+    export type PreUploadFile = {
       audioData: AudioData;
+    } & EditableFile;
+    export type EditableFile = {
       metadata: EditableMetadata;
     };
     export type AudioData = {

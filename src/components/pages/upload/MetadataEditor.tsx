@@ -11,6 +11,7 @@ import { useContext, useState } from "react";
 
 type MetadataEditorProps = {
   otherFiles?: Music.Files.EditableFile[];
+  audioData?: Uint8Array;
   setFileMetadata: Pages.Upload.SetFileMetadataFunction;
 };
 
@@ -99,10 +100,12 @@ export default function MetadataEditor(props: MetadataEditorProps) {
             {file.metadata.title}
           </span>
         </h3>
-        <BufferAudioPlayer
-          key={file.metadata.id + "-AudioPlayer"}
-          data={file.audioData.buffer}
-        />
+        {props.audioData && (
+          <BufferAudioPlayer
+            key={file.metadata.id + "-AudioPlayer"}
+            data={props.audioData}
+          />
+        )}
         <div className="flex flex-col">
           <label>Artists</label>
           <MultiSuggestionInput
@@ -191,7 +194,6 @@ export default function MetadataEditor(props: MetadataEditorProps) {
           >
             {JSON.stringify(
               {
-                fileType: file.audioData.fileType,
                 metadata: file.metadata,
               },
               null,
