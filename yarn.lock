@@ -1681,6 +1681,10 @@
   resolved "https://registry.yarnpkg.com/@eslint/js/-/js-8.43.0.tgz#559ca3d9ddbd6bf907ad524320a0d14b85586af0"
   integrity sha512-s2UHCoiXfxMvmfzqoN+vrQ84ahUSYde9qNO1MdxmoEhyHWsfmwOpFlwYV+ePJEVc7gFnATGUi376WowX1N7tFg==
 
+"@fm-player/shared@git+https://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:x-oauth-basic@github.com/flynow10/FMPlayer-Shared.git":
+  version "1.0.2"
+  resolved "git+https://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:x-oauth-basic@github.com/flynow10/FMPlayer-Shared.git#effc18b9b4e8395ed9510fbbd4ded5147ae9a6c1"
+
 "@humanwhocodes/config-array@^0.11.10":
   version "0.11.10"
   resolved "https://registry.yarnpkg.com/@humanwhocodes/config-array/-/config-array-0.11.10.tgz#5a3ffe32cc9306365fb3fd572596cd602d5e12d2"
