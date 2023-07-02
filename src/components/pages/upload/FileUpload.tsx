@@ -37,7 +37,6 @@ export default function FileUpload(props: FileUploadProps) {
           files = await Promise.all(
             props.data.files.map(async (file) => {
               const fileName = file.name.replace(/\.[^/.]+$/, "");
-              console.log(fileName);
               return await getPreUploadFileFromData(
                 await fetchFile(file),
                 fileName
@@ -166,7 +165,7 @@ export default function FileUpload(props: FileUploadProps) {
           }
         });
       });
-      console.log(await MyMusicLibrary.uploadFile(file));
+      await MyMusicLibrary.uploadFile(file);
       setFileStatuses((prev) => {
         return prev.map((s) => {
           if (s.id === file.metadata.id) {

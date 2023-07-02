@@ -1357,8 +1357,8 @@
   integrity sha512-Ag+9YM4ocKQx9AarydN0KY2j0ErMHNIocPDrVo8zAE44xLTjEtz81OdR68/cydGtk6m6jDb5Za3r2useMzYmSw==
 
 "@fm-player/shared@git+https://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:x-oauth-basic@github.com/flynow10/FMPlayer-Shared.git":
-  version "1.1.0"
-  resolved "git+https://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:x-oauth-basic@github.com/flynow10/FMPlayer-Shared.git#be56b999b0676050278b094625fe8aa33e8ef79a"
+  version "1.2.0"
+  resolved "git+https://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:x-oauth-basic@github.com/flynow10/FMPlayer-Shared.git#288f255c5b12a2cbb8882f963eece9b10a906f5a"
 
 "@humanwhocodes/config-array@^0.11.10":
   version "0.11.10"
