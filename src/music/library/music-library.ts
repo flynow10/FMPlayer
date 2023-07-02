@@ -84,6 +84,23 @@ class PostgresMusicLibrary {
     return uploadResult.song;
   }
 
+  public async downloadYoutubeVideo(
+    videoId: string,
+    metadata: Music.Files.EditableMetadata
+  ): Promise<Song> {
+    const { song }: PostgresRequest.DownloadYoutubeVideoResponse =
+      await VercelAPI.makeRequest<
+        PostgresRequest.DownloadYoutubeVideoResponse,
+        PostgresRequest.DownloadYoutubeVideoBody
+      >(Endpoint.UPLOAD, "downloadYoutubeVideo", {
+        video: {
+          id: videoId,
+        },
+        metadata: metadata,
+      });
+    return song;
+  }
+
   private async sendS3Post(post: PresignedPost, body: Music.Files.AudioData) {
     const form = new FormData();
     Object.entries(post.fields).forEach(([field, value]) => {

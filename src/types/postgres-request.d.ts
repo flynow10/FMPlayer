@@ -1,5 +1,6 @@
 import { FileType } from "@/src/types/file-type";
 import { Music } from "@/src/types/music";
+import { InvokeCommandOutput } from "@aws-sdk/client-lambda";
 import { PresignedPost } from "@aws-sdk/s3-presigned-post";
 import { Album, Song } from "@prisma/client";
 
@@ -65,8 +66,19 @@ export namespace PostgresRequest {
   };
 
   export type UploadFileResponse = {
-    id: string;
     song: Song;
     post: PresignedPost;
+  };
+
+  export type DownloadYoutubeVideoBody = {
+    video: {
+      id: string;
+    };
+    metadata: Music.Files.EditableMetadata;
+  };
+
+  export type DownloadYoutubeVideoResponse = {
+    song: Song;
+    output: InvokeCommandOutput;
   };
 }
