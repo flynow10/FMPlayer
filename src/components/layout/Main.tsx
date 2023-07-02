@@ -4,6 +4,7 @@ import Page from "@/src/components/layout/Page";
 import { ChevronLeft } from "lucide-react";
 import classNames from "classnames";
 import { Pages } from "@/src/types/pages";
+import ToastTest from "@/src/components/utils/ToastTest";
 
 type MainProps = {
   onPlayMedia?: Pages.PlayByID;
@@ -107,7 +108,10 @@ export default function Main(props: MainProps) {
           </button>
           <h3 className="text-2xl inline-block">{pageTitle}</h3>
         </div>
-        <UUID />
+        <div className="flex flex-row gap-2">
+          <UUID />
+          <ToastTest />
+        </div>
       </div>
       {pageElements}
     </div>
