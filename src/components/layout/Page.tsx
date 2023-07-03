@@ -2,6 +2,7 @@ import FileSearch from "@/src/components/pages/upload/FileSearch";
 import AlbumList from "@/src/components/pages/AlbumList";
 import SongList from "@/src/components/pages/SongList";
 import GenreList from "@/src/components/pages/GenreList";
+import RecentlyAddedList from "@/src/components/pages/RecentlyAddedList";
 import FileUpload from "@/src/components/pages/upload/FileUpload";
 import { Pages } from "@/src/types/pages";
 
@@ -26,7 +27,12 @@ export default function Page(props: PageProps) {
     <div className={pageClass}>
       <div className="h-full overflow-auto relative">
         {(() => {
+          
           switch (props.type) {
+            case "recent list": {
+              return <RecentlyAddedList onPlayMedia={props.onPlayMedia} onNavigate={props.onNavigate} />;
+            }
+
             case "file search": {
               return <FileSearch onNavigate={props.onNavigate} />;
             }

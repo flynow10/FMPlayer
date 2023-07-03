@@ -24,7 +24,7 @@ export default function Main(props: MainProps) {
     "Import Media": [{ type: "file search" }],
     Artists: [{ type: "album display" }], // no page created yet
     "Edit Playlists": [{ type: "album display" }], // no page created yet
-    "Recently Added": [{ type: "album display" }], // no page created yet
+    "Recently Added": [{ type: "recent list" }], 
   });
 
   const pageTitle = props.isSearching
