@@ -18,6 +18,7 @@ export namespace Pages {
   }
 
   export type Location =
+    | "Search"
     | "Recently Added"
     | "Albums"
     | "Artists"
