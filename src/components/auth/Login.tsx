@@ -35,7 +35,7 @@ export function Login() {
         >
           <div className="flex flex-col justify-items-center">
             <h1 className="m-7 text-4xl">Functional Music Player</h1>
-            <div className="m-auto mb-5 max-w-fit rounded-full bg-sky-700 text-white p-2">
+            <div className="m-auto mb-5 max-w-fit rounded-full dark:invert bg-sky-700 text-white p-2">
               <Music4 size={36} className="" />
             </div>
             <input
@@ -48,7 +48,7 @@ export function Login() {
                 setPassword(e.currentTarget.value);
               }}
             />
-            <button className="bg-green-400 mx-4 mb-4 p-2 rounded-md text-lg hover:bg-green-500 transition-colors">
+            <button className="dark:invert bg-green-400 mx-4 mb-4 p-2 rounded-md text-lg hover:bg-green-500 transition-colors">
               <Lock className="inline " /> Login
             </button>
           </div>

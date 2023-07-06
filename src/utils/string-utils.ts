@@ -62,3 +62,43 @@ export function pickSuggestions(
     .map((strObj) => strObj.str)
     .slice(0, suggestionCount);
 }
+
+export function shortenNumberString(
+  number: number | string,
+  maxTrailingDecimal?: number,
+  requiredTrailingDecimals?: number
+) {
+  number = Number(number);
+  let rounded = 0;
+  let abbr = "";
+
+  if (number >= 1e12) {
+    abbr = "T";
+    rounded = number / 1e12;
+  } else if (number >= 1e9) {
+    abbr = "B";
+    rounded = number / 1e9;
+  } else if (number >= 1e6) {
+    abbr = "M";
+    rounded = number / 1e6;
+  } else if (number >= 1e3) {
+    abbr = "K";
+    rounded = number / 1e3;
+  } else {
+    rounded = number;
+  }
+
+  let roundedString = "" + rounded;
+
+  if (maxTrailingDecimal !== undefined) {
+    const test = new RegExp(`\\.\\d{${maxTrailingDecimal + 1},}$`);
+    if (test.test("" + rounded)) {
+      roundedString = rounded.toFixed(maxTrailingDecimal);
+    }
+  }
+  if (requiredTrailingDecimals !== undefined) {
+    roundedString = Number(roundedString).toFixed(requiredTrailingDecimals);
+  }
+
+  return roundedString + abbr;
+}

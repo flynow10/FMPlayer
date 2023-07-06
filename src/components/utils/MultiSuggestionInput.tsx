@@ -72,7 +72,7 @@ export default function MultiSuggestionInput(props: MultiSuggestionInputProps) {
           >
             <span>{artist}</span>
             <button
-              className="hover:text-red-500 transition-colors"
+              className="hover:text-red-500 dark:invert dark:text-white transition-colors"
               tabIndex={-1}
               onClick={() => {
                 deleteArtist();

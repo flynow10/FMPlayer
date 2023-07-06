@@ -79,13 +79,13 @@ export default function MetadataEditor(props: MetadataEditorProps) {
       }, []);
     file.metadata;
     return (
-      <div className="gap-2 flex flex-col">
+      <div className="gap-4 flex flex-col">
         <h3
           key={file.metadata.id + "-Title"}
           className="text-xl relative box-border"
         >
           <input
-            className="peer w-full focus:opacity-100 bg-transparent opacity-0 outline-none p-2"
+            className="relative z-10 peer w-full focus:opacity-100 bg-transparent opacity-0 outline-none p-2 max-w-full"
             defaultValue={file.metadata.title}
             placeholder={file.metadata.title}
             onChange={(e) => {
@@ -96,7 +96,7 @@ export default function MetadataEditor(props: MetadataEditorProps) {
               );
             }}
           />
-          <span className="whitespace-pre peer-focus:text-transparent inline absolute left-0 top-0 -z-10 outline  outline-gray-200 outline-2 box-border rounded-lg p-2">
+          <span className="whitespace-pre peer-focus:text-transparent inline absolute left-0 top-0 outline max-w-full outline-gray-200 outline-2 box-border rounded-lg p-2 overflow-clip">
             {file.metadata.title}
           </span>
         </h3>
@@ -182,7 +182,7 @@ export default function MetadataEditor(props: MetadataEditorProps) {
             onClick={() => {
               setShowDebugJson(!showDebugJson);
             }}
-            className="btn bg-gray-300 active:bg-gray-500"
+            className="btn text-black bg-gray-300 active:bg-gray-500"
           >
             Show Debug
           </button>

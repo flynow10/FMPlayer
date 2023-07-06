@@ -158,5 +158,60 @@ export namespace API {
       title: string;
       liveBroadcastContent: LiveBroadcastEnum;
     };
+
+    export type ChannelResultList = {
+      kind: "youtube#channelListResponse";
+      etag: string;
+      eventId: string;
+      visitorId: string;
+      nextPageToken: string;
+      prevPageToken: string;
+      pageInfo: PageInfo;
+      items: Channel[];
+    };
+
+    export type Channel = {
+      etag: string;
+      id: string;
+      kind: "youtube#channel";
+      snippet: ChannelSnippet;
+      statistics: ChannelStatistics;
+    };
+
+    export type ChannelSnippet = {
+      title: string;
+      customUrl: string;
+      publishedAt: string;
+      defaultLanguage: string;
+      country: string;
+      thumbnails: ThumbnailDetails;
+      description: string;
+      localized: ChannelLocalization;
+    };
+
+    export type ChannelLocalization = {
+      title: string;
+      description: string;
+    };
+
+    export type ChannelStatistics = {
+      /**
+       * Uint64 number
+       */
+      commentCount: string;
+      hiddenSubscriberCount: boolean;
+      /**
+       * Uint64 number
+       */
+      subscriberCount: string;
+      /**
+       * Uint64 number
+       */
+      viewCount: string;
+      /**
+       * Uint64 number
+       */
+      videoCount: string;
+    };
   }
 }

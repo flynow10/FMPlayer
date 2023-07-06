@@ -35,7 +35,8 @@ export namespace Pages {
     | "album display"
     | "file search"
     | "genre list"
-    | "file upload";
+    | "file upload"
+    | "youtube upload";
 
   export type NavigationType = "new" | "back";
 
