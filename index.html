@@ -2,12 +2,39 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link
+      rel="icon"
+      id="dark-favicon"
+      type="image/svg+xml"
+      href="/favicon-dark-mode.svg"
+    />
+    <link
+      rel="icon"
+      id="light-favicon"
+      type="image/svg+xml"
+      href="/favicon-light-mode.svg"
+    />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Functional Music Player</title>
   </head>
   <body class="h-screen">
     <div id="root" class="h-screen bg-white dark:invert"></div>
+    <script>
+      const matcher = window.matchMedia("(prefers-color-scheme: dark)");
+      const lightModeIcon = document.getElementById("light-favicon");
+      const darkModeIcon = document.getElementById("dark-favicon");
+      matcher.addListener(onUpdate);
+      onUpdate();
+      function onUpdate() {
+        if (matcher.matches) {
+          lightModeIcon.remove();
+          document.head.append(darkModeIcon);
+        } else {
+          document.head.append(lightModeIcon);
+          darkModeIcon.remove();
+        }
+      }
+    </script>
     <script src="/google-api.js"></script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
