@@ -53,6 +53,7 @@ ReactDOM.createRoot(root).render(
   <React.StrictMode>
     <RouterProvider router={router} />
     <ToastContainer
+      className="dark:invert"
       position="bottom-right"
       draggable={true}
       draggableDirection="x"

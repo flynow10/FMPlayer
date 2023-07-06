@@ -4,7 +4,7 @@ import { useCallback, useState } from "react";
 import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
 import { Pages } from "@/src/types/pages";
 import { getFileNameFromUrl } from "@/src/utils/url-utils";
-import MetadataEditor from "@/src/components/pages/upload/MetadataEditor";
+import MetadataEditor from "@/src/components/utils/MetadataEditor";
 import { MyMusicLibrary } from "@/src/music/library/music-library";
 import FileList from "@/src/components/pages/upload/FileList";
 import { FileContext } from "@/src/contexts/FileContext";
@@ -235,6 +235,7 @@ export default function FileUpload(props: FileUploadProps) {
         <div className="p-7 h-full border-x-2 col-span-7 row-span-6 overflow-auto relative">
           <MetadataEditor
             otherFiles={files}
+            audioData={openFile?.audioData.buffer}
             setFileMetadata={setFileMetadataProperty}
           />
         </div>

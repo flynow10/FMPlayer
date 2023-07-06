@@ -4,6 +4,7 @@ import SongList from "@/src/components/pages/SongList";
 import GenreList from "@/src/components/pages/GenreList";
 import FileUpload from "@/src/components/pages/upload/FileUpload";
 import { Pages } from "@/src/types/pages";
+import YoutubeUpload from "@/src/components/pages/upload/YoutubeUpload";
 
 type PageProps = {
   location: string;
@@ -34,6 +35,15 @@ export default function Page(props: PageProps) {
             case "file upload": {
               return (
                 <FileUpload data={props.data} onNavigate={props.onNavigate} />
+              );
+            }
+
+            case "youtube upload": {
+              return (
+                <YoutubeUpload
+                  data={props.data}
+                  onNavigate={props.onNavigate}
+                />
               );
             }
 

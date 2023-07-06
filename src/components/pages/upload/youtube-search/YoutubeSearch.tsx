@@ -8,7 +8,7 @@ import { useAsyncLoad } from "@/src/hooks/use-async-load";
 import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
 
 type YoutubeSearchProps = {
-  onClickDownload: (videoId: string) => void;
+  onClickDownload: (video: API.Youtube.Video) => void;
 };
 
 export default function YoutubeSearch(props: YoutubeSearchProps) {
@@ -25,9 +25,7 @@ export default function YoutubeSearch(props: YoutubeSearchProps) {
     [searchText]
   );
 
-  const [resultList, setResultList] = useState<
-    { snippet: API.Youtube.VideoSnippet; id: string }[]
-  >([]);
+  const [resultList, setResultList] = useState<API.Youtube.Video[]>([]);
   const [loadingResults, setLoadingResults] = useState(false);
 
   const onSearch = async (searchText: string) => {
@@ -39,12 +37,7 @@ export default function YoutubeSearch(props: YoutubeSearchProps) {
       const videoResult = await YoutubeAPI.video(videoId);
 
       if (videoResult) {
-        setResultList(
-          videoResult.items.map((video) => ({
-            snippet: video.snippet,
-            id: video.id,
-          }))
-        );
+        setResultList(videoResult.items);
       }
     } else {
       const searchResult = await YoutubeAPI.search(searchText);
@@ -57,16 +50,11 @@ export default function YoutubeSearch(props: YoutubeSearchProps) {
           const videoResult = await YoutubeAPI.video(searchVideoId);
 
           if (videoResult) {
-            results.push(
-              ...videoResult.items.map((video) => ({
-                snippet: video.snippet,
-                id: video.id,
-              }))
-            );
+            results.push(...videoResult.items);
           }
         }
 
-        setResultList([...results]);
+        setResultList(results);
       }
     }
 
@@ -94,7 +82,9 @@ export default function YoutubeSearch(props: YoutubeSearchProps) {
               key={index}
               videoSnippet={result.snippet}
               videoId={result.id}
-              onClickDownLoad={props.onClickDownload}
+              onClickDownLoad={() => {
+                props.onClickDownload(result);
+              }}
             />
           );
         })}

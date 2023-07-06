@@ -3,6 +3,7 @@ import { API } from "@/src/types/api";
 type Cache = {
   search: { [key: string]: API.Youtube.SearchResultList };
   video: { [key: string]: API.Youtube.VideoResultList };
+  channel: { [key: string]: API.Youtube.ChannelResultList };
 };
 
 type CacheType = keyof Cache;
@@ -11,6 +12,7 @@ class YoutubeAPISingleton {
   private cache: Cache = {
     search: {},
     video: {},
+    channel: {},
   };
 
   private getCacheResponse<T>(type: CacheType, key: string): T | null {
@@ -43,6 +45,30 @@ class YoutubeAPISingleton {
 
     return this.loaded;
   }
+
+  public async channel(id: string) {
+    if (!this.loaded) return null;
+    const cacheResponse = this.getCacheResponse<API.Youtube.ChannelResultList>(
+      "channel",
+      id
+    );
+    if (cacheResponse) {
+      return cacheResponse;
+    }
+
+    try {
+      const response = await gapi.client.request({
+        path: `https://youtube.googleapis.com/youtube/v3/channels?part=snippet%2Cstatistics&id=${id}`,
+      });
+      const channelResult: API.Youtube.ChannelResultList = response.result;
+      this.cache.channel[id] = channelResult;
+      return channelResult;
+    } catch (reason) {
+      console.log("Error: " + reason);
+      return null;
+    }
+  }
+
   public async video(id: string) {
     if (!this.loaded) return null;
     const cacheResponse = this.getCacheResponse<API.Youtube.VideoResultList>(
@@ -113,6 +139,28 @@ class YoutubeAPISingleton {
       suggestions: (await response.json())[1],
       search: incompleteSearch,
     };
+  }
+
+  public getBestThumbnail(
+    thumbnails: API.Youtube.ThumbnailDetails
+  ): API.Youtube.Thumbnail | undefined {
+    const thumbnailOrder: (keyof API.Youtube.ThumbnailDetails)[] = [
+      "default",
+      "medium",
+      "high",
+      "standard",
+      "maxres",
+    ];
+    return thumbnailOrder.reduce<API.Youtube.Thumbnail | undefined>(
+      (value, key) => {
+        if (thumbnails[key] !== undefined) {
+          value = thumbnails[key];
+        }
+
+        return value;
+      },
+      undefined
+    );
   }
 }
 

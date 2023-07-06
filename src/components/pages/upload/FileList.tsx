@@ -143,6 +143,8 @@ export default function FileList(props: FileListProps) {
                     props.selectedFiles.includes(file.metadata.id) ||
                     file.metadata.id === openFile?.metadata.id,
                 },
+                // "dark:invert",
+                // "dark:text-white",
                 "select-none",
                 "shrink-0",
                 "last:border-b-0",

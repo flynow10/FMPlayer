@@ -76,7 +76,7 @@ export class AblyClient {
         const [title, setTitle] = useState(props.fileId);
         client.getSongTitle(props.fileId).then(setTitle);
 
-        return props.text(title);
+        return createElement("span", {}, props.text(title));
       }
 
       switch (msg.status) {

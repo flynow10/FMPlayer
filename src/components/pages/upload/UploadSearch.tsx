@@ -16,8 +16,13 @@ export default function UploadSearch(props: UploadSearchProps) {
       <div className="youtube-search w-2/3 border-r-2 h-full pr-3 flex flex-col">
         <h1 className="text-xl pt-4 pb-2">From Youtube</h1>
         <YoutubeSearch
-          onClickDownload={(videoId) => {
-            alert("Downloading " + videoId);
+          onClickDownload={(video) => {
+            props.onNavigate("new", {
+              type: "youtube upload",
+              data: {
+                video,
+              },
+            });
           }}
         />
       </div>
