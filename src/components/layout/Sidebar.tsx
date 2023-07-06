@@ -1,6 +1,6 @@
 import { Pages } from "@/src/types/pages";
 
-export type SidebarProps = {
+type SidebarProps = {
   location: Pages.Location;
   isSearching: boolean;
   onSelectTab?: (location: Pages.Location) => void;
@@ -50,7 +50,7 @@ export default function Sidebar(props: SidebarProps) {
   return (
     <div className="sidebar flex flex-col border-r-2">
       <h3 className="text-4xl font-medium p-3 whitespace-nowrap overflow-clip">
-        <img src="./icon.svg" className="inline mr-1 h-full" />
+        <img src="./icon.svg" className="dark:invert-0 inline mr-1 h-full" />
         FM Player
       </h3>
       <div className="p-3 flex flex-col flex-1">

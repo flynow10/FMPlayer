@@ -8,7 +8,7 @@ import { Song } from "@prisma/client";
 import { Pages } from "@/src/types/pages";
 import { PostgresRequest } from "@/src/types/postgres-request";
 
-export type SongListProps = {
+type SongListProps = {
   onPlayMedia: Pages.PlayByID;
   onNavigate: Pages.NavigationMethod;
 };

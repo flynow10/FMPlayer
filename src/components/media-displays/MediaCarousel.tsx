@@ -2,7 +2,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
 import { MediaCardProps } from "@/src/components/media-displays/MediaCard";
 
-export type MediaCarouselProps = {
+type MediaCarouselProps = {
   children: ReactElement<MediaCardProps>[];
 };
 

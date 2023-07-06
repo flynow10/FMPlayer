@@ -8,10 +8,10 @@ const config = {
     {
       rules: {
         "work-in-progress-rule": (
-          /** @type {{subject: string}} */ { subject }
+          /** @type {{subject: string | undefined}} */ { subject }
         ) => {
           let valid = true;
-          if (subject.toLowerCase().includes("wip")) {
+          if (subject?.toLowerCase().includes("wip")) {
             valid = subject.endsWith("(wip)");
           }
           return [
