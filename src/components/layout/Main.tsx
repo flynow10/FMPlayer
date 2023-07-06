@@ -1,5 +1,5 @@
 import { UUID } from "@/src/components/utils/UUID";
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import Page from "@/src/components/layout/Page";
 import { ChevronLeft } from "lucide-react";
 import classNames from "classnames";
@@ -12,21 +12,41 @@ type MainProps = {
   searchString: string;
   isSearching: boolean;
 };
+const DEFAULT_PAGES: Record<Pages.Location, Pages.PageStore> = {
+  Search: { type: "search results" },
+  Albums: { type: "album list" },
+  Songs: { type: "song list" },
+  Playlists: { type: "playlist list" },
+  Genres: { type: "genre list" },
+  "Import Media": { type: "file search" },
+  Artists: { type: "album display" }, // no page created yet
+  "Edit Playlists": { type: "album display" }, // no page created yet
+  "Recently Added": { type: "album display" }, // no page created yet
+};
 
 export default function Main(props: MainProps) {
   const [tabs, updateTabs] = useState<
-    Record<Pages.Location | "Search", Pages.PageStore[]>
+    Record<Pages.Location, Pages.PageStore[]>
   >({
-    Search: [{ type: "search results" }],
-    Albums: [{ type: "album list" }],
-    Songs: [{ type: "song list" }],
-    Playlists: [{ type: "playlist list" }],
-    Genres: [{ type: "genre list" }],
-    "Import Media": [{ type: "file search" }],
-    Artists: [{ type: "album display" }], // no page created yet
-    "Edit Playlists": [{ type: "album display" }], // no page created yet
-    "Recently Added": [{ type: "album display" }], // no page created yet
+    Albums: [],
+    Artists: [],
+    "Edit Playlists": [],
+    Genres: [],
+    "Import Media": [],
+    Playlists: [],
+    "Recently Added": [],
+    Search: [],
+    Songs: [],
   });
+
+  useEffect(() => {
+    if (tabs[props.location].length === 0) {
+      updateTabs((prev) => ({
+        ...prev,
+        [props.location]: [DEFAULT_PAGES[props.location]],
+      }));
+    }
+  }, [props.location, tabs]);
 
   const pageTitle = props.isSearching
     ? "Search: " + props.searchString
@@ -35,7 +55,7 @@ export default function Main(props: MainProps) {
   const pageElements: ReactNode[] = [];
 
   const onNavigate = (
-    location: Pages.Location | "Search",
+    location: Pages.Location,
     navigateType: Pages.NavigationType,
     pageData?: Pages.PageStore
   ) => {
@@ -62,27 +82,27 @@ export default function Main(props: MainProps) {
     }
   };
 
-  (
-    Object.entries(tabs) as [Pages.Location | "Search", Pages.PageStore[]][]
-  ).forEach(([location, pageList]) => {
-    pageList.forEach((page, index) => {
-      pageElements.push(
-        <Page
-          index={index}
-          location={location}
-          type={page.type}
-          data={page.data}
-          locationPageCount={pageList.length}
-          currentLocation={props.isSearching ? "Search" : props.location}
-          key={location + index + page.type + JSON.stringify(page.data)}
-          onNavigate={onNavigate.bind(null, location)}
-          onPlayMedia={(id, type) => {
-            props.onPlayMedia?.(id, type);
-          }}
-        />
-      );
-    });
-  });
+  (Object.entries(tabs) as [Pages.Location, Pages.PageStore[]][]).forEach(
+    ([location, pageList]) => {
+      pageList.forEach((page, index) => {
+        pageElements.push(
+          <Page
+            index={index}
+            location={location}
+            type={page.type}
+            data={page.data}
+            locationPageCount={pageList.length}
+            currentLocation={props.isSearching ? "Search" : props.location}
+            key={location + index + page.type + JSON.stringify(page.data)}
+            onNavigate={onNavigate.bind(null, location)}
+            onPlayMedia={(id, type) => {
+              props.onPlayMedia?.(id, type);
+            }}
+          />
+        );
+      });
+    }
+  );
   return (
     <div className="main overflow-clip flex flex-col">
       <div className="py-3 border-b-2 px-4">
