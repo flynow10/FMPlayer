@@ -149,7 +149,7 @@ export namespace FileType {
     | "cpio"
     | "ace"
     | "avro"
-    | "icc"; // eslint-disable-line semi-style
+    | "icc";
 
   export type Mime =
     | "image/jpeg"
@@ -296,7 +296,7 @@ export namespace FileType {
     | "application/x-cpio"
     | "application/x-ace-compressed"
     | "application/avro"
-    | "application/vnd.iccprofile"; // eslint-disable-line semi-style
+    | "application/vnd.iccprofile";
 
   export type FileTypeResult = {
     /**

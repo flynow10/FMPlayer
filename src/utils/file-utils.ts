@@ -1,3 +1,8 @@
+import { Music } from "@/src/types/music";
+import { fileTypeFromBuffer } from "@/src/utils/file-type";
+import { getTags, pullMetadataFromTags } from "@/src/utils/media-tags";
+import { v4 as uuid } from "uuid";
+
 // https://github.com/ffmpegwasm/ffmpeg.wasm/blob/master/src/browser/fetchFile.js
 const readFromBlobOrFile = (blob: File | Blob): Promise<ArrayBuffer> =>
   new Promise((resolve, reject) => {
@@ -48,4 +53,38 @@ export const fetchFile = async (_data: string | Buffer | File | Blob) => {
   }
 
   return new Uint8Array(data);
+};
+
+export const getPreUploadFileFromData = async (
+  data: Uint8Array,
+  defaultFileName = "Untitled Song"
+): Promise<Music.Files.PreUploadFile> => {
+  const fileType = await fileTypeFromBuffer(data);
+  const tags = await getTags(data);
+  let metadata: Music.Files.EditableMetadata = {
+    id: uuid(),
+    title: defaultFileName,
+    artists: [],
+    featuring: [],
+    genre: "",
+    albumId: null,
+    audioUploaded: null,
+    trackNumber: 0,
+  };
+
+  if (tags !== null) {
+    metadata = Object.assign({}, metadata, pullMetadataFromTags(tags));
+  }
+
+  if (fileType === undefined) {
+    throw new Error("Failed to extract file type from uploaded data");
+  }
+
+  return {
+    audioData: {
+      buffer: data,
+      fileType,
+    },
+    metadata,
+  };
 };

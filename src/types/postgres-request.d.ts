@@ -1,6 +1,10 @@
+import { FileType } from "@/src/types/file-type";
+import { Music } from "@/src/types/music";
+import { InvokeCommandOutput } from "@aws-sdk/client-lambda";
+import { PresignedPost } from "@aws-sdk/s3-presigned-post";
+import { Album, Song } from "@prisma/client";
+
 export namespace PostgresRequest {
-  type Song = import("@prisma/client").Song;
-  type Album = import("@prisma/client").Album;
   export type SortType = "asc" | "desc";
   export type SongSortFields =
     | "title"
@@ -40,8 +44,8 @@ export namespace PostgresRequest {
 
   export type GenreListResponse = {
     genre: string;
-    song_count: number;
-    album_count: number;
+    songCount: number;
+    albumCount: number;
   };
 
   export type GenreMediaResponse = {
@@ -49,16 +53,32 @@ export namespace PostgresRequest {
     songs: Song[];
     albums: Album[];
   };
+
+  export type ArtistListResponse = {
+    artist: string;
+    songCount: number;
+    albumCount: number;
+  };
+
   export type UploadFileBody = {
     file: FileType.FileTypeResult;
-    metadata: Metadata;
+    metadata: Music.Files.EditableMetadata;
   };
-  export type Metadata = {
-    title?: string;
-    genre?: string;
-    artists?: string[] | string;
-    featuring?: string[] | string;
-    albumId?: string;
-    trackNumber?: number;
+
+  export type UploadFileResponse = {
+    song: Song;
+    post: PresignedPost;
+  };
+
+  export type DownloadYoutubeVideoBody = {
+    video: {
+      id: string;
+    };
+    metadata: Music.Files.EditableMetadata;
+  };
+
+  export type DownloadYoutubeVideoResponse = {
+    song: Song;
+    output: InvokeCommandOutput;
   };
 }

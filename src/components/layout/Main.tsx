@@ -4,8 +4,9 @@ import Page from "@/src/components/layout/Page";
 import { ChevronLeft } from "lucide-react";
 import classNames from "classnames";
 import { Pages } from "@/src/types/pages";
+import ToastTest from "@/src/components/utils/ToastTest";
 
-export type MainProps = {
+type MainProps = {
   onPlayMedia?: Pages.PlayByID;
   location: Pages.Location;
   searchString: string;
@@ -34,6 +35,7 @@ export default function Main(props: MainProps) {
   const pageElements: ReactNode[] = [];
 
   const onNavigate = (
+    location: Pages.Location | "Search",
     navigateType: Pages.NavigationType,
     pageData?: Pages.PageStore
   ) => {
@@ -44,23 +46,25 @@ export default function Main(props: MainProps) {
 
       updateTabs({
         ...tabs,
-        [props.location]: [...tabs[props.location], pageData],
+        [location]: [...tabs[location], pageData],
       });
     }
 
     if (navigateType === "back") {
-      if (tabs[props.location].length > 1) {
+      if (tabs[location].length > 1) {
         updateTabs({
           ...tabs,
-          [props.location]: [
-            ...tabs[props.location].filter((_, i, arr) => i !== arr.length - 1),
+          [location]: [
+            ...tabs[location].filter((_, i, arr) => i !== arr.length - 1),
           ],
         });
       }
     }
   };
 
-  Object.entries(tabs).forEach(([location, pageList]) => {
+  (
+    Object.entries(tabs) as [Pages.Location | "Search", Pages.PageStore[]][]
+  ).forEach(([location, pageList]) => {
     pageList.forEach((page, index) => {
       pageElements.push(
         <Page
@@ -71,7 +75,7 @@ export default function Main(props: MainProps) {
           locationPageCount={pageList.length}
           currentLocation={props.isSearching ? "Search" : props.location}
           key={location + index + page.type + JSON.stringify(page.data)}
-          onNavigate={onNavigate}
+          onNavigate={onNavigate.bind(null, location)}
           onPlayMedia={(id, type) => {
             props.onPlayMedia?.(id, type);
           }}
@@ -97,14 +101,17 @@ export default function Main(props: MainProps) {
             )}
             disabled={tabs[props.location].length === 1}
             onClick={() => {
-              onNavigate("back");
+              onNavigate(props.location, "back");
             }}
           >
             <ChevronLeft />
           </button>
           <h3 className="text-2xl inline-block">{pageTitle}</h3>
         </div>
-        <UUID />
+        <div className="flex flex-row gap-2">
+          <UUID />
+          <ToastTest />
+        </div>
       </div>
       {pageElements}
     </div>

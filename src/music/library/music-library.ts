@@ -1,7 +1,8 @@
 import { Album, Song } from "@prisma/client";
-import { PresignedPost } from "@aws-sdk/s3-presigned-post";
 import { Endpoint, VercelAPI } from "@/src/api/vercel-API";
 import { PostgresRequest } from "@/src/types/postgres-request";
+import { Music } from "@/src/types/music";
+import { PresignedPost } from "@aws-sdk/s3-presigned-post";
 
 class PostgresMusicLibrary {
   public async getSong(
@@ -62,34 +63,54 @@ class PostgresMusicLibrary {
     );
   }
 
-  private async uploadFileToConvert(
-    fileName: string,
-    fileType: string,
-    file: Blob
-  ): Promise<void> {
-    const presignedUrl: PresignedPost = await VercelAPI.makeRequest(
-      Endpoint.AWS,
-      "presigned-post",
-      {
-        fileName: `${fileName}.${fileType}`,
-      }
+  public async getArtistList(): Promise<PostgresRequest.ArtistListResponse[]> {
+    return VercelAPI.makeRequest<PostgresRequest.ArtistListResponse[]>(
+      Endpoint.POSTGRES,
+      "getArtistList",
+      {},
+      []
     );
-    const formData = new FormData();
+  }
 
-    for (const [key, value] of Object.entries(presignedUrl.fields)) {
-      formData.append(key, value);
-    }
+  public async uploadFile(file: Music.Files.PreUploadFile): Promise<Song> {
+    const uploadResult = await VercelAPI.makeRequest<
+      PostgresRequest.UploadFileResponse,
+      PostgresRequest.UploadFileBody
+    >(Endpoint.UPLOAD, "uploadFile", {
+      file: file.audioData.fileType,
+      metadata: file.metadata,
+    });
+    this.sendS3Post(uploadResult.post, file.audioData);
+    return uploadResult.song;
+  }
 
-    formData.append("file", file);
-    console.log(
-      await fetch(presignedUrl.url, {
-        method: "POST",
-        body: formData,
-        headers: {
-          "Content-Type": "multipart/form-data",
+  public async downloadYoutubeVideo(
+    videoId: string,
+    metadata: Music.Files.EditableMetadata
+  ): Promise<Song> {
+    const { song }: PostgresRequest.DownloadYoutubeVideoResponse =
+      await VercelAPI.makeRequest<
+        PostgresRequest.DownloadYoutubeVideoResponse,
+        PostgresRequest.DownloadYoutubeVideoBody
+      >(Endpoint.UPLOAD, "downloadYoutubeVideo", {
+        video: {
+          id: videoId,
         },
-      })
-    );
+        metadata: metadata,
+      });
+    return song;
+  }
+
+  private async sendS3Post(post: PresignedPost, body: Music.Files.AudioData) {
+    const form = new FormData();
+    Object.entries(post.fields).forEach(([field, value]) => {
+      form.append(field, value);
+    });
+    form.append("file", new Blob([body.buffer], { type: body.fileType.mime }));
+    await fetch(post.url, {
+      body: form,
+      method: "POST",
+    });
   }
 
   public async getMusicFileUrl(id: string): Promise<string | undefined> {
