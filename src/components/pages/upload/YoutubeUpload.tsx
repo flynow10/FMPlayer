@@ -7,7 +7,7 @@ import { API } from "@/src/types/api";
 import { v4 as uuid } from "uuid";
 import Youtube from "react-youtube";
 import { YoutubeAPI } from "@/src/api/youtube-API";
-import { Play } from "lucide-react";
+import { Loader2, Play } from "lucide-react";
 import { useAsyncLoad } from "@/src/hooks/use-async-load";
 import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
 import { shortenNumberString } from "@/src/utils/string-utils";
@@ -189,7 +189,7 @@ export default function YoutubeUpload(props: YoutubeUploadProps) {
             </div>
             <div className="shrink-0 flex flex-col border-t-2 p-4">
               <button
-                className="btn success"
+                className="btn success flex justify-center"
                 disabled={isUploading}
                 onClick={() => {
                   if (
@@ -201,7 +201,14 @@ export default function YoutubeUpload(props: YoutubeUploadProps) {
                   }
                 }}
               >
-                Add Audio to Library
+                {isUploading ? (
+                  <span className="flex gap-2">
+                    Adding Audio
+                    <Loader2 className="animate-spin" />
+                  </span>
+                ) : (
+                  "Add Audio to Library"
+                )}
               </button>
             </div>
           </div>
