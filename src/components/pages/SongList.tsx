@@ -125,12 +125,12 @@ export default function SongList(props: SongListProps) {
                         : "");
                   }
 
-                  if (value instanceof Array) {
+                  if (Array.isArray(value)) {
                     value = value.join(", ");
                   }
 
-                  if (value instanceof Object) {
-                    value = value.title;
+                  if (typeof value === "object") {
+                    value = value?.title ?? "";
                   }
 
                   return (
