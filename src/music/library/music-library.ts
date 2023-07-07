@@ -1,4 +1,4 @@
-import { Album, Song } from "@prisma/client";
+import { Song } from "@prisma/client";
 import { Endpoint, VercelAPI } from "@/src/api/vercel-API";
 import { PostgresRequest } from "@/src/types/postgres-request";
 import { Music } from "@/src/types/music";
@@ -7,7 +7,7 @@ import { PresignedPost } from "@aws-sdk/s3-presigned-post";
 class PostgresMusicLibrary {
   public async getSong(
     id: string
-  ): Promise<PostgresRequest.SongWithAlbum | undefined> {
+  ): Promise<PostgresRequest.SongWithRelations | undefined> {
     return VercelAPI.makeRequest(
       Endpoint.POSTGRES,
       "getSong",
@@ -18,7 +18,7 @@ class PostgresMusicLibrary {
 
   public async getAlbum(
     id: string
-  ): Promise<PostgresRequest.AlbumWithSongs | undefined> {
+  ): Promise<PostgresRequest.AlbumWithRelations | undefined> {
     return VercelAPI.makeRequest(
       Endpoint.POSTGRES,
       "getAlbum",
@@ -29,13 +29,13 @@ class PostgresMusicLibrary {
 
   public async getSongList(
     options: Partial<PostgresRequest.SongListOptions> = {}
-  ): Promise<Song[]> {
+  ): Promise<PostgresRequest.SongWithRelations[]> {
     return VercelAPI.makeRequest(Endpoint.POSTGRES, "getSongList", options, []);
   }
 
   public async getAlbumList(
     options: Partial<PostgresRequest.AlbumListOptions> = {}
-  ): Promise<Album[]> {
+  ): Promise<PostgresRequest.AlbumWithRelations[]> {
     return VercelAPI.makeRequest(
       Endpoint.POSTGRES,
       "getAlbumList",
@@ -63,8 +63,8 @@ class PostgresMusicLibrary {
     );
   }
 
-  public async getArtistList(): Promise<PostgresRequest.ArtistListResponse[]> {
-    return VercelAPI.makeRequest<PostgresRequest.ArtistListResponse[]>(
+  public async getArtistList(): Promise<PostgresRequest.ArtistListResponse> {
+    return VercelAPI.makeRequest<PostgresRequest.ArtistListResponse>(
       Endpoint.POSTGRES,
       "getArtistList",
       {},

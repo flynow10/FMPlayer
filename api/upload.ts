@@ -141,8 +141,30 @@ async function updateDbWithMetadata(metadata: Music.Files.EditableMetadata) {
       id: metadata.id,
       title: metadata.title,
       genre: metadata.genre,
-      artists: metadata.artists,
-      featuring: metadata.featuring,
+      artists: {
+        connectOrCreate: metadata.artists.map((a) => {
+          return {
+            create: {
+              name: a,
+            },
+            where: {
+              name: a,
+            },
+          };
+        }),
+      },
+      featuring: {
+        connectOrCreate: metadata.featuring.map((a) => {
+          return {
+            create: {
+              name: a,
+            },
+            where: {
+              name: a,
+            },
+          };
+        }),
+      },
       album,
       trackNumber: metadata.trackNumber,
     },

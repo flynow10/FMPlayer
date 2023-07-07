@@ -3,7 +3,7 @@ import { Playlist } from "@/src/music/playlists/playlist";
 import { PostgresRequest } from "@/src/types/postgres-request";
 
 export const PlaylistHelper = {
-  getPlaylistFromAlbum(album: PostgresRequest.AlbumWithSongs): Playlist {
+  getPlaylistFromAlbum(album: PostgresRequest.AlbumWithRelations): Playlist {
     const playlist = new Playlist();
     album.songs.forEach((song) => {
       playlist.addAction(new PlaySongAction(song.id));
