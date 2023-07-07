@@ -22,6 +22,9 @@
     "postinstall": "prisma generate; patch-package",
     "prepare": "husky install"
   },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
   "dependencies": {
     "@aws-sdk/client-lambda": "^3.363.0",
     "@aws-sdk/client-s3": "^3.327.0",
