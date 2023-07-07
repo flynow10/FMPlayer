@@ -1,27 +1,30 @@
 import { Audio } from "@/src/components/layout/Audio";
-import { Song } from "@prisma/client";
+import { PostgresRequest } from "@/src/types/postgres-request";
 import { waitFor } from "@testing-library/react";
 import { render } from "@testing-library/react";
 import { v4 } from "uuid";
 
 jest.mock("@/src/music/library/music-library", () => ({
   MyMusicLibrary: {
-    getSong: jest.fn((id: string): Promise<Song> => {
-      return new Promise((r) =>
-        r({
-          id,
-          title: "Test song",
-          albumId: v4(),
-          artists: [],
-          featuring: [],
-          genre: "Test",
-          trackNumber: 1,
-          createdOn: new Date(),
-          modifiedOn: new Date(),
-          audioUploaded: null,
-        })
-      );
-    }),
+    getSong: jest.fn(
+      (id: string): Promise<PostgresRequest.SongWithRelations> => {
+        return new Promise((r) =>
+          r({
+            id,
+            title: "Test song",
+            albumId: null,
+            album: null,
+            artists: [],
+            featuring: [],
+            genre: "Test",
+            trackNumber: 1,
+            createdOn: new Date(),
+            modifiedOn: new Date(),
+            audioUploaded: null,
+          })
+        );
+      }
+    ),
   },
 }));
 
