@@ -6,6 +6,7 @@ import {
 } from "../api-lib/api-utils.js";
 import { prismaClient } from "../api-lib/data-clients.js";
 import { PostgresRequest } from "@/src/types/postgres-request.js";
+import { Prisma } from "@prisma/client";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "GET") {
@@ -34,13 +35,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return;
       }
 
-      const song: PostgresRequest.SongWithAlbum | null =
+      const song: PostgresRequest.SongWithRelations | null =
         await prismaClient.song.findUnique({
           where: {
             id,
           },
           include: {
             album: true,
+            artists: true,
+            featuring: true,
           },
         });
 
@@ -61,15 +64,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return;
       }
 
-      const album = await prismaClient.album.findUnique({
-        where: {
-          id,
-        },
-        include: {
-          songs: true,
-        },
-      });
-
+      const album: PostgresRequest.AlbumWithRelations | null =
+        await prismaClient.album.findUnique({
+          where: {
+            id,
+          },
+          include: {
+            songs: true,
+            artists: true,
+            featuring: true,
+          },
+        });
       if (!album) {
         res.status(404).json("Album not found");
         return;
@@ -86,7 +91,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         sortBy: sortBy ? (sortBy as PostgresRequest.AlbumSortFields) : "title",
       };
 
-      const selectQuery = getPrismaSelectPaginationOptions(options, "title");
+      const selectQuery = {
+        ...getPrismaSelectPaginationOptions(options, "title"),
+        include: {
+          songs: true,
+          artists: true,
+          featuring: true,
+        },
+      };
 
       try {
         const albumList = await prismaClient.album.findMany(selectQuery);
@@ -106,7 +118,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         sortBy: sortBy ? (sortBy as PostgresRequest.SongSortFields) : "title",
       };
 
-      const selectQuery = getPrismaSelectPaginationOptions(options, "title");
+      const selectQuery = {
+        ...getPrismaSelectPaginationOptions(options, "title"),
+        include: {
+          album: true,
+          artists: true,
+          featuring: true,
+        },
+      };
 
       try {
         const songList = await prismaClient.song.findMany(selectQuery);
@@ -183,16 +202,42 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     case "getArtistList": {
-      const artistResults = (
-        await prismaClient.$queryRaw<
-          { artist: string; song_count: bigint; album_count: bigint }[]
-        >`SELECT s1.artist, s1.count AS song_count, coalesce(s2.count, 0) AS album_count FROM (select distinct unnest (artists) as artist, count(*) from "Song" group by unnest(artists)) s1 LEFT JOIN (SELECT distinct unnest (artists) as artist, COUNT(*) FROM "Album" GROUP BY unnest(artists)) s2 ON (s1.artist = s2.artist) UNION SELECT s1.artist, coalesce(s2.count, 0) AS song_count, s1.count AS album_count FROM (select distinct unnest (artists) as artist, count(*) from "Album" group by unnest(artists)) s1 LEFT JOIN (SELECT distinct unnest (artists) as artist, COUNT(*) FROM "Song" GROUP BY unnest(artists)) s2 ON (s1.artist = s2.artist) ORDER BY artist ASC;`
-      ).map<PostgresRequest.ArtistListResponse>((obj) => ({
-        artist: obj.artist,
-        albumCount: Number(obj.album_count),
-        songCount: Number(obj.song_count),
-      }));
-      res.status(200).json(artistResults);
+      const { sortBy } = req.query;
+      const options: PostgresRequest.ArtistListOptions = {
+        ...getPaginationOptions(req),
+        sortBy: sortBy ? (sortBy as PostgresRequest.ArtistSortFields) : "name",
+      };
+
+      const selectQuery: Prisma.ArtistFindManyArgs = {
+        ...getPrismaSelectPaginationOptions(options, "name"),
+        include: {
+          _count: true,
+        },
+      };
+
+      if (options.sortBy !== "id" && options.sortBy !== "name") {
+        selectQuery.orderBy = [
+          {
+            [options.sortBy]: {
+              _count: options.sortDirection,
+            },
+          },
+          {
+            name: options.sortDirection,
+          },
+        ];
+      }
+
+      try {
+        const songList: PostgresRequest.ArtistListResponse =
+          await prismaClient.artist.findMany(
+            selectQuery as { include: { _count: true } }
+          );
+        res.status(200).json(songList);
+      } catch (e) {
+        console.error(e);
+        res.status(400).json("Something went wrong when querying the database");
+      }
       return;
     }
 

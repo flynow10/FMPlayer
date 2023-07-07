@@ -29,7 +29,7 @@ export default function MetadataEditor(props: MetadataEditorProps) {
   const [libraryArtists, libraryArtistsLoaded] = useAsyncLoad<string[]>(
     async () => {
       return (await MyMusicLibrary.getArtistList()).map(
-        (result) => result.artist
+        (result) => result.name
       );
     },
     [],
