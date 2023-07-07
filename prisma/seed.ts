@@ -16,6 +16,17 @@ async function main() {
     create: {
       id: albumId,
       title: "Best of Bootie Mashup 2022",
+      genre: "Mashup",
+      artists: {
+        connectOrCreate: {
+          create: {
+            name: "Bootie Mashup",
+          },
+          where: {
+            name: "Bootie Mashup",
+          },
+        },
+      },
     },
   });
   const bestOfBootieSongs: { id: string; title: string; artists: string[] }[] =
