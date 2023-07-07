@@ -15,8 +15,8 @@ model Song {
 
   // Metadata
   title     String   @db.VarChar(256)
-  artists   String[] @default(["Unknown Artist"]) @db.VarChar(64)
-  featuring String[] @default([]) @db.VarChar(64)
+  artists   Artist[] @relation("artistsSong")
+  featuring Artist[] @relation("featuringSong")
   genre     String   @default("Unknown") @db.VarChar(64)
 
   // Album Info
@@ -32,14 +32,23 @@ model Song {
   audioUploaded DateTime?
 }
 
+model Artist {
+  id               Int     @id @default(autoincrement())
+  name             String  @unique @db.VarChar(64)
+  artistOfSongs    Song[]  @relation("artistsSong")
+  featuredOnSongs  Song[]  @relation("featuringSong")
+  artistOfAlbums   Album[] @relation("artistsAlbum")
+  featuredOnAlbums Album[] @relation("featuringAlbum")
+}
+
 model Album {
   // Id
   id String @id @default(uuid()) @db.Uuid
 
   // Metadata
   title     String   @db.VarChar(256)
-  artists   String[] @default(["Unknown Artist"]) @db.VarChar(64)
-  featuring String[] @default([]) @db.VarChar(64)
+  artists   Artist[] @relation("artistsAlbum")
+  featuring Artist[] @relation("featuringAlbum")
   genre     String   @default("Unknown") @db.VarChar(64)
 
   // Song Info
