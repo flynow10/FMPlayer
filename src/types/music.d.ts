@@ -14,7 +14,10 @@ export namespace Music {
       buffer: Uint8Array;
     };
 
-    export type EditableMetadata = Omit<Song, "modifiedOn" | "createdOn">;
+    export type EditableMetadata = Omit<Song, "modifiedOn" | "createdOn"> & {
+      artists: string[];
+      featuring: string[];
+    };
   }
 
   export type ActionType =

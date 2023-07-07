@@ -3,6 +3,10 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
+  await prisma.song.deleteMany({});
+  await prisma.album.deleteMany({});
+  await prisma.artist.deleteMany({});
+  await prisma.playlist.deleteMany({});
   const albumId = "ae18c530-d9e0-4130-8645-3ab032ff8431";
   const bestOfBootieAlbum = await prisma.album.upsert({
     where: {
@@ -12,6 +16,17 @@ async function main() {
     create: {
       id: albumId,
       title: "Best of Bootie Mashup 2022",
+      genre: "Mashup",
+      artists: {
+        connectOrCreate: {
+          create: {
+            name: "Bootie Mashup",
+          },
+          where: {
+            name: "Bootie Mashup",
+          },
+        },
+      },
     },
   });
   const bestOfBootieSongs: { id: string; title: string; artists: string[] }[] =
@@ -68,7 +83,12 @@ async function main() {
       create: {
         id: songData.id,
         title: songData.title,
-        artists: songData.artists,
+        artists: {
+          connectOrCreate: songData.artists.map((a) => ({
+            create: { name: a },
+            where: { name: a },
+          })),
+        },
         albumId: bestOfBootieAlbum.id,
         trackNumber: trackNumber,
         genre: "Mashup",
