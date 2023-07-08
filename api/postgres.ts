@@ -70,7 +70,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             id,
           },
           include: {
-            songs: true,
+            songs: {
+              orderBy: {
+                trackNumber: "asc",
+              },
+            },
             artists: true,
             featuring: true,
           },
@@ -91,17 +95,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         sortBy: sortBy ? (sortBy as PostgresRequest.AlbumSortFields) : "title",
       };
 
-      const selectQuery = {
-        ...getPrismaSelectPaginationOptions(options, "title"),
-        include: {
-          songs: true,
-          artists: true,
-          featuring: true,
-        },
-      };
-
       try {
-        const albumList = await prismaClient.album.findMany(selectQuery);
+        const albumList = await prismaClient.album.findMany({
+          ...getPrismaSelectPaginationOptions(options, "title"),
+          include: {
+            songs: {
+              orderBy: {
+                trackNumber: "asc",
+              },
+            },
+            artists: true,
+            featuring: true,
+          },
+        });
         res.status(200).json(albumList);
       } catch (e) {
         console.error(e);
