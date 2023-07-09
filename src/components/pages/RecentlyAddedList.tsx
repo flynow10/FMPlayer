@@ -78,27 +78,32 @@ export default function RecentlyAddedList(props: RecentlyAddedListProps) {
         return 0;
       });
       return groupBy(
-        albumsAndSongs.map((media) => {
-          const timeClass = getRelativeTime(
-            new Date(media.createdOn).getTime()
-          ).replace(
-            /\w\S*/g,
-            (txt) =>
-              txt.charAt(0).toUpperCase() + txt.substring(1).toLowerCase()
-          );
-          return {
-            ...media,
-            timeClass,
-          };
-        }),
+        albumsAndSongs
+          .filter((media) => {
+            if (media.type === "song") {
+              return media.albumId === null;
+            }
+            return true;
+          })
+          .map((media) => {
+            const timeClass = getRelativeTime(
+              new Date(media.createdOn).getTime()
+            ).replace(
+              /\w\S*/g,
+              (txt) =>
+                txt.charAt(0).toUpperCase() + txt.substring(1).toLowerCase()
+            );
+            return {
+              ...media,
+              timeClass,
+            };
+          }),
         (item) => item.timeClass
       );
     },
     {},
     []
   );
-
-  recent;
 
   if (!loaded) {
     return <FullCover />;
