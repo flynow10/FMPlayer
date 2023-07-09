@@ -13,7 +13,7 @@ import { Song } from "@prisma/client";
 import { useAsyncLoad } from "@/src/hooks/use-async-load";
 import { Music } from "@/src/types/music";
 
-export type AudioProps = {
+type AudioProps = {
   id: string | null;
   loaded: boolean;
   playing: boolean;

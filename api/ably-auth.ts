@@ -11,7 +11,7 @@ async function getAblyToken(): Promise<Ably.Types.TokenRequest> {
     rest.auth.createTokenRequest(
       {
         capability: {
-          "upload-status": ["subscribe"],
+          ["file-upload"]: ["subscribe"],
         },
       },
       (err, tokenRequest) => {

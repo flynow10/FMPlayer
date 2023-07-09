@@ -1,10 +1,6 @@
 import { nanoid } from "nanoid";
 import { SignJWT, jwtVerify } from "jose";
-import {
-  USER_TOKEN,
-  getJwtSecretKey,
-  getVercelEnvironment,
-} from "./constants.js";
+import { USER_TOKEN, getJwtSecretKey } from "./constants.js";
 import cookie from "cookie";
 import { VercelResponse } from "@vercel/node";
 
@@ -51,8 +47,6 @@ export async function setUserCookie(res: VercelResponse) {
     cookie.serialize(USER_TOKEN, token, {
       secure: true,
       path: "/",
-      httpOnly: getVercelEnvironment() !== "development",
-      // maxAge: 60 * 60 * 2,
     })
   );
 
@@ -67,7 +61,8 @@ export function expireUserCookie(res: VercelResponse) {
   res.setHeader(
     "Set-Cookie",
     cookie.serialize(USER_TOKEN, "", {
-      httpOnly: true,
+      secure: true,
+      path: "/",
       maxAge: 0,
     })
   );

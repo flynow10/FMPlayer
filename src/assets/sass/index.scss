@@ -43,3 +43,8 @@
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+img,
+iframe {
+  @apply dark:invert;
+}

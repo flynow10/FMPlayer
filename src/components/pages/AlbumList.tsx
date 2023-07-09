@@ -4,7 +4,7 @@ import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
 import { MediaCard } from "@/src/components/media-displays/MediaCard";
 import { Pages } from "@/src/types/pages";
 
-export type AlbumListProps = {
+type AlbumListProps = {
   onPlayMedia: Pages.PlayByID;
   onNavigate: Pages.NavigationMethod;
 };
