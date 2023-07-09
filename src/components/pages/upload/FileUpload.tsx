@@ -1,47 +1,32 @@
-import { fetchFile } from "@/src/utils/fetch-file";
+import { fetchFile, getPreUploadFileFromData } from "@/src/utils/file-utils";
 import { useAsyncLoad } from "@/src/hooks/use-async-load";
-import { fileTypeFromBuffer } from "@/src/utils/file-type";
-import * as jsmediatags from "jsmediatags";
-import { v4 as uuid } from "uuid";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
-import classNames from "classnames";
-import { CheckSquare, Square } from "lucide-react";
-import { PostgresRequest } from "@/src/types/postgres-request";
 import { Pages } from "@/src/types/pages";
+import { getFileNameFromUrl } from "@/src/utils/url-utils";
+import MetadataEditor from "@/src/components/utils/MetadataEditor";
+import { MyMusicLibrary } from "@/src/music/library/music-library";
+import FileList from "@/src/components/pages/upload/FileList";
+import { FileContext } from "@/src/contexts/FileContext";
+import { Music } from "@/src/types/music";
+import { Loader2 } from "lucide-react";
+import { toast } from "react-toastify";
 
-export type FileUploadProps = {
+type FileUploadProps = {
   data: {
     uploadType: Pages.Upload.FileUploadType;
     url?: string;
     files?: File[];
   };
+  onNavigate: Pages.NavigationMethod;
 };
 
-export type PreUploadSong = {
-  tempId: string;
-  checked: boolean;
-  data: Uint8Array;
-} & PostgresRequest.UploadFileBody;
-
 export default function FileUpload(props: FileUploadProps) {
-  const [files, loaded, setFiles] = useAsyncLoad<PreUploadSong[]>(
+  const [files, filesLoaded, setFiles] = useAsyncLoad<
+    Music.Files.PreUploadFile[]
+  >(
     async () => {
-      const songFromData = async (data: Uint8Array): Promise<PreUploadSong> => {
-        const fileType = await fileTypeFromBuffer(data);
-
-        if (fileType === undefined) {
-          throw new Error("Failed to extract file type from uploaded data");
-        }
-
-        return {
-          tempId: uuid(),
-          checked: false,
-          data,
-          file: fileType,
-          metadata: {},
-        };
-      };
+      let files: Music.Files.PreUploadFile[] = [];
 
       switch (props.data.uploadType) {
         case "file": {
@@ -49,20 +34,16 @@ export default function FileUpload(props: FileUploadProps) {
             throw new Error("Files missing from file upload");
           }
 
-          return Promise.all(
+          files = await Promise.all(
             props.data.files.map(async (file) => {
-              const data = await songFromData(await fetchFile(file));
-              jsmediatags.read(new Blob([data.data]), {
-                onSuccess: (tags) => {
-                  console.log(tags);
-                },
-                onError: (error) => {
-                  console.warn(error);
-                },
-              });
-              return data;
+              const fileName = file.name.replace(/\.[^/.]+$/, "");
+              return await getPreUploadFileFromData(
+                await fetchFile(file),
+                fileName
+              );
             })
           );
+          break;
         }
 
         case "url": {
@@ -70,128 +51,195 @@ export default function FileUpload(props: FileUploadProps) {
             throw new Error("Url missing from url upload");
           }
 
-          return [await songFromData(await fetchFile(props.data.url))];
+          const fileName = getFileNameFromUrl(props.data.url);
+          files = [
+            await getPreUploadFileFromData(
+              await fetchFile(props.data.url),
+              fileName
+            ),
+          ];
+          break;
         }
       }
+
+      const fileIds = files.map((f) => f.metadata.id);
+
+      if (!fileIds.includes(openFileId) && files.length > 0) {
+        setOpenFileId(files[0].metadata.id);
+      }
+
+      setSelectedFileIds((prev) => {
+        const newSelected = prev.filter((f) => fileIds.includes(f));
+
+        if (newSelected.length === 0) {
+          newSelected.push(...fileIds);
+        }
+
+        return newSelected;
+      });
+
+      return files;
     },
     [],
     [props.data]
   );
 
-  const [lastSelectedFile, setLastSelectedFile] = useState("");
+  const [openFileId, setOpenFileId] = useState("");
+  const openFile = files.find((f) => f.metadata.id === openFileId) ?? null;
+
+  const [selectedFileIds, setSelectedFileIds] = useState<string[]>([]);
+
+  const [fileStatuses, setFileStatuses] = useState<Pages.Upload.FileStatus[]>(
+    []
+  );
+  const [isUploading, setIsUploading] = useState(false);
+
+  const selectFile = useCallback(
+    (fileId: string, isSelected: boolean) => {
+      setSelectedFileIds((prev) => {
+        prev = prev.filter((id) =>
+          files.map((f) => f.metadata.id).includes(id)
+        );
+
+        if (isSelected) {
+          if (!prev.includes(fileId)) {
+            return [...prev, fileId];
+          }
+        } else {
+          return prev.filter((f) => f !== fileId);
+        }
+
+        return prev;
+      });
+    },
+    [files]
+  );
 
   // Allows the user to select use shift to select all files between the current and last selected files
-  const onSelectFile = (
-    event: React.MouseEvent<HTMLElement, MouseEvent>,
-    file: PreUploadSong,
-    fileIndex: number
-  ) => {
-    // Set all files to the inverse of the current selected file
-    const newCheckValue = !file.checked;
-    setFiles((prev) => {
-      const filesToFlip: string[] = [];
-      let startIndex = prev.findIndex((findFile) => {
-        return findFile.tempId === lastSelectedFile;
+
+  const setFileMetadataProperty =
+    useCallback<Pages.Upload.SetFileMetadataFunction>(
+      (fileId, property, value) => {
+        setFiles((prev) => {
+          return prev.map((mapFiles) => {
+            if (mapFiles.metadata.id !== fileId) {
+              return {
+                ...mapFiles,
+              };
+            }
+
+            return {
+              ...mapFiles,
+              metadata: {
+                ...mapFiles.metadata,
+                [property]: value,
+              },
+            };
+          });
+        });
+      },
+      [setFiles]
+    );
+
+  const uploadSelectedFiles = async () => {
+    const selectedFiles = files.filter((f) =>
+      selectedFileIds.includes(f.metadata.id)
+    );
+    setIsUploading(true);
+
+    setFileStatuses(
+      selectedFiles.map((f) => ({ id: f.metadata.id, status: "waiting" }))
+    );
+
+    for (let i = 0; i < selectedFiles.length; i++) {
+      const file = selectedFiles[i];
+      setFileStatuses((prev) => {
+        return prev.map((s) => {
+          if (s.id === file.metadata.id) {
+            return {
+              id: file.metadata.id,
+              status: "uploading",
+            };
+          } else {
+            return s;
+          }
+        });
       });
-
-      if (!event.shiftKey || startIndex === -1) {
-        // Normal select / same file selected with shift
-        filesToFlip.push(file.tempId);
-      } else {
-        // Swap if selecting up instead of down
-        let endIndex = fileIndex;
-
-        if (startIndex > endIndex) {
-          const temp = startIndex;
-          startIndex = endIndex;
-          endIndex = temp;
-        }
-
-        for (let i = startIndex; i <= endIndex; i++) {
-          filesToFlip.push(prev[i].tempId);
-        }
-      }
-
-      return prev.map((mapFile) => {
-        // Keep other files the same
-        if (!filesToFlip.includes(mapFile.tempId)) return mapFile;
-        return {
-          ...mapFile,
-          checked: newCheckValue,
-        };
+      await MyMusicLibrary.uploadFile(file);
+      setFileStatuses((prev) => {
+        return prev.map((s) => {
+          if (s.id === file.metadata.id) {
+            return {
+              id: file.metadata.id,
+              status: "uploaded",
+            };
+          } else {
+            return s;
+          }
+        });
       });
+    }
+
+    toast(`Completed preupload for ${selectedFiles.length} files`, {
+      type: "success",
     });
-    setLastSelectedFile(file.tempId);
+    props.onNavigate("back");
   };
 
-  if (!loaded) {
+  const ableToUpload =
+    files.filter((f) => selectedFileIds.includes(f.metadata.id)).length > 0;
+
+  if (!filesLoaded) {
     return <FullCover />;
   }
 
   return (
-    <div className="grid grid-rows-1 grid-cols-10 h-full">
-      <div className="flex flex-col col-span-3 h-full">
-        <div className="grow flex flex-col overflow-auto border-b-2">
-          {files.map((file, fileIndex) => {
-            return (
-              <div
-                key={file.tempId}
-                className={classNames(
-                  {
-                    "bg-blue-200": file.checked,
-                    "border-blue-100": file.checked,
-                  },
-                  "shrink-0",
-                  "last:border-b-0",
-                  "border-b-2",
-                  "overflow-hidden",
-                  "whitespace-nowrap",
-                  "overflow-ellipsis",
-                  "p-3"
-                )}
-              >
-                <div className="flex">
-                  <div
-                    className="m-2 outline-none"
-                    onClick={(e) => {
-                      onSelectFile(e, file, fileIndex);
-                    }}
-                  >
-                    {file.checked ? <CheckSquare /> : <Square />}
-                  </div>
-                  {/* <input
-                    id={file.tempId}
-                    type="checkbox"
-                    className="m-2 outline-none"
-                    checked={file.checked}
-                    onClick={(e) => {
-                      onSelectFile(e, file, fileIndex);
-                    }}
-                  /> */}
-                  <div className="">
-                    <span className="block">
-                      {file.metadata.title || "Unnamed Song"}
-                    </span>
-                    <span className="block text-xs font-light text-gray-400">
-                      {file.file.mime}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+    <FileContext.Provider value={openFile}>
+      <div className="grid grid-rows-1 grid-cols-10 h-full">
+        <div className="flex flex-col col-span-3 h-full">
+          <FileList
+            files={files}
+            onOpenFile={setOpenFileId}
+            selectedFiles={selectedFileIds}
+            setSelectedFile={selectFile}
+            ableToSelect={!isUploading}
+            fileStatuses={fileStatuses}
+          />
+          <button
+            onClick={() => {
+              if (
+                confirm("Are you sure you want to upload the selected files?")
+              ) {
+                uploadSelectedFiles();
+              }
+            }}
+            disabled={!ableToUpload || isUploading}
+            className="text-white m-4 rounded-lg btn success border-2"
+          >
+            {ableToUpload && !isUploading ? (
+              selectedFileIds.length !== files.length ? (
+                "Upload selected files"
+              ) : (
+                "Upload all files"
+              )
+            ) : !isUploading ? (
+              "No files selected"
+            ) : (
+              <span className="flex flex-row justify-center gap-2">
+                {"Performing inital upload"}
+                <Loader2 className="animate-spin" />
+              </span>
+            )}
+          </button>
         </div>
-        <button className="text-white m-4 rounded-lg btn success border-2">
-          Upload selected files
-        </button>
+        <div className="p-7 h-full border-x-2 col-span-7 row-span-6 overflow-auto relative">
+          <MetadataEditor
+            otherFiles={files}
+            audioData={openFile?.audioData.buffer}
+            setFileMetadata={setFileMetadataProperty}
+          />
+        </div>
       </div>
-      <div className="h-full border-l-2 col-span-7 row-span-6 whitespace-pre-wrap overflow-auto">
-        {JSON.stringify(
-          files.map((song) => ({ file: song.file, metadata: song.metadata })),
-          null,
-          2
-        )}
-      </div>
-    </div>
+    </FileContext.Provider>
   );
 }

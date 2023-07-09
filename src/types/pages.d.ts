@@ -1,8 +1,24 @@
+import { Music } from "@/src/types/music";
+
 export namespace Pages {
   export namespace Upload {
     export type FileUploadType = "file" | "url";
+    export type SetFileMetadataFunction = <
+      T extends keyof Music.Files.EditableMetadata
+    >(
+      fileId: string,
+      property: T,
+      value: Music.Files.EditableFile[T]
+    ) => void;
+
+    export type FileStatus = {
+      id: string;
+      status: "not queued" | "waiting" | "uploading" | "uploaded";
+    };
   }
+
   export type Location =
+    | "Search"
     | "Recently Added"
     | "Albums"
     | "Artists"
@@ -21,7 +37,8 @@ export namespace Pages {
     | "file search"
     | "genre list"
     | "recent list"
-    | "file upload";
+    | "file upload"
+    | "youtube upload";
 
   export type NavigationType = "new" | "back";
 

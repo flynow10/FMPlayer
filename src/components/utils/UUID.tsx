@@ -9,7 +9,7 @@ export function UUID() {
         {uuid}
       </pre>
       <button
-        className=" shadow-[0_0_4px_rgb(0,0,0,0.2)] rounded-md px-2"
+        className="border-2 rounded-md px-2"
         onClick={() => {
           setUuid(uuidGen());
         }}

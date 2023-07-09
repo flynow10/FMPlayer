@@ -3,7 +3,7 @@
 }
 
 .btn.success {
-  @apply bg-green-500 border-emerald-500 active:bg-green-600;
+  @apply bg-green-500 border-emerald-500 active:bg-green-600 dark:invert;
 }
 
 .btn:disabled {

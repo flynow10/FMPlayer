@@ -21,6 +21,10 @@
       "@/api-lib/*": ["./api-lib/*"]
     }
   },
-  "include": ["src", "middleware.ts", "api", "api-lib"]
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node"
+  },
+  "include": ["src", "middleware.ts", "api", "api-lib", "prisma"]
   // "references": [{ "path": "./tsconfig.node.json" }]
 }

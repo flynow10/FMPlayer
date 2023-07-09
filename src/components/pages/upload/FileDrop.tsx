@@ -1,7 +1,7 @@
 import { Download } from "lucide-react";
 import { DragEvent as ReactDragEvent, useEffect, useState } from "react";
 
-export type FileDropProps = {
+type FileDropProps = {
   onReceiveFiles: (files: File[]) => void;
 };
 
@@ -34,7 +34,7 @@ export default function FileDrop(props: FileDropProps) {
   };
 
   const isValidFile = (file: File): boolean => {
-    return file.size > 0 && file.type.indexOf("audio") !== -1;
+    return file.size > 0;
   };
 
   const showInvalidFile = () => {

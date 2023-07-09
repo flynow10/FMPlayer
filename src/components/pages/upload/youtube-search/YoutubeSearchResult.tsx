@@ -1,3 +1,4 @@
+import { YoutubeAPI } from "@/src/api/youtube-API";
 import { API } from "@/src/types/api";
 import { splitOutUrls } from "@/src/utils/url-utils";
 import { DownloadCloud, ExternalLink } from "lucide-react";
@@ -5,27 +6,10 @@ import { DownloadCloud, ExternalLink } from "lucide-react";
 type YoutubeSearchResultProps = {
   videoSnippet: API.Youtube.VideoSnippet;
   videoId: string;
-  onClickDownLoad: (videoId: string) => void;
+  onClickDownLoad: () => void;
 };
 
 export function YoutubeSearchResult(props: YoutubeSearchResultProps) {
-  const thumbnailOrder: (keyof API.Youtube.ThumbnailDetails)[] = [
-    "default",
-    "medium",
-    "high",
-    "standard",
-    "maxres",
-  ];
-  const thumbnail = thumbnailOrder.reduce<API.Youtube.Thumbnail | undefined>(
-    (value, key) => {
-      if (props.videoSnippet.thumbnails[key] !== undefined) {
-        value = props.videoSnippet.thumbnails[key];
-      }
-
-      return value;
-    },
-    undefined
-  );
   const parsedDescription = splitOutUrls(props.videoSnippet.description).map(
     (split, index) => {
       if (split.type === "string") {
@@ -57,7 +41,9 @@ export function YoutubeSearchResult(props: YoutubeSearchResultProps) {
       >
         <div className="group relative rounded-md overflow-hidden">
           <img
-            src={thumbnail?.url}
+            src={
+              YoutubeAPI.getBestThumbnail(props.videoSnippet.thumbnails)?.url
+            }
             width={240}
             height={135}
             className="object-cover min-h-[135px] max-h-[135px] min-w-[240px]"
@@ -83,7 +69,7 @@ export function YoutubeSearchResult(props: YoutubeSearchResultProps) {
           <div className="buttons whitespace-nowrap">
             <button
               onClick={() => {
-                props.onClickDownLoad(props.videoId);
+                props.onClickDownLoad();
               }}
               className="hover:bg-gray-300 rounded-md p-1"
             >

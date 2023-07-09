@@ -1,10 +1,11 @@
-import FileSearch from "@/src/components/pages/upload/FileSearch";
+import UploadSearch from "@/src/components/pages/upload/UploadSearch";
 import AlbumList from "@/src/components/pages/AlbumList";
 import SongList from "@/src/components/pages/SongList";
 import GenreList from "@/src/components/pages/GenreList";
 import RecentlyAddedList from "@/src/components/pages/RecentlyAddedList";
 import FileUpload from "@/src/components/pages/upload/FileUpload";
 import { Pages } from "@/src/types/pages";
+import YoutubeUpload from "@/src/components/pages/upload/YoutubeUpload";
 
 type PageProps = {
   location: string;
@@ -34,11 +35,22 @@ export default function Page(props: PageProps) {
             }
 
             case "file search": {
-              return <FileSearch onNavigate={props.onNavigate} />;
+              return <UploadSearch onNavigate={props.onNavigate} />;
             }
 
             case "file upload": {
-              return <FileUpload data={props.data} />;
+              return (
+                <FileUpload data={props.data} onNavigate={props.onNavigate} />
+              );
+            }
+
+            case "youtube upload": {
+              return (
+                <YoutubeUpload
+                  data={props.data}
+                  onNavigate={props.onNavigate}
+                />
+              );
             }
 
             case "album list": {

@@ -4,11 +4,10 @@ import { ChevronDown, ChevronUp, Play } from "lucide-react";
 import { Blur } from "@/src/components/utils/loading-pages/Blur";
 import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
 import { useState } from "react";
-import { Song } from "@prisma/client";
 import { Pages } from "@/src/types/pages";
 import { PostgresRequest } from "@/src/types/postgres-request";
 
-export type SongListProps = {
+type SongListProps = {
   onPlayMedia: Pages.PlayByID;
   onNavigate: Pages.NavigationMethod;
 };
@@ -21,7 +20,7 @@ type Column = {
       sortable: true;
     }
   | {
-      prop: keyof Song;
+      prop: keyof PostgresRequest.SongWithRelations;
       sortable: false;
     }
 );
@@ -40,7 +39,7 @@ const columns: Column[] = [
   {
     name: "Artist(s)",
     prop: "artists",
-    sortable: true,
+    sortable: false,
   },
 ];
 
@@ -116,8 +115,22 @@ export default function SongList(props: SongListProps) {
                     value = value.toISOString();
                   }
 
-                  if (value instanceof Array) {
+                  if (column.prop === "artists") {
+                    value =
+                      song[column.prop].map((a) => a.name).join(", ") +
+                      (song.featuring.length > 0
+                        ? " (feat. " +
+                          song["featuring"].map((a) => a.name).join(", ") +
+                          ")"
+                        : "");
+                  }
+
+                  if (Array.isArray(value)) {
                     value = value.join(", ");
+                  }
+
+                  if (typeof value === "object") {
+                    value = value?.title ?? "";
                   }
 
                   return (

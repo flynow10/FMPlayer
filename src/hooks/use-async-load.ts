@@ -20,7 +20,7 @@ export function useAsyncLoad<T>(
     async function internalLoad() {
       const newData = await load();
 
-      if (active) {
+      if (active && newData !== undefined) {
         setLoaded(true);
         setData(newData);
       }
