@@ -16,7 +16,7 @@ export default function App() {
   const [queue, setQueue] = useState<Playlist>(new Playlist());
   const [currentSongIndex, setCurrentSongIndex] = useState(0);
   const [repeatMode, setRepeatMode] = useState<Music.RepeatMode>("none");
-  const [location, setLocation] = useState<Pages.Location>("Albums");
+  const [location, setLocation] = useState<Pages.Location>("Recently Added");
   const [searchString, setSearchString] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   // const data = useLoaderData();

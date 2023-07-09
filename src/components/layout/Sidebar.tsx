@@ -9,6 +9,7 @@ type SidebarProps = {
 
 export default function Sidebar(props: SidebarProps) {
   const notDisabled: Pages.Location[] = [
+    "Recently Added",
     "Albums",
     "Songs",
     // Pages.Location.Playlist,
