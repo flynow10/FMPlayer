@@ -4,6 +4,7 @@ import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
 import { MediaCard } from "@/src/components/media-displays/MediaCard";
 import { Pages } from "@/src/types/pages";
 import { Album, Song } from "@prisma/client";
+import { MediaCarousel } from "@/src/components/media-displays/MediaCarousel";
 
 export type RecentlyAddedListProps = {
   onPlayMedia: Pages.PlayByID;
@@ -32,11 +33,11 @@ const slugify = (...args: (string | number)[]): string => {
 };
 
 const units = {
-  year: 24 * 6 * 6 * 1e5 * 365,
-  month: (24 * 6 * 6 * 1e5 * 365) / 12,
-  day: 24 * 6 * 6 * 1e5,
-  hour: 6 * 6 * 1e5,
-  minute: 6 * 1e4,
+  year: 24 * 36e5 * 365,
+  month: (24 * 36e5 * 365) / 12,
+  day: 24 * 36e5,
+  hour: 36e5,
+  minute: 6e4,
   second: 1e3,
 };
 
@@ -115,22 +116,24 @@ export default function RecentlyAddedList(props: RecentlyAddedListProps) {
   }
 
   return (
-    <div className="grid grid-flow-row auto-rows-max gap-8 overflow-auto p-10">
+    <div className="p-10">
       {Object.entries(recent).map(([timeClass, mediaData]) => {
         return (
-          <div className="" key={slugify(timeClass)}>
+          <div className="flex flex-col" key={slugify(timeClass)}>
             <h1 className="text-xl pb-2">{timeClass}</h1>
-            {mediaData.map((media) => (
-              <MediaCard
-                key={media.id}
-                id={media.id}
-                title={media.title}
-                size={"medium"}
-                mediaType={media.type}
-                onNavigate={props.onNavigate}
-                onPlayMedia={props.onPlayMedia}
-              />
-            ))}
+            <MediaCarousel>
+              {mediaData.map((media) => (
+                <MediaCard
+                  key={media.id}
+                  id={media.id}
+                  title={media.title}
+                  size={"medium"}
+                  mediaType={media.type}
+                  onNavigate={props.onNavigate}
+                  onPlayMedia={props.onPlayMedia}
+                />
+              ))}
+            </MediaCarousel>
           </div>
         );
       })}
