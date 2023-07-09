@@ -57,7 +57,6 @@ export default function RecentlyAddedList(props: RecentlyAddedListProps) {
       const albums = await MyMusicLibrary.getAlbumList({
         sortBy: "createdOn",
         sortDirection: "asc",
-        limit: 5,
       });
       const songs = await MyMusicLibrary.getSongList({
         sortBy: "createdOn",
