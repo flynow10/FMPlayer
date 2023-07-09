@@ -5,6 +5,7 @@ import { MediaCard } from "@/src/components/media-displays/MediaCard";
 import { Pages } from "@/src/types/pages";
 import { Album, Song } from "@prisma/client";
 import { MediaCarousel } from "@/src/components/media-displays/MediaCarousel";
+import { slugify } from "@/src/utils/string-utils";
 
 export type RecentlyAddedListProps = {
   onPlayMedia: Pages.PlayByID;
@@ -19,18 +20,6 @@ const groupBy = <T, K extends string | number | symbol>(
     (groups[key(item)] ||= []).push(item);
     return groups;
   }, {} as Record<K, T[]>);
-
-const slugify = (...args: (string | number)[]): string => {
-  const value = args.join(" ");
-
-  return value
-    .normalize("NFD") // split an accented letter in the base letter and the acent
-    .replace(/[\u0300-\u036f]/g, "") // remove all previously split accents
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9 ]/g, "") // remove all chars not letters, numbers and spaces (to be replaced)
-    .replace(/\s+/g, "-"); // separator
-};
 
 const units = {
   year: 24 * 36e5 * 365,
