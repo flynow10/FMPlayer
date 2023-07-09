@@ -18,13 +18,28 @@ export default defineConfig({
         replacement: path.resolve(__dirname, "src"),
       },
       {
-        find: "@/lib",
-        replacement: path.resolve(__dirname, "lib"),
-      },
-      {
-        find: "@/Music",
-        replacement: path.resolve(__dirname, "src", "Music"),
+        find: "@/api-lib",
+        replacement: path.resolve(__dirname, "api-lib"),
       },
     ],
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: (id: string) => {
+          if (
+            id.includes("node_modules") &&
+            id.match(/\.(css|scss|sass|less)$/) === null
+          ) {
+            if (id.includes("lucide")) {
+              return "lucide-vendor";
+            } else if (id.includes("ably")) {
+              return "ably-vendor";
+            }
+            return "vendor";
+          }
+        },
+      },
+    },
   },
 });

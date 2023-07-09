@@ -4,11 +4,9 @@ generator client {
 }
 
 datasource db {
-  provider          = "postgresql"
-  url               = env("POSTGRES_PRISMA_URL") // uses connection pooling
-  directUrl         = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
-  shadowDatabaseUrl = env("POSTGRES_URL_NON_POOLING") // used for migrations
-  // url      = env("DEVELOPMENT_DB_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_DATABASE_URL")
 }
 
 model Song {
@@ -17,8 +15,8 @@ model Song {
 
   // Metadata
   title     String   @db.VarChar(256)
-  artists   String[] @default([]) @db.VarChar(64)
-  featuring String[] @default([]) @db.VarChar(64)
+  artists   Artist[] @relation("artistsSong")
+  featuring Artist[] @relation("featuringSong")
   genre     String   @default("Unknown") @db.VarChar(64)
 
   // Album Info
@@ -29,6 +27,18 @@ model Song {
   // Timestamps
   modifiedOn DateTime @default(now()) @updatedAt
   createdOn  DateTime @default(now())
+
+  // AWS Info
+  audioUploaded DateTime?
+}
+
+model Artist {
+  id               Int     @id @default(autoincrement())
+  name             String  @unique @db.VarChar(64)
+  artistOfSongs    Song[]  @relation("artistsSong")
+  featuredOnSongs  Song[]  @relation("featuringSong")
+  artistOfAlbums   Album[] @relation("artistsAlbum")
+  featuredOnAlbums Album[] @relation("featuringAlbum")
 }
 
 model Album {
@@ -37,8 +47,8 @@ model Album {
 
   // Metadata
   title     String   @db.VarChar(256)
-  artists   String[] @default([]) @db.VarChar(64)
-  featuring String[] @default([]) @db.VarChar(64)
+  artists   Artist[] @relation("artistsAlbum")
+  featuring Artist[] @relation("featuringAlbum")
   genre     String   @default("Unknown") @db.VarChar(64)
 
   // Song Info

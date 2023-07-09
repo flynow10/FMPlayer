@@ -18,10 +18,13 @@
     "baseUrl": "./",
     "paths": {
       "@/src/*": ["./src/*"],
-      "@/lib/*": ["./lib/*"],
-      "@/Music/*": ["./src/Music/*"]
+      "@/api-lib/*": ["./api-lib/*"]
     }
   },
-  "include": ["src", "middleware.ts", "api", "lib"]
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node"
+  },
+  "include": ["src", "middleware.ts", "api", "api-lib", "prisma"]
   // "references": [{ "path": "./tsconfig.node.json" }]
 }

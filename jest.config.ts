@@ -7,11 +7,10 @@ const config: Config = {
   moduleDirectories: ["node_modules"],
   moduleNameMapper: {
     "^@/src/(.*)$": "<rootDir>/src/$1",
-    "^@/lib/(.*)$": "<rootDir>/lib/$1",
-    "^@/Music/(.*)$": "<rootDir>/src/Music/$1",
+    "^@/api-lib/(.*)$": "<rootDir>/api-lib/$1",
   },
-  collectCoverage: true,
-  collectCoverageFrom: ["./src/**/*.(ts|tsx|js|jsx)"],
+  collectCoverage: false,
+  // collectCoverageFrom: ["./src/**/*.(ts|tsx|js|jsx)"],
   coverageReporters: ["cobertura", "lcov"],
 };
 export default config;
