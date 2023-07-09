@@ -1,14 +1,24 @@
+@import url("./button.scss");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-.audio-button:not(:disabled) {
+.audio-button {
   @apply m-2;
-  .lucide {
-    @apply transition-transform;
+
+  &:disabled {
+    @apply text-gray-500;
   }
-  &:hover .lucide {
-    @apply scale-90;
+
+  &:not(:disabled) {
+    .lucide {
+      @apply transition-transform;
+    }
+
+    &:hover .lucide {
+      @apply scale-90;
+    }
   }
 }
 
@@ -28,4 +38,13 @@
 
 .main {
   grid-area: main;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+img,
+iframe {
+  @apply dark:invert;
 }

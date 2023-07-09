@@ -1,65 +1,76 @@
-import React, { useState } from "react";
+import {
+  Await,
+  RouterProvider,
+  createBrowserRouter,
+  defer,
+  redirect,
+  useLoaderData,
+} from "react-router-dom";
 import ReactDOM from "react-dom/client";
-import App from "./App";
+import { ToastContainer } from "react-toastify";
+import React, { Suspense } from "react";
+
+import App from "@/src/components/App";
+import { Login } from "@/src/components/auth/Login";
+import { YoutubeAPI } from "@/src/api/youtube-API";
+import { VercelAPI } from "@/src/api/vercel-API";
+import { LambdaStatus } from "@/src/api/ably-client";
+import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
+
+import "react-toastify/dist/ReactToastify.min.css";
 import "@/src/assets/sass/index.scss";
-import { Login } from "@/src/components/Login";
-import { MyMusicLibrary } from "@/Music/Library/MusicLibrary";
-import { YoutubeAPI } from "./Youtube/YoutubeAPI";
-import { isAuthenticatable } from "./Music/Library/Authenticatable";
-(async () => {
-  const root = document.getElementById("root");
-  if (!root) {
-    console.error("Catastrophic Failure! Failed to load application!");
-    return;
-  }
-  root.innerHTML = `
-  <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:row;font-size:5em">
-    <h1>Loading</h1>
-    <div style="margin-left:0.5em;width:1em;height:1em;margin-top:auto;margin-bottom:auto;">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide loading"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg>
-    </div>
-    <style>
-      .loading {
-        width:100%;
-        animation: rotation 1s infinite linear;
-      }
-      @keyframes rotation {
-        from {
-          transform: rotate(0deg);
-        }
-        to {
-          transform: rotate(359deg);
-        }
-      }
-    </style>
-  </div>
-  `;
-  await YoutubeAPI.load();
-  let loginRequired = false;
-  if (isAuthenticatable(MyMusicLibrary)) {
-    const isValid = await MyMusicLibrary.tryLoadAuth();
-    if (!isValid) {
-      loginRequired = true;
-    }
-  }
-  root.innerHTML = "";
-  ReactDOM.createRoot(root as HTMLElement).render(
-    <React.StrictMode>
-      {loginRequired ? <WaitForLogin /> : <App />}
-    </React.StrictMode>
-  );
-})();
 
-function WaitForLogin() {
-  const [userLoggedIn, setLoggedIn] = useState(false);
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Root />,
 
-  return userLoggedIn ? (
-    <App />
-  ) : (
-    <Login
-      onAuthenticate={() => {
-        setLoggedIn(true);
-      }}
+    loader: async () => {
+      if (!(await VercelAPI.isLoggedIn())) {
+        return redirect("/login");
+      }
+
+      const youtubeAPILoadedPromise = YoutubeAPI.load();
+      const lambdaConnectionStatusPromise = LambdaStatus.connect();
+      return defer({
+        youtubeAPILoadedPromise,
+        lambdaConnectionStatusPromise,
+      });
+    },
+  },
+  {
+    path: "/login",
+    element: <Login />,
+  },
+]);
+const root = document.getElementById("root");
+
+if (!root) {
+  throw new Error("Catastrophic Failure! Failed to load application!");
+}
+
+ReactDOM.createRoot(root).render(
+  <React.StrictMode>
+    <RouterProvider router={router} />
+    <ToastContainer
+      className="dark:invert"
+      position="bottom-right"
+      draggable={true}
+      draggableDirection="x"
+      limit={5}
+      theme="colored"
     />
+  </React.StrictMode>
+);
+
+function Root() {
+  const data = useLoaderData() as { [key: string]: Promise<unknown> };
+
+  return (
+    <Suspense fallback={<FullCover />}>
+      <Await resolve={Promise.all(Object.values(data))}>
+        <App />
+      </Await>
+    </Suspense>
   );
 }
