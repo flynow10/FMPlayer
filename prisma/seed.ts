@@ -92,6 +92,7 @@ async function main() {
         albumId: bestOfBootieAlbum.id,
         trackNumber: trackNumber,
         genre: "Mashup",
+        createdOn: new Date(Math.floor(Math.random() * Date.now()))
       },
     });
   }
