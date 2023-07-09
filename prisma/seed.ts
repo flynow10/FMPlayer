@@ -75,6 +75,7 @@ async function main() {
   for (let i = 0; i < bestOfBootieSongs.length; i++) {
     const songData = bestOfBootieSongs[i];
     const trackNumber = i + 1;
+    const year = 24 * 36e5 * 365;
     await prisma.song.upsert({
       where: {
         id: songData.id,
@@ -92,7 +93,9 @@ async function main() {
         albumId: bestOfBootieAlbum.id,
         trackNumber: trackNumber,
         genre: "Mashup",
-        createdOn: new Date(Math.floor(Math.random() * Date.now()))
+        createdOn: new Date(
+          Math.floor(Math.random() * 2 * year + (Date.now() - 2 * year))
+        ),
       },
     });
   }
