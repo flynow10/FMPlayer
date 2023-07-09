@@ -36,6 +36,7 @@ export namespace Pages {
     | "album display"
     | "file search"
     | "genre list"
+    | "recent list"
     | "file upload"
     | "youtube upload";
 

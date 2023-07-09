@@ -21,7 +21,7 @@ const DEFAULT_PAGES: Record<Pages.Location, Pages.PageStore> = {
   "Import Media": { type: "file search" },
   Artists: { type: "album display" }, // no page created yet
   "Edit Playlists": { type: "album display" }, // no page created yet
-  "Recently Added": { type: "album display" }, // no page created yet
+  "Recently Added": { type: "recent list" },
 };
 
 export default function Main(props: MainProps) {
