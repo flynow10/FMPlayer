@@ -10,12 +10,14 @@ export type RecentlyAddedListProps = {
   onNavigate: Pages.NavigationMethod;
 };
 
-const groupBy = function <T extends Record<string, any>>(xs: T[], key: string) {
-  return xs.reduce<Record<string, T[]>>(function (rv, x) {
-    (rv[x[key]] = rv[x[key]] || []).push(x);
-    return rv;
-  }, {});
-};
+const groupBy = <T, K extends string | number | symbol>(
+  arr: T[],
+  key: (i: T) => K
+) =>
+  arr.reduce((groups, item) => {
+    (groups[key(item)] ||= []).push(item);
+    return groups;
+  }, {} as Record<K, T[]>);
 
 const slugify = (...args: (string | number)[]): string => {
   const value = args.join(" ");
@@ -30,26 +32,30 @@ const slugify = (...args: (string | number)[]): string => {
 };
 
 const units = {
-  year: 24 * 60 * 60 * 1000 * 365,
-  month: (24 * 60 * 60 * 1000 * 365) / 12,
-  day: 24 * 60 * 60 * 1000,
-  hour: 60 * 60 * 1000,
-  minute: 60 * 1000,
-  second: 1000,
+  year: 24 * 6 * 6 * 1e5 * 365,
+  month: (24 * 6 * 6 * 1e5 * 365) / 12,
+  day: 24 * 6 * 6 * 1e5,
+  hour: 6 * 6 * 1e5,
+  minute: 6 * 1e4,
+  second: 1e3,
 };
 
 const rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
 
-const getRelativeTime = (d1: any, d2: any = new Date()) => {
+const getRelativeTime = (d1: number, d2?: number) => {
+  d2 = d2 ?? Date.now();
   const elapsed = d1 - d2;
 
   // "Math.abs" accounts for both "past" & "future" scenarios
-  for (const u in units)
-    if (Math.abs(elapsed) > units[u as keyof typeof units] || u == "second")
+  for (const [unitName, value] of Object.entries(units)) {
+    if (Math.abs(elapsed) > value || unitName == "second") {
       return rtf.format(
-        Math.round(elapsed / units[u as keyof typeof units]),
-        u as keyof typeof units
+        Math.round(elapsed / value),
+        unitName as keyof typeof units
       );
+    }
+  }
+  return "less than a second ago";
 };
 
 type AlbumWithType = Album & { type: "album" };
@@ -84,15 +90,18 @@ export default function RecentlyAddedList(props: RecentlyAddedListProps) {
       return groupBy(
         albumsAndSongs.map((media) => {
           const timeClass = getRelativeTime(
-            new Date(media.createdOn),
-            new Date()
+            new Date(media.createdOn).getTime()
+          ).replace(
+            /\w\S*/g,
+            (txt) =>
+              txt.charAt(0).toUpperCase() + txt.substring(1).toLowerCase()
           );
           return {
             ...media,
             timeClass,
           };
         }),
-        "timeClass"
+        (item) => item.timeClass
       );
     },
     {},
