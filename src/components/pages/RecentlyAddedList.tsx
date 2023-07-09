@@ -17,6 +17,41 @@ const groupBy = function <T extends Record<string, any>>(xs: T[], key: string) {
   }, {});
 };
 
+const slugify = (...args: (string | number)[]): string => {
+  const value = args.join(" ");
+
+  return value
+    .normalize("NFD") // split an accented letter in the base letter and the acent
+    .replace(/[\u0300-\u036f]/g, "") // remove all previously split accents
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9 ]/g, "") // remove all chars not letters, numbers and spaces (to be replaced)
+    .replace(/\s+/g, "-"); // separator
+};
+
+const units = {
+  year: 24 * 60 * 60 * 1000 * 365,
+  month: (24 * 60 * 60 * 1000 * 365) / 12,
+  day: 24 * 60 * 60 * 1000,
+  hour: 60 * 60 * 1000,
+  minute: 60 * 1000,
+  second: 1000,
+};
+
+const rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
+
+const getRelativeTime = (d1: any, d2: any = new Date()) => {
+  const elapsed = d1 - d2;
+
+  // "Math.abs" accounts for both "past" & "future" scenarios
+  for (const u in units)
+    if (Math.abs(elapsed) > units[u as keyof typeof units] || u == "second")
+      return rtf.format(
+        Math.round(elapsed / units[u as keyof typeof units]),
+        u as keyof typeof units
+      );
+};
+
 type AlbumWithType = Album & { type: "album" };
 type SongWithType = Song & { type: "song" };
 
@@ -48,31 +83,10 @@ export default function RecentlyAddedList(props: RecentlyAddedListProps) {
       });
       return groupBy(
         albumsAndSongs.map((media) => {
-          let timeClass = "Unknown";
-          const mediaTime = new Date(media.createdOn).getTime();
-          const oneDay = 24 * 60 * 60 * 1000;
-          const today = new Date(
-            new Date().toISOString().substring(0, 10).toString()
-          ).getTime();
-
-          // yesterday
-          if (mediaTime > today - oneDay) {
-            timeClass = "Yesterday";
-          }
-
-          // today
-          if (mediaTime > today) {
-            timeClass = "Today";
-          }
-
-          // this week
-          // last week
-          // this month
-          // last 3 months
-          // last 6 months
-          // this year
-          // year {calculated}
-
+          const timeClass = getRelativeTime(
+            new Date(media.createdOn),
+            new Date()
+          );
           return {
             ...media,
             timeClass,
@@ -92,11 +106,11 @@ export default function RecentlyAddedList(props: RecentlyAddedListProps) {
   }
 
   return (
-    <div className="grid grid-cols-5 gap-x-8 overflow-auto p-10">
+    <div className="grid grid-flow-row auto-rows-max gap-8 overflow-auto p-10">
       {Object.entries(recent).map(([timeClass, mediaData]) => {
         return (
-          <div key={timeClass}>
-            <h1>{timeClass}</h1>
+          <div className="" key={slugify(timeClass)}>
+            <h1 className="text-xl pb-2">{timeClass}</h1>
             {mediaData.map((media) => (
               <MediaCard
                 key={media.id}
