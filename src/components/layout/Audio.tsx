@@ -31,7 +31,7 @@ type AudioProps = {
 };
 
 export function Audio(props: AudioProps) {
-  const [song] = useAsyncLoad<Song | null>(
+  const [song, loadedMetaData] = useAsyncLoad<Song | null>(
     async () => {
       if (!props.id) return null;
       return (await MyMusicLibrary.getSong(props.id)) || null;
@@ -138,7 +138,7 @@ export function Audio(props: AudioProps) {
         </div>
       </div>
       <div className="flex flex-col grow text-center">
-        {song?.title !== undefined ? (
+        {loadedMetaData ? (
           <>
             <h3 id="song-title">{song?.title}</h3>
             <h3 id="song-id">{song?.id}</h3>
