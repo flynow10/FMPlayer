@@ -6,6 +6,7 @@ import RecentlyAddedList from "@/src/components/pages/RecentlyAddedList";
 import FileUpload from "@/src/components/pages/upload/FileUpload";
 import { Pages } from "@/src/types/pages";
 import YoutubeUpload from "@/src/components/pages/upload/YoutubeUpload";
+import TestingPage from "@/src/components/pages/TestingPage";
 
 type PageProps = {
   location: string;
@@ -28,10 +29,14 @@ export default function Page(props: PageProps) {
     <div className={pageClass}>
       <div className="h-full overflow-auto relative">
         {(() => {
-          
           switch (props.type) {
             case "recent list": {
-              return <RecentlyAddedList onPlayMedia={props.onPlayMedia} onNavigate={props.onNavigate} />;
+              return (
+                <RecentlyAddedList
+                  onPlayMedia={props.onPlayMedia}
+                  onNavigate={props.onNavigate}
+                />
+              );
             }
 
             case "file search": {
@@ -78,6 +83,10 @@ export default function Page(props: PageProps) {
                   onNavigate={props.onNavigate}
                 />
               );
+            }
+
+            case "testing page": {
+              return <TestingPage />;
             }
 
             default: {
