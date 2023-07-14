@@ -38,7 +38,8 @@ export namespace Pages {
     | "genre list"
     | "recent list"
     | "file upload"
-    | "youtube upload";
+    | "youtube upload"
+    | "testing page";
 
   export type NavigationType = "new" | "back";
 

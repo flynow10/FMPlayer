@@ -103,7 +103,7 @@ export function shortenNumberString(
   return roundedString + abbr;
 }
 
-export const slugify = (...args: (string | number)[]): string => {
+export function slugify(...args: (string | number)[]): string {
   const value = args.join(" ");
 
   return value
@@ -113,4 +113,33 @@ export const slugify = (...args: (string | number)[]): string => {
     .trim()
     .replace(/[^a-z0-9 ]/g, "") // remove all chars not letters, numbers and spaces (to be replaced)
     .replace(/\s+/g, "-"); // separator
-};
+}
+
+export function boldPartialSearchCompletion(
+  search: string,
+  completion: string
+): { text: string; bold: boolean }[] {
+  const lowerCaseSearch = search.toLowerCase();
+  const lowerCaseCompletion = completion.toLowerCase();
+  const completionSplitBySearch = lowerCaseCompletion.split(lowerCaseSearch);
+  const result = [];
+  if (
+    completionSplitBySearch.length === 2 &&
+    completionSplitBySearch[0] === "" &&
+    lowerCaseCompletion.indexOf(lowerCaseSearch) === 0
+  ) {
+    result.push({ text: search, bold: false });
+    result.push({ text: completion.substring(search.length), bold: true });
+  } else {
+    const splitSearch = lowerCaseSearch.split(" ");
+    const splitSuggestion = completion.split(" ");
+    splitSuggestion.forEach((word) => {
+      let bold = true;
+      if (splitSearch.includes(word.toLowerCase())) {
+        bold = false;
+      }
+      result.push({ text: word + " ", bold });
+    });
+  }
+  return result;
+}
