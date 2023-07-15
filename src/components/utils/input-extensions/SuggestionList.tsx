@@ -1,20 +1,17 @@
-import {
-  RenderSuggestion,
-  SuggestionAttributes,
-} from "@/src/components/utils/input-extensions/BaseSuggestionInput";
 import Item from "@/src/components/utils/input-extensions/SuggestionItem";
+import { InputExtensions } from "@/src/types/input-extensions";
 import { mergeClasses } from "@/src/utils/component-utils";
 import { HTMLAttributes, RefCallback } from "react";
 
 type SuggestionListProps<S> = {
   suggestions: S[];
-  getSuggestionValue: (suggestion: S) => string;
-  renderSuggestion: RenderSuggestion<S>;
+  getSuggestionValue: InputExtensions.GetSuggestionValue<S>;
+  renderSuggestion: InputExtensions.RenderSuggestion<S>;
 
   highlightedSuggestion: number | null;
   query: string;
 
-  itemProps?: SuggestionAttributes;
+  itemProps?: InputExtensions.SuggestionAttributes;
 
   containerProps?: HTMLAttributes<HTMLUListElement>;
   containerRef?: RefCallback<HTMLUListElement>;
@@ -34,7 +31,8 @@ export default function SuggestionList<S>(props: SuggestionListProps<S>) {
         "top-full",
         "translate-y-1",
         "w-full",
-        "left-0"
+        "left-0",
+        "z-10"
       )}
       {...hiddenClass}
       ref={props.containerRef}
