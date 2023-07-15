@@ -1,125 +1,45 @@
 // Built off of http://react-autosuggest.js.org/
 
 import SuggestionList from "@/src/components/utils/input-extensions/SuggestionList";
+import { InputExtensions } from "@/src/types/input-extensions";
 import { mergeClasses } from "@/src/utils/component-utils";
 import {
   FocusEvent,
   FormEvent,
   HTMLAttributes,
-  InputHTMLAttributes,
-  LiHTMLAttributes,
-  MouseEvent as ReactMouseEvent,
-  ReactNode,
-  Ref,
   useEffect,
   useRef,
   useState,
 } from "react";
 
-type SuggestionMouseEventHandler = (
-  event: ReactMouseEvent<HTMLLIElement>,
-  suggestionIndex: number
-) => void;
-
-export type SuggestionAttributes = Omit<
-  LiHTMLAttributes<HTMLLIElement>,
-  "onMouseEnter" | "onMouseLeave" | "onMouseDown" | "onClick"
-> & {
-  onMouseEnter?: SuggestionMouseEventHandler;
-  onMouseLeave?: SuggestionMouseEventHandler;
-  onMouseDown?: SuggestionMouseEventHandler;
-  onClick?: SuggestionMouseEventHandler;
-};
-
-export type RenderSuggestion<S> = (
-  suggestion: S,
-  params: RenderSuggestionParams
-) => ReactNode;
-
-type ChangeMethod = "down" | "up" | "escape" | "enter" | "click" | "type";
-type ChangeEvent = {
-  newValue: string;
-  method: ChangeMethod;
-};
-
-type BlurEventParams<S> = {
-  highlightedSuggestion: S | null;
-};
-
-type InputProps<S> = Omit<
-  React.InputHTMLAttributes<HTMLElement>,
-  "onChange" | "onBlur"
-> & {
-  onChange: (event: FormEvent<HTMLElement>, params: ChangeEvent) => void;
-  onBlur?:
-    | ((event: FocusEvent<HTMLElement>, params?: BlurEventParams<S>) => void)
-    | undefined;
-  value: string;
-  ref?: React.RefCallback<HTMLInputElement> | undefined;
-};
-
-type RenderSuggestionParams = {
-  query: string;
-  isHighlighted: boolean;
-};
-
-type RenderableInputComponentProps = InputHTMLAttributes<HTMLInputElement> & {
-  value: string;
-  ref?: Ref<HTMLInputElement> | undefined;
-};
-
-type RenderInputComponent = (
-  inputProps: RenderableInputComponentProps
-) => ReactNode;
-
-type FetchRequestedReasons =
-  | "input-changed"
-  | "input-focused"
-  | "escape-pressed"
-  | "suggestions-revealed"
-  | "suggestion-selected";
-
-type SuggestionsFetchRequestedParams = {
-  value: string;
-  reason: FetchRequestedReasons;
-};
-
-type SuggestionsFetchRequested = (
-  request: SuggestionsFetchRequestedParams
-) => void;
-
-type SuggestionSelectMethod = "click" | "enter";
-
-interface SuggestionSelectedEventData<S> {
-  suggestion: S;
-  suggestionValue: string;
-  suggestionIndex: number;
-  method: SuggestionSelectMethod;
-}
-
-type OnSuggestionSelected<S> = (
-  event: React.FormEvent<HTMLElement>,
-  data: SuggestionSelectedEventData<S>
-) => void;
-
 type BaseSuggestionInputProps<S> = {
   suggestions: S[];
-  getSuggestionValue: (suggestion: S) => string;
-  onSuggestionsFetchRequested: SuggestionsFetchRequested;
-  renderSuggestion: RenderSuggestion<S>;
+  getSuggestionValue: InputExtensions.GetSuggestionValue<S>;
+  onSuggestionsFetchRequested: InputExtensions.SuggestionsFetchRequested;
+  onSuggestionsClearRequested?: () => void;
+  renderSuggestion: InputExtensions.RenderSuggestion<S>;
 
-  inputProps: InputProps<S>;
-  renderInputComponent?: RenderInputComponent;
+  inputProps: InputExtensions.InputProps<S>;
+  renderInputComponent?: InputExtensions.RenderInputComponent;
 
-  onSuggestionSelected?: OnSuggestionSelected<S>;
+  onSuggestionSelected?: InputExtensions.OnSuggestionSelected<S>;
+  shouldKeepSuggestionsOnSelect?: InputExtensions.ShouldKeepOpenOnSelect<S>;
+  focusInputOnSuggestionClick?: boolean;
+  shouldRenderSuggestions?: InputExtensions.ShouldRenderSuggestions;
 
   outerContainerProps?: HTMLAttributes<HTMLDivElement>;
   suggestionsContainerProps?: HTMLAttributes<HTMLUListElement>;
 };
 
-const defaultRenderInputComponent: RenderInputComponent = (inputProps) => {
+const defaultRenderInputComponent: InputExtensions.RenderInputComponent = (
+  inputProps
+) => {
   return <input {...inputProps} />;
 };
+const defaultShouldRenderSuggestions: InputExtensions.ShouldRenderSuggestions =
+  (value) => {
+    return value.trim().length > 0;
+  };
 
 export default function BaseSuggestionInput<S>(
   props: BaseSuggestionInputProps<S>
@@ -151,14 +71,20 @@ export default function BaseSuggestionInput<S>(
     setValueBeforeUpDown(null);
   };
 
-  const showSuggestions = () => {
-    setIsCollapsed(false);
+  const shouldRenderSuggestions: InputExtensions.ShouldRenderSuggestions = (
+    value,
+    reason
+  ) => {
+    return (props.shouldRenderSuggestions ?? defaultShouldRenderSuggestions)(
+      value,
+      reason
+    );
   };
 
   const maybeOnChange = (
     event: FormEvent<HTMLElement>,
     newValue: string,
-    method: ChangeMethod
+    method: InputExtensions.ChangeMethod
   ) => {
     const prevValue = props.inputProps.value;
 
@@ -176,9 +102,22 @@ export default function BaseSuggestionInput<S>(
 
   const onSuggestionSelected = (
     event: FormEvent<HTMLElement>,
-    data: SuggestionSelectedEventData<S>
+    data: InputExtensions.SuggestionSelectedEventData<S>
   ) => {
     props.onSuggestionSelected?.(event, data);
+
+    const keepSuggestions = (
+      props.shouldKeepSuggestionsOnSelect ?? (() => false)
+    )(data.suggestion);
+
+    if (keepSuggestions) {
+      requestSuggestionFetch({
+        value: data.suggestionValue,
+        reason: "suggestion-selected",
+      });
+    } else {
+      requestSuggestionClear();
+    }
     resetHighlighedSuggestion();
   };
 
@@ -228,10 +167,15 @@ export default function BaseSuggestionInput<S>(
   };
 
   const onBlur = () => {
+    const shouldRender = shouldRenderSuggestions(
+      props.inputProps.value,
+      "input-blurred"
+    );
     const highlightedSuggestion = getHighlightedSuggestion();
 
     setIsInputFocused(false);
     resetHighlighedSuggestion();
+    setIsCollapsed(!shouldRender);
 
     if (blurEvent.current) {
       props.inputProps.onBlur?.(blurEvent.current, { highlightedSuggestion });
@@ -240,7 +184,7 @@ export default function BaseSuggestionInput<S>(
     }
   };
 
-  const onSuggestionMouseEnter: SuggestionMouseEventHandler = (
+  const onSuggestionMouseEnter: InputExtensions.SuggestionMouseEventHandler = (
     event,
     index
   ) => {
@@ -251,8 +195,20 @@ export default function BaseSuggestionInput<S>(
     }
   };
 
-  const onSuggestionMouseLeave: SuggestionMouseEventHandler = (event) => {
-    resetHighlighedSuggestion();
+  const requestSuggestionFetch: InputExtensions.SuggestionsFetchRequested = (
+    request
+  ) => {
+    props.onSuggestionsFetchRequested?.(request);
+  };
+
+  const requestSuggestionClear = () => {
+    props.onSuggestionsClearRequested?.();
+  };
+
+  const onSuggestionMouseLeave: InputExtensions.SuggestionMouseEventHandler = (
+    event
+  ) => {
+    resetHighlighedSuggestion(false);
 
     if (
       justSelectedSuggestion.current &&
@@ -262,14 +218,19 @@ export default function BaseSuggestionInput<S>(
     }
   };
 
-  const onSuggestionMouseDown: SuggestionMouseEventHandler = (event) => {
+  const onSuggestionMouseDown: InputExtensions.SuggestionMouseEventHandler = (
+    event
+  ) => {
     if (!justSelectedSuggestion.current) {
       justSelectedSuggestion.current = true;
       pressedSuggestion.current = event.currentTarget;
     }
   };
 
-  const onSuggestionClick: SuggestionMouseEventHandler = (event, index) => {
+  const onSuggestionClick: InputExtensions.SuggestionMouseEventHandler = (
+    event,
+    index
+  ) => {
     const clickedSuggestion = props.suggestions[index];
     const clickedSuggestionValue = getSuggestionValueByIndex(index);
 
@@ -281,7 +242,11 @@ export default function BaseSuggestionInput<S>(
       suggestionValue: clickedSuggestionValue,
     });
 
-    onBlur();
+    if (props.focusInputOnSuggestionClick ?? false) {
+      input.current?.focus();
+    } else {
+      onBlur();
+    }
 
     setTimeout(() => {
       justSelectedSuggestion.current = false;
@@ -336,21 +301,26 @@ export default function BaseSuggestionInput<S>(
 
   // Components
 
-  const inputProps: RenderableInputComponentProps = {
+  const inputProps: InputExtensions.RenderableInputComponentProps = {
     type: "text",
     ...mergeClasses(props.inputProps, "w-full"),
     onChange: (event) => {
       const newValue = event.target.value;
+      const shouldRender = shouldRenderSuggestions(newValue, "input-changed");
 
       maybeOnChange(event, newValue, "type");
       setValueBeforeUpDown(null);
       setHighlightedIndex(null);
-      setIsCollapsed(false);
+      setIsCollapsed(!shouldRender);
 
-      props.onSuggestionsFetchRequested({
-        value: newValue,
-        reason: "input-changed",
-      });
+      if (shouldRender) {
+        requestSuggestionFetch({
+          value: newValue,
+          reason: "input-changed",
+        });
+      } else {
+        requestSuggestionClear();
+      }
     },
     onBlur: (event) => {
       if (justClickedOnSuggestionContainer.current) {
@@ -362,6 +332,7 @@ export default function BaseSuggestionInput<S>(
 
       if (!justSelectedSuggestion.current) {
         onBlur();
+        requestSuggestionClear();
       }
     },
     onFocus: (event) => {
@@ -369,24 +340,31 @@ export default function BaseSuggestionInput<S>(
         !justSelectedSuggestion.current &&
         !justClickedOnSuggestionContainer.current
       ) {
+        const value = props.inputProps.value;
+        const shouldRender = shouldRenderSuggestions(value, "input-focused");
         setIsInputFocused(true);
-        showSuggestions();
+        setIsCollapsed(!shouldRender);
 
         props.inputProps.onFocus?.(event);
-
-        props.onSuggestionsFetchRequested({
-          value: props.inputProps.value,
-          reason: "input-focused",
-        });
+        if (shouldRender) {
+          requestSuggestionFetch({
+            value: value,
+            reason: "input-focused",
+          });
+        }
       }
     },
     onKeyDown: (event) => {
-      let cancelEvent = true;
       switch (event.key) {
         case "ArrowDown":
         case "ArrowUp": {
+          const value = props.inputProps.value;
           if (isCollapsed) {
-            showSuggestions();
+            if (shouldRenderSuggestions(value, "suggestions-revealed")) {
+              requestSuggestionFetch({ value, reason: "suggestions-revealed" });
+              setIsCollapsed(false);
+              event.preventDefault();
+            }
           } else if (props.suggestions.length > 0) {
             const newHighlightIndex = getNextHighlightIndex(
               event.key === "ArrowDown" ? "down" : "up"
@@ -408,7 +386,7 @@ export default function BaseSuggestionInput<S>(
               newValue,
               event.key === "ArrowDown" ? "down" : "up"
             );
-            break;
+            event.preventDefault();
           }
           break;
         }
@@ -423,6 +401,7 @@ export default function BaseSuggestionInput<S>(
           }
 
           if (highlightedSuggestion !== null && highlightedIndex !== null) {
+            event.preventDefault();
             const newValue = props.getSuggestionValue(highlightedSuggestion);
             maybeOnChange(event, newValue, "enter");
 
@@ -436,37 +415,49 @@ export default function BaseSuggestionInput<S>(
           break;
         }
         case "Escape": {
+          if (isOpen) {
+            event.preventDefault();
+          }
           const willClose = isOpen;
           if (valueBeforeUpDown === null) {
             if (!willClose) {
               const newValue = "";
               maybeOnChange(event, newValue, "escape");
-              props.onSuggestionsFetchRequested({
-                value: newValue,
-                reason: "escape-pressed",
-              });
+              if (shouldRenderSuggestions(newValue, "escape-pressed")) {
+                requestSuggestionFetch({
+                  value: newValue,
+                  reason: "escape-pressed",
+                });
+              } else {
+                requestSuggestionClear();
+              }
             }
           } else {
             maybeOnChange(event, valueBeforeUpDown, "escape");
           }
           if (willClose) {
+            requestSuggestionClear();
             hideSuggestions();
+          } else {
+            resetHighlighedSuggestion();
           }
           break;
         }
-        default: {
-          cancelEvent = false;
-        }
-      }
-      if (cancelEvent) {
-        event.preventDefault();
       }
       props.inputProps.onKeyDown?.(event);
     },
     ref: setInputRef,
   };
 
-  const isOpen = isInputFocused && !isCollapsed && props.suggestions.length > 0;
+  const shouldRender = shouldRenderSuggestions(
+    props.inputProps.value,
+    "render"
+  );
+  const isOpen =
+    isInputFocused &&
+    !isCollapsed &&
+    props.suggestions.length > 0 &&
+    shouldRender;
   const suggestions = isOpen ? props.suggestions : [];
 
   const inputComponent = (

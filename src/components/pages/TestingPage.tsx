@@ -38,20 +38,21 @@ export default function TestingPage() {
           getSuggestionValue={(s) => s}
           inputProps={{
             value: text,
-            className: "border-2 rounded-lg p-2",
+            className: "border-2",
             onChange: (_event, params) => {
               setText(params.newValue);
             },
           }}
           suggestionsContainerProps={{
-            className: "p-2 border-2 rounded-lg",
+            className: "border-2",
           }}
           onSuggestionsFetchRequested={async ({ value }) => {
             setSuggestions(await loadSuggestions(value));
           }}
-          renderSuggestion={(suggestion) => {
-            return <span>{suggestion}</span>;
+          onSuggestionsClearRequested={() => {
+            setSuggestions([]);
           }}
+          renderSuggestion={(s) => s}
         />
       </div>
     </div>

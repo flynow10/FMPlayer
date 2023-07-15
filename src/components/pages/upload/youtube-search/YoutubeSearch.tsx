@@ -3,27 +3,19 @@ import { isYoutubeUrl } from "@/src/utils/url-utils";
 import { useState } from "react";
 import { API } from "@/src/types/api";
 import { YoutubeSearchResult } from "@/src/components/pages/upload/youtube-search/YoutubeSearchResult";
-import SuggestionInput from "@/src/components/utils/SuggestionInput";
-import { useAsyncLoad } from "@/src/hooks/use-async-load";
 import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
+import SuggestionSearch from "@/src/components/utils/input-extensions/SuggestionSearch";
 
 type YoutubeSearchProps = {
   onClickDownload: (video: API.Youtube.Video) => void;
 };
 
+const loadCompletions = async (text: string) => {
+  return (await YoutubeAPI.searchSuggestions(text)).suggestions;
+};
+
 export default function YoutubeSearch(props: YoutubeSearchProps) {
-  const [searchText, setSearchText] = useState("");
-  const [suggestions, loaded] = useAsyncLoad(
-    async () => {
-      if (searchText === "") {
-        return [];
-      } else {
-        return (await YoutubeAPI.searchSuggestions(searchText)).suggestions;
-      }
-    },
-    [],
-    [searchText]
-  );
+  const [completions, setCompletions] = useState<string[]>([]);
 
   const [resultList, setResultList] = useState<API.Youtube.Video[]>([]);
   const [loadingResults, setLoadingResults] = useState(false);
@@ -63,15 +55,17 @@ export default function YoutubeSearch(props: YoutubeSearchProps) {
 
   return (
     <>
-      <SuggestionInput
-        text={searchText}
-        onChangeText={setSearchText}
-        suggestions={loaded || suggestions.length !== 0 ? suggestions : null}
-        onSearch={onSearch}
-        options={{
-          boldTypedInput: true,
-          hasSearchButton: true,
+      <SuggestionSearch
+        completions={completions}
+        getSuggestionValue={(s) => s}
+        inputProps={{
           placeholder: "Search by Keyword | Paste URL",
+        }}
+        onCompletionFetchRequested={async ({ value }) => {
+          setCompletions(await loadCompletions(value));
+        }}
+        onSubmit={(search) => {
+          onSearch(search);
         }}
       />
       <div className="youtube-results flex flex-col overflow-auto h-full pr-4">

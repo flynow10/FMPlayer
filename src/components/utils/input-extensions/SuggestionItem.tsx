@@ -1,7 +1,4 @@
-import {
-  RenderSuggestion,
-  SuggestionAttributes,
-} from "@/src/components/utils/input-extensions/BaseSuggestionInput";
+import { InputExtensions } from "@/src/types/input-extensions";
 import { LiHTMLAttributes, MouseEvent } from "react";
 
 type ItemProps<S> = {
@@ -9,8 +6,8 @@ type ItemProps<S> = {
   suggestionIndex: number;
   isHighlighted: boolean;
   query: string;
-  renderSuggestion: RenderSuggestion<S>;
-  itemProps?: SuggestionAttributes;
+  renderSuggestion: InputExtensions.RenderSuggestion<S>;
+  itemProps?: InputExtensions.SuggestionAttributes;
 };
 
 // eslint-disable-next-line react/no-multi-comp
