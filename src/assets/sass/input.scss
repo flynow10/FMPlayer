@@ -1,0 +1,12 @@
+.input {
+  @apply border-2 p-2 rounded-lg;
+}
+
+%default-input-outline {
+  outline: -webkit-focus-ring-color auto 1px;
+}
+
+/* stylelint-disable-next-line selector-class-pattern */
+.child-input-focused\:default-input-outline:has(input:focus) {
+  @extend %default-input-outline;
+}

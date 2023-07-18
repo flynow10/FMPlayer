@@ -23,6 +23,10 @@ export namespace InputExtensions {
       buttonText?: string | ((search: string) => ReactNode);
     };
   }
+
+  export namespace MultiSelect {
+    export type MultiSelectPillDeleteParams = { item: string; index: number };
+  }
   export type SuggestionMouseEventHandler = (
     event: ReactMouseEvent<HTMLLIElement>,
     suggestionIndex: number

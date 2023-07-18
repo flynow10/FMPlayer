@@ -57,7 +57,7 @@ export default function YoutubeSearch(props: YoutubeSearchProps) {
     <>
       <SuggestionSearch
         completions={completions}
-        getSuggestionValue={(s) => s}
+        getCompletionValue={(s) => s}
         inputProps={{
           placeholder: "Search by Keyword | Paste URL",
         }}

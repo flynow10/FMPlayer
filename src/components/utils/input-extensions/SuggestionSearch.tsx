@@ -8,7 +8,8 @@ import { ButtonHTMLAttributes, HTMLAttributes, useRef, useState } from "react";
 type SuggestionSearchProps<S> = {
   completions: S[];
   onSubmit: InputExtensions.Search.SubmitSearch<S>;
-  getSuggestionValue: InputExtensions.GetSuggestionValue<S>;
+  getCompletionValue: InputExtensions.GetSuggestionValue<S>;
+  onCompletionClearRequested?: () => void;
   onCompletionFetchRequested: InputExtensions.SuggestionsFetchRequested;
   outerContainerProps?: HTMLAttributes<HTMLDivElement>;
   inputProps?: InputExtensions.Search.InputProps<S>;
@@ -33,9 +34,9 @@ export default function SuggestionSearch<S>(props: SuggestionSearchProps<S>) {
   return (
     <BaseSuggestionInput
       suggestions={props.completions}
-      getSuggestionValue={props.getSuggestionValue}
+      getSuggestionValue={props.getCompletionValue}
       inputProps={{
-        className: "border-2 p-2 rounded-lg rounded-r-none border-r-0",
+        className: "input rounded-r-none border-r-0 w-full",
         placeholder: "Search",
         ...props.inputProps,
         onChange: (event, params) => {
@@ -82,7 +83,7 @@ export default function SuggestionSearch<S>(props: SuggestionSearchProps<S>) {
         );
       }}
       renderSuggestion={(suggestion, { isHighlighted, query }) => {
-        const suggestionValue = props.getSuggestionValue(suggestion);
+        const suggestionValue = props.getCompletionValue(suggestion);
         const suggestionClass = classNames(
           "flex",
           "flex-row",
@@ -109,6 +110,7 @@ export default function SuggestionSearch<S>(props: SuggestionSearchProps<S>) {
         );
       }}
       outerContainerProps={props.outerContainerProps}
+      onSuggestionsClearRequested={props.onCompletionClearRequested}
     />
   );
 }
