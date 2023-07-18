@@ -65,7 +65,7 @@ export default function TestingPage() {
               {s}
             </span>
           )}
-          suggestionContainerProps={{
+          suggestionsContainerProps={{
             className: "border-2 rounded-lg p-2",
           }}
           onSuggestionFetchRequested={(params) => {

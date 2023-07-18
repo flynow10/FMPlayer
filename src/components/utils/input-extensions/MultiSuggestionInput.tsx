@@ -26,7 +26,7 @@ type MultiSuggestionInputProps<S> = {
   onSuggestionClearRequested?: () => void;
 
   outerContainerProps?: HTMLAttributes<HTMLDivElement>;
-  suggestionContainerProps?: HTMLAttributes<HTMLUListElement>;
+  suggestionsContainerProps?: HTMLAttributes<HTMLUListElement>;
 };
 
 export default function MultiSuggestionInput<S>(
@@ -153,7 +153,7 @@ export default function MultiSuggestionInput<S>(
       onSuggestionsClearRequested={props.onSuggestionClearRequested}
       renderSuggestion={props.renderSuggestion}
       outerContainerProps={props.outerContainerProps}
-      suggestionsContainerProps={props.suggestionContainerProps}
+      suggestionsContainerProps={props.suggestionsContainerProps}
     />
   );
 }
