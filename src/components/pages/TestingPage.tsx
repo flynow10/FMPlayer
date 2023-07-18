@@ -1,4 +1,3 @@
-import OldMultiSuggestionInput from "@/src/components/utils/MultiSuggestionInput";
 import MultiSuggestionInput from "@/src/components/utils/input-extensions/MultiSuggestionInput";
 import { pickSuggestions } from "@/src/utils/string-utils";
 import { useState } from "react";
@@ -36,17 +35,6 @@ export default function TestingPage() {
   };
   return (
     <div className="flex flex-col gap-3 m-3 w-1/3">
-      <div>
-        <label>Old Version</label>
-        <OldMultiSuggestionInput
-          selectedStrings={selectedItems}
-          setSelectedStrings={setSelectedItems}
-          suggestions={suggestions}
-          onChange={(text) => {
-            reloadSuggestions(text, selectedItems);
-          }}
-        />
-      </div>
       <pre>{JSON.stringify(selectedItems)}</pre>
       <div>
         <label>New Version</label>
