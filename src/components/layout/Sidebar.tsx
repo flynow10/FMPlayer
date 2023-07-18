@@ -60,7 +60,7 @@ export default function Sidebar(props: SidebarProps) {
       </h3>
       <SuggestionSearch
         completions={[] as string[]}
-        getSuggestionValue={(s) => s}
+        getCompletionValue={(s) => s}
         onCompletionFetchRequested={() => {
           return;
         }}
@@ -71,7 +71,8 @@ export default function Sidebar(props: SidebarProps) {
           className: "mx-3 my-2",
         }}
         inputProps={{
-          className: "rounded-md rounded-r-none border-2 border-r-0 px-2 py-1",
+          className:
+            "rounded-md rounded-r-none border-2 border-r-0 px-2 py-1 w-full",
         }}
         searchButtonProps={{
           className: "py-1 px-2 rounded-md rounded-l-none border-2",

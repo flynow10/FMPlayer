@@ -1,58 +1,80 @@
-import { YoutubeAPI } from "@/src/api/youtube-API";
-import SuggestionInput from "@/src/components/utils/SuggestionInput";
-import BaseSuggestionInput from "@/src/components/utils/input-extensions/BaseSuggestionInput";
-import { useAsyncLoad } from "@/src/hooks/use-async-load";
+import OldMultiSuggestionInput from "@/src/components/utils/MultiSuggestionInput";
+import MultiSuggestionInput from "@/src/components/utils/input-extensions/MultiSuggestionInput";
+import { pickSuggestions } from "@/src/utils/string-utils";
 import { useState } from "react";
 
-const loadSuggestions = async (text: string) => {
-  return (await YoutubeAPI.searchSuggestions(text)).suggestions;
-};
+const options = [
+  "Acoustic",
+  "Anime",
+  "Classical",
+  "EDM",
+  "Heavy Metal",
+  "Hip Hop",
+  "Mashup",
+  "Metal",
+  "Movie",
+  "Nightcore",
+  "Orchestral",
+  "Rock",
+  "TV Show",
+  "Video Game",
+];
 
 export default function TestingPage() {
-  const [text, setText] = useState("");
-  const [suggestions, , setSuggestions] = useAsyncLoad<string[]>(
-    () => {
-      return loadSuggestions(text);
-    },
-    [],
-    []
-  );
-
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const reloadSuggestions = (value: string, newItems: string[]) => {
+    console.log(newItems);
+    setSuggestions(
+      pickSuggestions(
+        value,
+        options.filter(
+          (s) => !newItems.includes(s) && !selectedItems.includes(s)
+        )
+      )
+    );
+  };
   return (
     <div className="flex flex-col gap-3 m-3 w-1/3">
       <div>
         <label>Old Version</label>
-        <SuggestionInput
-          onChangeText={async (newText) => {
-            setText(newText);
-            setSuggestions(await loadSuggestions(newText));
-          }}
-          text={text}
+        <OldMultiSuggestionInput
+          selectedStrings={selectedItems}
+          setSelectedStrings={setSelectedItems}
           suggestions={suggestions}
+          onChange={(text) => {
+            reloadSuggestions(text, selectedItems);
+          }}
         />
       </div>
+      <pre>{JSON.stringify(selectedItems)}</pre>
       <div>
         <label>New Version</label>
-        <BaseSuggestionInput
+        <MultiSuggestionInput
+          selectedItems={selectedItems}
+          setSelectedItems={setSelectedItems}
           suggestions={suggestions}
           getSuggestionValue={(s) => s}
-          inputProps={{
-            value: text,
-            className: "border-2",
-            onChange: (_event, params) => {
-              setText(params.newValue);
-            },
+          renderSuggestion={(s, { isHighlighted }) => (
+            <span
+              className={
+                "flex flex-row my-1 px-1" +
+                (isHighlighted ? " bg-gray-400" : "")
+              }
+            >
+              {s}
+            </span>
+          )}
+          suggestionContainerProps={{
+            className: "border-2 rounded-lg p-2",
           }}
-          suggestionsContainerProps={{
-            className: "border-2",
+          onSuggestionFetchRequested={(params) => {
+            reloadSuggestions(params.value, params.addedItems ?? []);
           }}
-          onSuggestionsFetchRequested={async ({ value }) => {
-            setSuggestions(await loadSuggestions(value));
-          }}
-          onSuggestionsClearRequested={() => {
+          onSuggestionClearRequested={() => {
             setSuggestions([]);
           }}
-          renderSuggestion={(s) => s}
+          shouldRenderSuggestions={() => true}
         />
       </div>
     </div>

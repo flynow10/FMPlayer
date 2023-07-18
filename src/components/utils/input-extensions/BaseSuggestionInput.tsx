@@ -303,7 +303,7 @@ export default function BaseSuggestionInput<S>(
 
   const inputProps: InputExtensions.RenderableInputComponentProps = {
     type: "text",
-    ...mergeClasses(props.inputProps, "w-full"),
+    ...props.inputProps,
     onChange: (event) => {
       const newValue = event.target.value;
       const shouldRender = shouldRenderSuggestions(newValue, "input-changed");
@@ -340,6 +340,7 @@ export default function BaseSuggestionInput<S>(
         !justSelectedSuggestion.current &&
         !justClickedOnSuggestionContainer.current
       ) {
+        console.log("Focused!");
         const value = props.inputProps.value;
         const shouldRender = shouldRenderSuggestions(value, "input-focused");
         setIsInputFocused(true);
