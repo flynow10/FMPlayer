@@ -11,6 +11,7 @@ import { FileContext } from "@/src/contexts/FileContext";
 import { Music } from "@/src/types/music";
 import { Loader2 } from "lucide-react";
 import { toast } from "react-toastify";
+import VerticalSplit from "@/src/components/utils/VerticalSplit";
 
 type FileUploadProps = {
   data: {
@@ -195,51 +196,53 @@ export default function FileUpload(props: FileUploadProps) {
 
   return (
     <FileContext.Provider value={openFile}>
-      <div className="grid grid-rows-1 grid-cols-10 h-full">
-        <div className="flex flex-col col-span-3 h-full">
-          <FileList
-            files={files}
-            onOpenFile={setOpenFileId}
-            selectedFiles={selectedFileIds}
-            setSelectedFile={selectFile}
-            ableToSelect={!isUploading}
-            fileStatuses={fileStatuses}
-          />
-          <button
-            onClick={() => {
-              if (
-                confirm("Are you sure you want to upload the selected files?")
-              ) {
-                uploadSelectedFiles();
-              }
-            }}
-            disabled={!ableToUpload || isUploading}
-            className="text-white m-4 rounded-lg btn success border-2"
-          >
-            {ableToUpload && !isUploading ? (
-              selectedFileIds.length !== files.length ? (
-                "Upload selected files"
+      <VerticalSplit
+        left={
+          <div className="flex flex-col h-full">
+            <FileList
+              files={files}
+              onOpenFile={setOpenFileId}
+              selectedFiles={selectedFileIds}
+              setSelectedFile={selectFile}
+              ableToSelect={!isUploading}
+              fileStatuses={fileStatuses}
+            />
+            <button
+              onClick={() => {
+                if (
+                  confirm("Are you sure you want to upload the selected files?")
+                ) {
+                  uploadSelectedFiles();
+                }
+              }}
+              disabled={!ableToUpload || isUploading}
+              className="text-white m-4 rounded-lg btn success border-2"
+            >
+              {ableToUpload && !isUploading ? (
+                selectedFileIds.length !== files.length ? (
+                  "Upload selected files"
+                ) : (
+                  "Upload all files"
+                )
+              ) : !isUploading ? (
+                "No files selected"
               ) : (
-                "Upload all files"
-              )
-            ) : !isUploading ? (
-              "No files selected"
-            ) : (
-              <span className="flex flex-row justify-center gap-2">
-                {"Performing inital upload"}
-                <Loader2 className="animate-spin" />
-              </span>
-            )}
-          </button>
-        </div>
-        <div className="p-7 h-full border-x-2 col-span-7 row-span-6 overflow-auto relative">
-          <MetadataEditor
-            otherFiles={files}
-            audioData={openFile?.audioData.buffer}
-            setFileMetadata={setFileMetadataProperty}
-          />
-        </div>
-      </div>
+                <span className="flex flex-row justify-center gap-2">
+                  {"Performing inital upload"}
+                  <Loader2 className="animate-spin" />
+                </span>
+              )}
+            </button>
+          </div>
+        }
+        right={
+          <div className="p-7 h-full overflow-auto relative">
+            <MetadataEditor setFileMetadata={setFileMetadataProperty} />
+          </div>
+        }
+        defaultPosition="left"
+        minWidth={450}
+      />
     </FileContext.Provider>
   );
 }

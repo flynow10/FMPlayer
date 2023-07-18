@@ -131,6 +131,16 @@ export default function Main(props: MainProps) {
         <div className="flex flex-row gap-2">
           <UUID />
           <ToastTest />
+          <div>
+            <button
+              className="px-2 border-2 rounded-md"
+              onClick={() =>
+                onNavigate(props.location, "new", { type: "testing page" })
+              }
+            >
+              Go To Testing Page
+            </button>
+          </div>
         </div>
       </div>
       {pageElements}
