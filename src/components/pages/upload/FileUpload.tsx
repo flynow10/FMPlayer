@@ -237,11 +237,7 @@ export default function FileUpload(props: FileUploadProps) {
         }
         right={
           <div className="p-7 h-full overflow-auto relative">
-            <MetadataEditor
-              otherFiles={files}
-              audioData={openFile?.audioData.buffer}
-              setFileMetadata={setFileMetadataProperty}
-            />
+            <MetadataEditor setFileMetadata={setFileMetadataProperty} />
           </div>
         }
         defaultPosition="left"
