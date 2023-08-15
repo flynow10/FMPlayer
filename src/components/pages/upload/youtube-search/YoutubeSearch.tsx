@@ -32,7 +32,7 @@ export default function YoutubeSearch(props: YoutubeSearchProps) {
         setResultList(videoResult.items);
       }
     } else {
-      const searchResult = await YoutubeAPI.search(searchText);
+      const searchResult = await YoutubeAPI.search(searchText, 10);
 
       if (searchResult) {
         const results = [];
@@ -68,14 +68,14 @@ export default function YoutubeSearch(props: YoutubeSearchProps) {
           onSearch(search);
         }}
       />
-      <div className="youtube-results flex flex-col overflow-auto h-full pr-4">
+      <div className="youtube-results flex flex-col overflow-auto h-full pr-4 mt-2">
         {loadingResults && resultList.length === 0 && <FullCover />}
         {resultList.map((result, index) => {
           return (
             <YoutubeSearchResult
               key={index}
-              videoSnippet={result.snippet}
               videoId={result.id}
+              video={result}
               onClickDownLoad={() => {
                 props.onClickDownload(result);
               }}
