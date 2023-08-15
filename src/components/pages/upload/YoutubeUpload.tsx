@@ -8,12 +8,11 @@ import { v4 as uuid } from "uuid";
 import Youtube from "react-youtube";
 import { YoutubeAPI } from "@/src/api/youtube-API";
 import { Loader2, Play } from "lucide-react";
-import { useAsyncLoad } from "@/src/hooks/use-async-load";
-import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
-import { shortenNumberString } from "@/src/utils/string-utils";
 import VerticalSplit from "@/src/components/utils/VerticalSplit";
 import { MyMusicLibrary } from "@/src/music/library/music-library";
 import { toast } from "react-toastify";
+import { splitOutUrls } from "@/src/utils/url-utils";
+import ChannelDisplay from "@/src/components/utils/youtube/ChannelDisplay";
 
 type YoutubeUploadProps = {
   data: {
@@ -35,19 +34,31 @@ export default function YoutubeUpload(props: YoutubeUploadProps) {
       audioUploaded: null,
     };
   });
-  const [channel, loadedChannel] = useAsyncLoad(
-    async () => {
-      return (
-        (await YoutubeAPI.channel(props.data.video.snippet.channelId))
-          ?.items[0] ?? null
-      );
-    },
-    null,
-    [props.data]
-  );
+
   const [isUploading, setIsUploading] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const youtubeRef = useRef<Youtube>(null);
+
+  const parsedDescription = splitOutUrls(
+    props.data.video.snippet.description
+  ).map((split, index) => {
+    if (split.type === "string") {
+      return <span key={index}>{split.data}</span>;
+    } else {
+      return (
+        <span key={index}>
+          <a
+            target="_blank"
+            rel="noreferrer"
+            href={split.data}
+            className="underline"
+          >
+            {split.data}
+          </a>
+        </span>
+      );
+    }
+  });
 
   const setFileMetadataProperty =
     useCallback<Pages.Upload.SetFileMetadataFunction>(
@@ -86,12 +97,6 @@ export default function YoutubeUpload(props: YoutubeUploadProps) {
     });
     props.onNavigate("back");
   };
-
-  if (!loadedChannel) {
-    return <FullCover />;
-  }
-
-  const channelUrl = `https://www.youtube.com/channel/${props.data.video.snippet.channelId}`;
 
   return (
     <FileContext.Provider value={{ metadata }}>
@@ -144,46 +149,20 @@ export default function YoutubeUpload(props: YoutubeUploadProps) {
                 </div>
                 <span>{props.data.video.snippet.title}</span>
               </div>
-              <div className="relative channel border-2 rounded-md p-3 flex gap-2">
+              <div className="relative channel border-2 rounded-md p-3 h-20 flex gap-2">
                 <span className="absolute -top-4 left-2 text-gray-400 bg-white px-1">
                   Channel
                 </span>
-                {channel && (
-                  <a href={channelUrl} target="_blank" rel="noreferrer">
-                    <img
-                      src={
-                        YoutubeAPI.getBestThumbnail(channel.snippet.thumbnails)
-                          ?.url
-                      }
-                      width={48}
-                      height={48}
-                      className="rounded-full"
-                    />
-                  </a>
-                )}
-                <div className="flex flex-col justify-around">
-                  <a href={channelUrl} target="_blank" rel="noreferrer">
-                    {channel
-                      ? channel.snippet.localized.title
-                      : props.data.video.snippet.channelTitle}
-                  </a>
-                  {channel && (
-                    <span className="text-sm text-gray-500">
-                      {shortenNumberString(
-                        channel.statistics.subscriberCount,
-                        2
-                      )}{" "}
-                      subscribers
-                    </span>
-                  )}
-                </div>
+                <ChannelDisplay
+                  channelId={props.data.video.snippet.channelId}
+                />
               </div>
               <div className="p-2 min-h-[100px] max-h-fit rounded-md border-2 relative">
                 <span className="absolute -top-4 left-2 text-gray-400 bg-white px-1">
                   Description
                 </span>
                 <p className="whitespace-pre-wrap overflow-y-auto h-full">
-                  {props.data.video.snippet.description}
+                  {parsedDescription}
                 </p>
               </div>
             </div>
