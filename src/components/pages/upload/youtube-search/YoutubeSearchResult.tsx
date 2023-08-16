@@ -1,53 +1,38 @@
 import { YoutubeAPI } from "@/src/api/youtube-API";
+import ChannelDisplay from "@/src/components/utils/youtube/ChannelDisplay";
 import { API } from "@/src/types/api";
-import { splitOutUrls } from "@/src/utils/url-utils";
-import { DownloadCloud, ExternalLink } from "lucide-react";
+import { shortenNumberString } from "@/src/utils/string-utils";
+import { formatIsoDuration, timeSince } from "@/src/utils/date-utils";
+import { ExternalLink } from "lucide-react";
 
 type YoutubeSearchResultProps = {
-  videoSnippet: API.Youtube.VideoSnippet;
   videoId: string;
+  video: API.Youtube.Video;
   onClickDownLoad: () => void;
 };
 
 export function YoutubeSearchResult(props: YoutubeSearchResultProps) {
-  const parsedDescription = splitOutUrls(props.videoSnippet.description).map(
-    (split, index) => {
-      if (split.type === "string") {
-        return <span key={index}>{split.data}</span>;
-      } else {
-        return (
-          <span key={index}>
-            <a
-              target="_blank"
-              rel="noreferrer"
-              href={split.data}
-              className="underline"
-            >
-              {split.data}
-            </a>
-          </span>
-        );
-      }
-    }
-  );
   const videoLink = `https://youtube.com/watch?v=${props.videoId}`;
+
+  const videoSnippet = props.video.snippet;
   return (
-    <div className="flex flex-row max-h-[135px] my-3">
+    <div className="flex flex-row p-2 rounded-md odd:bg-gray-100">
       <a
         href={videoLink}
         target="_blank"
         rel="noreferrer"
-        className="max-w-[240px] max-h-[135px] mr-2"
+        className="aspect-video h-48 mr-2"
       >
-        <div className="group relative rounded-md overflow-hidden">
+        <div className="aspect-video group relative rounded-md overflow-hidden">
           <img
-            src={
-              YoutubeAPI.getBestThumbnail(props.videoSnippet.thumbnails)?.url
-            }
-            width={240}
-            height={135}
-            className="object-cover min-h-[135px] max-h-[135px] min-w-[240px]"
+            src={YoutubeAPI.getBestThumbnail(videoSnippet.thumbnails)?.url}
+            className="aspect-video object-cover"
           />
+          <div className="video-duration p-1 bg-gray-200 absolute right-0 bottom-0 text-xs m-1 rounded-md">
+            <span>
+              {formatIsoDuration(props.video.contentDetails.duration)}
+            </span>
+          </div>
           <div className="absolute left-0 top-0 w-full h-full bg-black bg-opacity-20 group-hover:block hidden">
             <ExternalLink
               size={48}
@@ -56,39 +41,36 @@ export function YoutubeSearchResult(props: YoutubeSearchResultProps) {
           </div>
         </div>
       </a>
-      <div className="flex flex-col relative grow overflow-clip">
-        <div className="overflow-hidden flex flex-row shrink-0">
+      <div className="flex flex-col relative grow gap-2 overflow-clip">
+        <div className="flex flex-col overflow-hidden">
           <a
             href={videoLink}
             target="_blank"
             rel="noreferrer"
-            className="my-auto block grow min-w-0 whitespace-nowrap overflow-hidden overflow-ellipsis"
+            className="block min-w-0 w-fit whitespace-nowrap overflow-hidden overflow-ellipsis text-lg"
           >
-            {props.videoSnippet.title}
+            {videoSnippet.title}
           </a>
-          <div className="buttons whitespace-nowrap">
-            <button
-              onClick={() => {
-                props.onClickDownLoad();
-              }}
-              className="hover:bg-gray-300 rounded-md p-1"
-            >
-              <DownloadCloud />
-            </button>
+          <div className="flex gap-1 flex-row video-stats text-xs text-gray-400 ml-2">
+            <span>
+              {shortenNumberString(props.video.statistics.viewCount, 2)} views
+            </span>
+            <span>•</span>
+            <span>
+              {timeSince(new Date(props.video.snippet.publishedAt))} ago
+            </span>
           </div>
         </div>
-        <a
-          className="ml-3 text-gray-600 font-light underline inline"
-          target="_blank"
-          rel="noreferrer"
-          href={`https://youtube.com/channel/${props.videoSnippet.channelId}`}
-        >
-          By: {props.videoSnippet.channelTitle}
-        </a>
-        <div className="grow overflow-clip border-t-2 relative">
-          <p className="overflow-scroll whitespace-pre-line max-h-full">
-            {parsedDescription}
-          </p>
+        <div className="relative flex h-10">
+          <ChannelDisplay channelId={videoSnippet.channelId} />
+        </div>
+        <div className="mt-auto flex flex-row-reverse">
+          <button
+            className="btn py-1 bg-sky-600 border-cyan-600 active:bg-sky-700 dark:invert"
+            onClick={props.onClickDownLoad}
+          >
+            Import Audio
+          </button>
         </div>
       </div>
     </div>

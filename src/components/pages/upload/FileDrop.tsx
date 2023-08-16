@@ -103,7 +103,7 @@ export default function FileDrop(props: FileDropProps) {
   return (
     <div
       className={
-        "grow relative overflow-hidden flex items-center justify-center rounded-md mt-2 border-2 group" +
+        "grow relative overflow-hidden flex items-center justify-center rounded-md border-2 group" +
         (dropZoneState === DropZoneState.NoFile ? " hover:cursor-pointer" : "")
       }
       onDrop={onDrop}
