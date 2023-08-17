@@ -1,101 +1,121 @@
 import { PrismaClient } from "@prisma/client";
+import { v4 as uuid } from "uuid";
 
 const prisma = new PrismaClient();
 
+type SongStub = {
+  id: string;
+  title: string;
+};
 async function main() {
   await prisma.song.deleteMany({});
   await prisma.album.deleteMany({});
   await prisma.artist.deleteMany({});
   await prisma.playlist.deleteMany({});
-  const albumId = "ae18c530-d9e0-4130-8645-3ab032ff8431";
-  const bestOfBootieAlbum = await prisma.album.upsert({
-    where: {
-      id: albumId,
-    },
-    update: {},
-    create: {
-      id: albumId,
-      title: "Best of Bootie Mashup 2022",
-      genre: "Mashup",
-      artists: {
-        connectOrCreate: {
-          create: {
-            name: "Bootie Mashup",
-          },
-          where: {
-            name: "Bootie Mashup",
-          },
-        },
-      },
+
+  const pianoGuysArtist = await prisma.artist.create({
+    data: {
+      name: "The Piano Guys",
     },
   });
-  const bestOfBootieSongs: { id: string; title: string; artists: string[] }[] =
-    [
-      {
-        id: "a8f3a856-9cbf-417d-a859-e1dc0ff3efbd",
-        title: "Best of Bootie Mashup Intro 2022",
-        artists: ["Lewis Wake"],
-      },
-      {
-        id: "d98209dc-ba61-463d-9462-3773c9edfd0b",
-        title: "My Own Worst Anti-Hero",
-        artists: ["Adriana A"],
-      },
-      {
-        id: "d185130f-9ad4-4a98-8f23-a219288d99b5",
-        title: "About The Damn End",
-        artists: ["DJ Cummerbund"],
-      },
-      {
-        id: "35a3da7f-4d0e-425d-8f08-a9e72fe1f733",
-        title: "Feeling Big Energy",
-        artists: ["Satis5d"],
-      },
-      {
-        id: "ffc30d08-37c9-4e2a-a45c-51db98dc3be9",
-        title: "We Don't Talk About Backstreet",
-        artists: ["Titus Jones"],
-      },
-      {
-        id: "fa414131-9669-4776-a585-65c0c0ecd81f",
-        title: "Summer Up That Hill",
-        artists: ["iWillBattle"],
-      },
-      {
-        id: "fa1f8d71-0f7f-4dde-9018-a317f26203a7",
-        title: "Break My Lights",
-        artists: ["Girl Talk"],
-      },
-      {
-        id: "b5166a99-90f6-481a-9234-405ae0be649c",
-        title: "Bulletproof Feels",
-        artists: ["PDS MIX"],
-      },
-    ];
-  for (let i = 0; i < bestOfBootieSongs.length; i++) {
-    const songData = bestOfBootieSongs[i];
-    const trackNumber = i + 1;
-    const year = 24 * 36e5 * 365;
-    await prisma.song.upsert({
-      where: {
-        id: songData.id,
-      },
-      update: {},
-      create: {
-        id: songData.id,
-        title: songData.title,
-        artists: {
-          connectOrCreate: songData.artists.map((a) => ({
-            create: { name: a },
-            where: { name: a },
-          })),
+  const pianoGuysAlbum = await prisma.album.create({
+    data: {
+      id: uuid(),
+      title: "The Piano Guys",
+      artists: {
+        connect: {
+          id: pianoGuysArtist.id,
         },
-        albumId: bestOfBootieAlbum.id,
-        trackNumber: trackNumber,
-        genre: "Mashup",
-        createdOn: new Date(
-          Math.floor(Math.random() * 2 * year + (Date.now() - 2 * year))
-        ),
+      },
+      genre: "Classical",
+    },
+  });
+  const pianoGuysAlbumSongs: SongStub[] = [
+    {
+      id: "b0820e12-4582-4b9f-bd19-3c29d30b64c4",
+      title: "Titanium / Pavane",
+    },
+    {
+      id: "674434a9-8e12-4229-a443-c15ee8aab019",
+      title: "Peponi (Paradise)",
+    },
+    {
+      id: "38624a48-69d9-4be7-972b-82ddc7a71a33",
+      title: "Code Name Vivaldi",
+    },
+    {
+      id: "34c9a9a5-cabe-44c3-a7cb-e5ca7d5082ef",
+      title: "Beethoven's 5 Secrets",
+    },
+    {
+      id: "11480307-5d38-4b11-9cab-933373ffaa10",
+      title: "Over the Rainbow / Simple Gifts",
+    },
+    {
+      id: "1455b086-2c52-46ab-bccc-99c8f8c6f9a6",
+      title: "Cello Wars",
+    },
+    {
+      id: "0c90ce5c-31e7-4b4e-9729-e3cc646e9f81",
+      title: "Arwen's Vigil",
+    },
+    {
+      id: "58bb7c76-04b4-40f8-a7b0-026b094bad22",
+      title: "Moonlight",
+    },
+    {
+      id: "be9fdb90-6242-4d4d-a2f1-1b4adbfc8279",
+      title: "A Thousand Years",
+    },
+    {
+      id: "fdbe24dc-3fe7-41c7-a665-41271d29a68b",
+      title: "Michael Meets Mozart",
+    },
+    {
+      id: "a1aa94cd-edd8-4f73-b98c-51be8196015e",
+      title: "The Cello Song",
+    },
+    {
+      id: "a30102d0-1006-4f9e-9fd4-c63c5318e879",
+      title: "Rolling in the Deep",
+    },
+    {
+      id: "aaa24e58-36a7-45d6-b16a-1fbbec320421",
+      title: "What Makes You Beautiful",
+    },
+    {
+      id: "d717320d-28b2-4d39-ac98-6024fe2c67c7",
+      title: "Bring Him Home",
+    },
+    {
+      id: "4752277b-42ac-4908-9c8f-1b1f7ee18e14",
+      title: "Without You",
+    },
+    {
+      id: "c94394ea-0371-4ea3-b801-5cb184f0a215",
+      title: "Nearer My God to Thee",
+    },
+  ];
+  for (let i = 0; i < pianoGuysAlbumSongs.length; i++) {
+    const song = pianoGuysAlbumSongs[i];
+
+    await prisma.song.create({
+      data: {
+        id: song.id,
+        title: song.title,
+        album: {
+          connect: {
+            id: pianoGuysAlbum.id,
+          },
+        },
+        genre: "Classical",
+        artists: {
+          connect: {
+            id: pianoGuysArtist.id,
+          },
+        },
+        audioUploaded: new Date(),
+        trackNumber: i + 1,
       },
     });
   }

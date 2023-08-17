@@ -31,4 +31,7 @@ coverage
 
 # Personal Music
 static/*
+
+# Seeded songs
+!static/songs
 .env*.local
