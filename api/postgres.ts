@@ -197,7 +197,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const genreResults = (
         await prismaClient.$queryRaw<
           { genre: string; song_count: bigint; album_count: bigint }[]
-        >`select s1.genre, s1.count as song_count, coalesce(s2.count, 0) as album_count from (select genre, COUNT(*) from "Song" group by genre) s1 left join (select genre, COUNT(*) from "Album" group by genre) s2 on (s1.genre = s2.genre) union select s1.genre, coalesce(s2.count, 0) as song_count, s1.count as album_count from (select genre, COUNT(*) from "Album" group by genre) s1 left join (select genre, COUNT(*) from "Song" group by genre) s2 on (s1.genre = s2.genre) order by genre asc;`
+        >`select s1.genre, s1.count as song_count, coalesce(s2.count, 0) as album_count from ( select genre, COUNT(*) as count from \`Song\` group by genre) s1 left join ( select genre, COUNT(*) as count from \`Album\` group by genre) s2 on (s1.genre = s2.genre) union select s1.genre, coalesce(s2.count, 0) as song_count, s1.count as album_count from ( select genre, COUNT(*) as count from \`Album\` group by genre) s1 left join ( select genre, COUNT(*) as count from \`Song\` group by genre) s2 on (s1.genre = s2.genre) order by genre asc;`
       ).map<PostgresRequest.GenreListResponse>((obj) => ({
         genre: obj.genre,
         songCount: Number(obj.song_count),
