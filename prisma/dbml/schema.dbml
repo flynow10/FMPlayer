@@ -1,0 +1,207 @@
+//// ------------------------------------------------------
+//// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+//// ------------------------------------------------------
+
+Table TagType {
+  id String [pk]
+  name String [unique, not null]
+  description String
+  tags Tag [not null]
+  modifiedOn DateTime [default: `now()`, not null]
+  createdOn DateTime [default: `now()`, not null]
+}
+
+Table Tag {
+  id String [pk]
+  name String [unique, not null]
+  description String
+  tagType TagType [not null]
+  tagTypeId String [not null]
+  tracks Track [not null]
+  albums Album [not null]
+  functions Function [not null]
+  playlists Playlist [not null]
+  modifiedOn DateTime [default: `now()`, not null]
+  createdOn DateTime [default: `now()`, not null]
+}
+
+Table Genre {
+  id String [pk]
+  name String [unique, not null]
+  tracks Track [not null]
+  albums Album [not null]
+  modifiedOn DateTime [default: `now()`, not null]
+  createdOn DateTime [default: `now()`, not null]
+}
+
+Table Artwork {
+  id String [pk]
+  tracks Track [not null]
+  albums Album [not null]
+  functions Function [not null]
+  playlists Playlist [not null]
+  modifiedOn DateTime [default: `now()`, not null]
+  createdOn DateTime [default: `now()`, not null]
+}
+
+Table Track {
+  id String [pk]
+  title String [not null]
+  artists TrackArtist [not null]
+  genre Genre [not null]
+  genreId String [not null]
+  artwork Artwork
+  artworkId String
+  tags Tag [not null]
+  listConnections TrackInList [not null]
+  audioSource AudioSource
+  modifiedOn DateTime [default: `now()`, not null]
+  createdOn DateTime [default: `now()`, not null]
+}
+
+Table TrackArtist {
+  id Int [pk, increment]
+  track Track [not null]
+  trackId String [not null]
+  artist Artist [not null]
+  artistId String [not null]
+  artistType ArtistType [not null]
+  modifiedOn DateTime [default: `now()`, not null]
+}
+
+Table TrackInList {
+  track Track [not null]
+  trackId String [not null]
+  trackList TrackList [not null]
+  trackListId String [not null]
+  trackNumber Int [not null]
+  modifiedOn DateTime [default: `now()`, not null]
+
+  indexes {
+    (trackId, trackListId) [pk]
+  }
+}
+
+Table AudioSource {
+  id Int [pk, increment]
+  track Track [not null]
+  trackId String [unique, not null]
+  sourceType SourceType [not null]
+  sourceId String
+  durationMS Int [not null]
+  integratedLoudness Float [not null]
+  modifiedOn DateTime [default: `now()`, not null]
+  createdOn DateTime [default: `now()`, not null]
+}
+
+Table Album {
+  id String [pk]
+  title String [not null]
+  artists AlbumArtist [not null]
+  genre Genre [not null]
+  genreId String [not null]
+  artwork Artwork
+  artworkId String
+  tags Tag [not null]
+  trackList TrackList [not null]
+  trackListId String [unique, not null]
+  modifiedOn DateTime [default: `now()`, not null]
+  createdOn DateTime [default: `now()`, not null]
+}
+
+Table AlbumArtist {
+  album Album [not null]
+  albumId String [not null]
+  artist Artist [not null]
+  artistId String [not null]
+  artistType ArtistType [not null]
+  modifiedOn DateTime [default: `now()`, not null]
+
+  indexes {
+    (albumId, artistId) [pk]
+  }
+}
+
+Table TrackList {
+  id String [pk]
+  trackConnections TrackInList [not null]
+  integratedLoudness Float
+  album Album
+  playlist Playlist
+  modifiedOn DateTime [default: `now()`, not null]
+  createdOn DateTime [default: `now()`, not null]
+}
+
+Table Artist {
+  id String [pk]
+  name String [unique, not null]
+  tracks TrackArtist [not null]
+  albums AlbumArtist [not null]
+  modifiedOn DateTime [default: `now()`, not null]
+  createdOn DateTime [default: `now()`, not null]
+}
+
+Table Function {
+  id String [pk]
+  title String [not null]
+  artwork Artwork
+  artworkId String
+  tags Tag [not null]
+  functionData Json [not null]
+  modifiedOn DateTime [default: `now()`, not null]
+  createdOn DateTime [default: `now()`, not null]
+}
+
+Table Playlist {
+  id String [pk]
+  title String [not null]
+  artwork Artwork
+  artworkId String
+  tags Tag [not null]
+  trackList TrackList [not null]
+  trackListId String [unique, not null]
+  modifiedOn DateTime [default: `now()`, not null]
+  createdOn DateTime [default: `now()`, not null]
+}
+
+Enum ArtistType {
+  MAIN
+  FEATURED
+}
+
+Enum SourceType {
+  FILE
+  YOUTUBE
+}
+
+Ref: Tag.tagTypeId > TagType.id
+
+Ref: Track.genreId > Genre.id
+
+Ref: Track.artworkId > Artwork.id
+
+Ref: TrackArtist.trackId > Track.id
+
+Ref: TrackArtist.artistId > Artist.id
+
+Ref: TrackInList.trackId > Track.id
+
+Ref: TrackInList.trackListId > TrackList.id
+
+Ref: AudioSource.trackId - Track.id
+
+Ref: Album.genreId > Genre.id
+
+Ref: Album.artworkId > Artwork.id
+
+Ref: Album.trackListId - TrackList.id
+
+Ref: AlbumArtist.albumId > Album.id
+
+Ref: AlbumArtist.artistId > Artist.id
+
+Ref: Function.artworkId > Artwork.id
+
+Ref: Playlist.artworkId > Artwork.id
+
+Ref: Playlist.trackListId - TrackList.id
