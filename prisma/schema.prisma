@@ -94,8 +94,6 @@ model Track {
 }
 
 model TrackArtist {
-  id Int @id @default(autoincrement())
-
   track    Track  @relation(fields: [trackId], references: [id])
   trackId  String @db.VarChar(36)
   artist   Artist @relation(fields: [artistId], references: [id])
@@ -104,6 +102,8 @@ model TrackArtist {
   artistType ArtistType
 
   modifiedOn DateTime @default(now()) @updatedAt
+
+  @@id([trackId, artistId])
 }
 
 model TrackInList {
