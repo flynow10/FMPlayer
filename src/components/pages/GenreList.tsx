@@ -1,9 +1,8 @@
 import { useAsyncLoad } from "@/src/hooks/use-async-load";
-import { MyMusicLibrary } from "@/src/music/library/music-library";
+import { MusicLibrary } from "@/src/music/library/music-library";
 import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
 import { MediaCard } from "@/src/components/media-displays/MediaCard";
 import { MediaCarousel } from "@/src/components/media-displays/MediaCarousel";
-import { PostgresRequest } from "@/src/types/postgres-request";
 import { Pages } from "@/src/types/pages";
 
 type GenreListProps = {
@@ -12,16 +11,9 @@ type GenreListProps = {
 };
 
 export default function GenreList(props: GenreListProps) {
-  const [genreMedia, loaded] = useAsyncLoad<
-    PostgresRequest.GenreMediaResponse[]
-  >(
+  const [genreMedia, loaded] = useAsyncLoad(
     async () => {
-      const genreList = await MyMusicLibrary.getGenreList();
-      return Promise.all(
-        genreList.map((genre) => {
-          return MyMusicLibrary.getGenreMedia(genre.genre);
-        })
-      );
+      return await MusicLibrary.db.genre.list();
     },
     [],
     []
@@ -34,12 +26,9 @@ export default function GenreList(props: GenreListProps) {
   return (
     <div>
       {genreMedia.map((genreInfo) => {
-        const filteredSongs = genreInfo.songs.filter(
-          (song) => song.albumId === null
-        );
         return (
-          <div key={genreInfo.genre} className="flex flex-col p-10">
-            <h3 className="text-2xl font-bold">{genreInfo.genre}</h3>
+          <div key={genreInfo.name} className="flex flex-col p-10">
+            <h3 className="text-2xl font-bold">{genreInfo.name}</h3>
             {genreInfo.albums.length > 0 && (
               <>
                 <h2 className="text-lg ml-5">Albums</h2>
@@ -60,18 +49,18 @@ export default function GenreList(props: GenreListProps) {
                 </MediaCarousel>
               </>
             )}
-            {filteredSongs.length > 0 && (
+            {genreInfo.tracks.length > 0 && (
               <>
-                <h2 className="text-lg ml-5">Songs</h2>
+                <h2 className="text-lg ml-5">Tracks</h2>
                 <MediaCarousel>
-                  {filteredSongs.map((song) => {
+                  {genreInfo.tracks.map((track) => {
                     return (
                       <MediaCard
-                        key={song.id}
-                        id={song.id}
-                        mediaType={"song"}
+                        key={track.id}
+                        id={track.id}
+                        mediaType={"track"}
                         size={"medium"}
-                        title={song.title}
+                        title={track.title}
                         onPlayMedia={props.onPlayMedia}
                         onNavigate={props.onNavigate}
                       />

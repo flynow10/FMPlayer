@@ -13,36 +13,36 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
-  if (typeof req.query.type !== "string" || req.query.type === "") {
-    res.status(400).json("Missing type");
+  // if (typeof req.query.type !== "string" || req.query.type === "") {
+  //   res.status(400).json("Missing type");
+  //   return;
+  // }
+
+  printRequestType("aws", "songUrl");
+
+  // switch (req.query.type) {
+  //   case "songUrl": {
+  const { trackId: id } = req.query;
+
+  if (IS_LOCAL) {
+    res.status(200).json({ url: `/static/songs/${id}.ogg` });
     return;
   }
 
-  printRequestType("aws", req.query.type);
-
-  switch (req.query.type) {
-    case "songUrl": {
-      const { id } = req.query;
-
-      if (IS_LOCAL) {
-        res.status(200).json({ url: `/static/songs/${id}.ogg` });
-        return;
-      }
-
-      if (typeof id !== "string" || id === "") {
-        res.status(400).json("Missing song ID!");
-        return;
-      }
-
-      res.status(200).json({ url: await getSongUrl(id) });
-      break;
-    }
-
-    default: {
-      res.status(400).json("Invalid type");
-      return;
-    }
+  if (typeof id !== "string" || id === "") {
+    res.status(400).json("Missing song ID!");
+    return;
   }
+
+  res.status(200).json({ url: await getSongUrl(id) });
+  // break;
+  //     }
+
+  //     default: {
+  //       res.status(400).json("Invalid type");
+  //       return;
+  //     }
+  //   }
 }
 
 const S3_SONGS_BUCKET = getEnvVar("S3_SONGS_BUCKET");

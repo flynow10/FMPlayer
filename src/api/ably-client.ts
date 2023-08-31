@@ -8,7 +8,7 @@ import {
   toast,
 } from "react-toastify";
 import { AblyMessage } from "@fm-player/shared";
-import { MyMusicLibrary } from "@/src/music/library/music-library";
+import { MusicLibrary } from "@/src/music/library/music-library";
 import { createElement, useState } from "react";
 
 type MessageCallback<T> = (msg: T) => void;
@@ -172,8 +172,8 @@ export class AblyClient {
     if (this.songTitles[id]) {
       return this.songTitles[id];
     } else {
-      return MyMusicLibrary.getSong(id).then((song) => {
-        if (song !== undefined) {
+      return MusicLibrary.db.track.get({ id }).then((song) => {
+        if (song !== null) {
           this.songTitles[id] = song.title;
         }
         return this.songTitles[id];

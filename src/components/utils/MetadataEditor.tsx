@@ -2,7 +2,7 @@ import BaseSuggestionInput from "@/src/components/utils/input-extensions/BaseSug
 import MultiSuggestionInput from "@/src/components/utils/input-extensions/MultiSuggestionInput";
 import { FileContext } from "@/src/contexts/FileContext";
 import { useAsyncLoad } from "@/src/hooks/use-async-load";
-import { MyMusicLibrary } from "@/src/music/library/music-library";
+import { MusicLibrary } from "@/src/music/library/music-library";
 import { Pages } from "@/src/types/pages";
 import { pickSuggestions } from "@/src/utils/string-utils";
 import { useContext, useState } from "react";
@@ -15,14 +15,14 @@ export default function MetadataEditor(props: MetadataEditorProps) {
   const file = useContext(FileContext);
   const [allArtists, allArtistsLoaded] = useAsyncLoad(
     () => {
-      return MyMusicLibrary.getArtistList();
+      return MusicLibrary.db.artist.list();
     },
     [],
     []
   );
   const [libraryGenres, libraryGenresLoaded] = useAsyncLoad(
     () => {
-      return MyMusicLibrary.getGenreList();
+      return MusicLibrary.db.genre.list();
     },
     [],
     []
@@ -61,7 +61,7 @@ export default function MetadataEditor(props: MetadataEditorProps) {
     }
     return pickSuggestions(
       search,
-      libraryGenres.map((g) => g.genre)
+      libraryGenres.map((g) => g.name)
     );
   };
 
