@@ -1,4 +1,4 @@
-import { MyMusicLibrary } from "@/src/music/library/music-library";
+import { MusicLibrary } from "@/src/music/library/music-library";
 import { useAsyncLoad } from "@/src/hooks/use-async-load";
 import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
 import { MediaCard } from "@/src/components/media-displays/MediaCard";
@@ -12,7 +12,7 @@ type AlbumListProps = {
 export default function AlbumList(props: AlbumListProps) {
   const [albumList, loaded] = useAsyncLoad(
     () => {
-      return MyMusicLibrary.getAlbumList();
+      return MusicLibrary.db.album.list();
     },
     [],
     []

@@ -9,8 +9,8 @@ import Youtube from "react-youtube";
 import { YoutubeAPI } from "@/src/api/youtube-API";
 import { Loader2, Play } from "lucide-react";
 import VerticalSplit from "@/src/components/utils/VerticalSplit";
-import { MyMusicLibrary } from "@/src/music/library/music-library";
-import { toast } from "react-toastify";
+// import { MusicLibrary } from "@/src/music/library/music-library";
+// import { toast } from "react-toastify";
 import { splitOutUrls } from "@/src/utils/url-utils";
 import ChannelDisplay from "@/src/components/utils/youtube/ChannelDisplay";
 
@@ -79,22 +79,22 @@ export default function YoutubeUpload(props: YoutubeUploadProps) {
   const uploadVideo = async () => {
     youtubeRef.current?.internalPlayer?.stopVideo();
     setIsUploading(true);
+    alert("Uploading is currently not implemented!");
+    // try {
+    //   const track = await MusicLibrary.downloadYoutubeVideo(
+    //     props.data.video.id,
+    //     metadata
+    //   );
+    //   console.log(track);
+    // } catch (e) {
+    //   toast(`Failed to upload ${metadata.title}!`, {
+    //     type: "error",
+    //   });
+    // }
 
-    try {
-      const song = await MyMusicLibrary.downloadYoutubeVideo(
-        props.data.video.id,
-        metadata
-      );
-      console.log(song);
-    } catch (e) {
-      toast(`Failed to upload ${metadata.title}!`, {
-        type: "error",
-      });
-    }
-
-    toast(`Completed preupload for ${metadata.title}`, {
-      type: "success",
-    });
+    // toast(`Completed preupload for ${metadata.title}`, {
+    //   type: "success",
+    // });
     props.onNavigate("back");
   };
 

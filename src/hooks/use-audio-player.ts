@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { MyMusicLibrary } from "@/src/music/library/music-library";
+import { MusicLibrary } from "@/src/music/library/music-library";
 
 export function useAudioPlayer(id: string | null, onSongEnded?: () => void) {
   const audioTag = useRef(new Audio());
@@ -62,9 +62,9 @@ export function useAudioPlayer(id: string | null, onSongEnded?: () => void) {
 
     if (id !== null) {
       (async () => {
-        const url = await MyMusicLibrary.getMusicFileUrl(id);
+        const url = await MusicLibrary.audio.getAudioFileUrl(id);
 
-        if (url !== undefined && active) {
+        if (url !== null && active) {
           audioRef.src = url;
           audioRef.load();
         }

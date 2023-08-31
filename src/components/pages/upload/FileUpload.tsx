@@ -5,7 +5,7 @@ import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
 import { Pages } from "@/src/types/pages";
 import { getFileNameFromUrl } from "@/src/utils/url-utils";
 import MetadataEditor from "@/src/components/utils/MetadataEditor";
-import { MyMusicLibrary } from "@/src/music/library/music-library";
+// import { MusicLibrary } from "@/src/music/library/music-library";
 import FileList from "@/src/components/pages/upload/FileList";
 import { FileContext } from "@/src/contexts/FileContext";
 import { Music } from "@/src/types/music";
@@ -151,7 +151,7 @@ export default function FileUpload(props: FileUploadProps) {
     setFileStatuses(
       selectedFiles.map((f) => ({ id: f.metadata.id, status: "waiting" }))
     );
-
+    alert("Uploading is currently not implemented!");
     for (let i = 0; i < selectedFiles.length; i++) {
       const file = selectedFiles[i];
       setFileStatuses((prev) => {
@@ -166,7 +166,7 @@ export default function FileUpload(props: FileUploadProps) {
           }
         });
       });
-      await MyMusicLibrary.uploadFile(file);
+      // await MusicLibrary.uploadFile(file);
       setFileStatuses((prev) => {
         return prev.map((s) => {
           if (s.id === file.metadata.id) {

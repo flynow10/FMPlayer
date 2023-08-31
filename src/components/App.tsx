@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Audio } from "@/src/components/layout/Audio";
-import { MyMusicLibrary } from "@/src/music/library/music-library";
+import { MusicLibrary } from "@/src/music/library/music-library";
 import { Playlist } from "@/src/music/playlists/playlist";
 import AudioControlPlaceholder from "@/src/components/layout/AudioControlPlaceholder";
 import { useAudioPlayer } from "@/src/hooks/use-audio-player";
@@ -28,10 +28,10 @@ export default function App() {
     nextSong(false);
   });
 
-  const beginPlayback = () => {
+  const beginPlayback = async () => {
     const playlist = new Playlist();
     playlist.addAction(
-      new PlaySongAction("0179e8ca-3ff8-4ad8-bfba-332296670252")
+      new PlaySongAction((await MusicLibrary.db.track.list())[0].id)
     );
     setQueue(playlist);
     audioPlayer.startPlayback();
@@ -143,7 +143,7 @@ export default function App() {
 
           switch (type) {
             case "album": {
-              const album = await MyMusicLibrary.getAlbum(id);
+              const album = await MusicLibrary.db.album.get({ id });
 
               if (album) {
                 playlist = PlaylistHelper.getPlaylistFromAlbum(album);
@@ -152,12 +152,12 @@ export default function App() {
               break;
             }
 
-            case "song": {
-              const song = await MyMusicLibrary.getSong(id);
+            case "track": {
+              const track = await MusicLibrary.db.track.get({ id });
 
-              if (song) {
+              if (track) {
                 playlist = new Playlist().addAction(
-                  new PlaySongAction(song.id)
+                  new PlaySongAction(track.id)
                 );
               }
 
