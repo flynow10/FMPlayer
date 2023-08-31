@@ -1,7 +1,8 @@
 import { PrismaClient } from "@prisma/client";
-import { v4 as uuid } from "uuid";
 
 const prisma = new PrismaClient();
+
+const PIANO_GUYS_ALBUM_ID = "c2119c55-3e03-4b21-8c89-57efaeebdf6a";
 
 type SongStub = {
   id: string;
@@ -27,9 +28,13 @@ async function main() {
     update: {},
   });
 
-  const pianoGuysAlbum = await prisma.album.create({
-    data: {
-      id: uuid(),
+  const pianoGuysAlbum = await prisma.album.upsert({
+    update: {},
+    where: {
+      id: PIANO_GUYS_ALBUM_ID,
+    },
+    create: {
+      id: PIANO_GUYS_ALBUM_ID,
       title: "The Piano Guys",
       genre: {
         connect: {
