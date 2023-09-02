@@ -1,5 +1,5 @@
 import { FileType } from "@/src/types/file-type";
-import { Prisma, PrismaClient } from "@prisma/client";
+import { ArtistType, Prisma, PrismaClient } from "@prisma/client";
 
 export namespace Music {
   export namespace DB {
@@ -143,20 +143,35 @@ export namespace Music {
     };
   }
   export namespace Files {
-    export type PreUploadFile = {
-      audioData: AudioData;
-    } & EditableFile;
     export type EditableFile = {
       metadata: EditableMetadata;
+      audioData: AudioData;
     };
     export type AudioData = {
       fileType: FileType.FileTypeResult;
       buffer: Uint8Array;
     };
 
-    export type EditableMetadata = Omit<Song, "modifiedOn" | "createdOn"> & {
-      artists: string[];
-      featuring: string[];
+    export type EditableMetadata = {
+      id: string;
+      title: string;
+      artists: {
+        name: string;
+        type: ArtistType;
+      }[];
+      albumId: string | null;
+      artworkUrl: string | null;
+      tags: (
+        | {
+            id: string;
+          }
+        | {
+            name: string;
+            description: string;
+            tagTypeId: string;
+          }
+      )[];
+      genre: string;
     };
   }
 

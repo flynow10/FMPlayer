@@ -6,7 +6,7 @@ import { Check, CheckSquare, Loader2, MinusSquare, Square } from "lucide-react";
 import { useContext, useState } from "react";
 
 type FileListProps = {
-  files: Music.Files.PreUploadFile[];
+  files: Music.Files.EditableMetadata[];
   selectedFiles: string[];
   ableToSelect: boolean;
   fileStatuses: Pages.Upload.FileStatus[];
@@ -20,20 +20,20 @@ export default function FileList(props: FileListProps) {
 
   const onSelectFile = (
     event: React.MouseEvent<HTMLElement, MouseEvent>,
-    file: Music.Files.EditableFile,
+    file: Music.Files.EditableMetadata,
     fileIndex: number
   ) => {
     event.preventDefault();
     // Set all files to the inverse of the current selected file
-    const newCheckValue = !props.selectedFiles.includes(file.metadata.id);
+    const newCheckValue = !props.selectedFiles.includes(file.id);
     const filesToFlip: string[] = [];
     let startIndex = props.files.findIndex((findFile) => {
-      return findFile.metadata.id === lastSelectedFile;
+      return findFile.id === lastSelectedFile;
     });
 
     if (!event.shiftKey || startIndex === -1) {
       // Normal select / same file selected with shift
-      filesToFlip.push(file.metadata.id);
+      filesToFlip.push(file.id);
     } else {
       // Swap if selecting up instead of down
       let endIndex = fileIndex;
@@ -45,7 +45,7 @@ export default function FileList(props: FileListProps) {
       }
 
       for (let i = startIndex; i <= endIndex; i++) {
-        filesToFlip.push(props.files[i].metadata.id);
+        filesToFlip.push(props.files[i].id);
       }
     }
 
@@ -53,7 +53,7 @@ export default function FileList(props: FileListProps) {
       props.setSelectedFile(flipFile, newCheckValue);
     });
 
-    setLastSelectedFile(file.metadata.id);
+    setLastSelectedFile(file.id);
   };
 
   return (
@@ -73,7 +73,7 @@ export default function FileList(props: FileListProps) {
                 e.preventDefault();
                 props.files.forEach((file) => {
                   props.setSelectedFile(
-                    file.metadata.id,
+                    file.id,
                     props.selectedFiles.length === 0
                   );
                 });
@@ -98,13 +98,13 @@ export default function FileList(props: FileListProps) {
       <div className="grow flex flex-col overflow-auto border-b-2">
         {props.files.map((file, fileIndex) => {
           const status: Pages.Upload.FileStatus = props.fileStatuses.find(
-            (s) => s.id === file.metadata.id
+            (s) => s.id === file.id
           ) ?? {
-            id: file.metadata.id,
+            id: file.id,
             status: "not queued",
           };
           let icon;
-          let subText: string = file.audioData.fileType.mime;
+          let subText = file.artists.map((a) => a.name).join(", "); //= file.audioData.fileType.mime;
 
           switch (status.status) {
             case "waiting":
@@ -113,7 +113,7 @@ export default function FileList(props: FileListProps) {
                 subText = "Waiting to upload...";
               }
 
-              icon = props.selectedFiles.includes(file.metadata.id) ? (
+              icon = props.selectedFiles.includes(file.id) ? (
                 <CheckSquare />
               ) : (
                 <Square />
@@ -131,17 +131,17 @@ export default function FileList(props: FileListProps) {
 
           return (
             <div
-              key={file.metadata.id}
+              key={file.id}
               className={classNames(
                 {
                   "text-gray-500": !props.ableToSelect,
-                  "bg-blue-300": file.metadata.id === openFile?.metadata.id,
+                  "bg-blue-300": file.id === openFile?.id,
                   "bg-blue-100":
-                    props.selectedFiles.includes(file.metadata.id) &&
-                    !(file.metadata.id === openFile?.metadata.id),
+                    props.selectedFiles.includes(file.id) &&
+                    !(file.id === openFile?.id),
                   "border-blue-100":
-                    props.selectedFiles.includes(file.metadata.id) ||
-                    file.metadata.id === openFile?.metadata.id,
+                    props.selectedFiles.includes(file.id) ||
+                    file.id === openFile?.id,
                 },
                 // "dark:invert",
                 // "dark:text-white",
@@ -172,15 +172,17 @@ export default function FileList(props: FileListProps) {
                 <div
                   className="flex flex-col cursor-pointer overflow-hidden"
                   onClick={() => {
-                    props.onOpenFile(file.metadata.id);
+                    props.onOpenFile(file.id);
                   }}
                 >
-                  <span className="block overflow-auto no-scrollbar">
-                    {file.metadata.title}
+                  <span className="my-auto block overflow-auto no-scrollbar">
+                    {file.title}
                   </span>
-                  <span className="block text-xs font-light text-gray-400">
-                    {subText}
-                  </span>
+                  {subText.trim() !== "" && (
+                    <span className="block text-xs font-light text-gray-800">
+                      {subText}
+                    </span>
+                  )}
                 </div>
               </div>
             </div>

@@ -8,7 +8,7 @@ export namespace Pages {
     >(
       fileId: string,
       property: T,
-      value: Music.Files.EditableFile[T]
+      value: Music.Files.EditableMetadata[T]
     ) => void;
 
     export type FileStatus = {

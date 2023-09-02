@@ -84,8 +84,8 @@ export default function RecentlyAddedList(props: RecentlyAddedListProps) {
         albumsAndSongs
           .filter((media) => {
             if (media.type === "track") {
-              return media.listConnections.some(
-                (connection) => connection.trackList.album !== null
+              return media.listConnections.every(
+                (connection) => connection.trackList.album === null
               );
             }
             return true;

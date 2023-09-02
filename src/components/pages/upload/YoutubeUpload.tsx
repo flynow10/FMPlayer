@@ -9,10 +9,10 @@ import Youtube from "react-youtube";
 import { YoutubeAPI } from "@/src/api/youtube-API";
 import { Loader2, Play } from "lucide-react";
 import VerticalSplit from "@/src/components/utils/VerticalSplit";
-// import { MusicLibrary } from "@/src/music/library/music-library";
-// import { toast } from "react-toastify";
 import { splitOutUrls } from "@/src/utils/url-utils";
 import ChannelDisplay from "@/src/components/utils/youtube/ChannelDisplay";
+import { MusicLibrary } from "@/src/music/library/music-library";
+import { toast } from "react-toastify";
 
 type YoutubeUploadProps = {
   data: {
@@ -26,12 +26,11 @@ export default function YoutubeUpload(props: YoutubeUploadProps) {
     return {
       id: uuid(),
       title: props.data.video.snippet.title,
-      artists: [props.data.video.snippet.channelTitle],
-      featuring: [],
-      genre: "Unknown",
+      artists: [{ name: props.data.video.snippet.channelTitle, type: "MAIN" }],
+      genre: "",
       albumId: null,
-      trackNumber: 1,
-      audioUploaded: null,
+      tags: [],
+      artworkUrl: null,
     };
   });
 
@@ -79,27 +78,31 @@ export default function YoutubeUpload(props: YoutubeUploadProps) {
   const uploadVideo = async () => {
     youtubeRef.current?.internalPlayer?.stopVideo();
     setIsUploading(true);
-    alert("Uploading is currently not implemented!");
-    // try {
-    //   const track = await MusicLibrary.downloadYoutubeVideo(
-    //     props.data.video.id,
-    //     metadata
-    //   );
-    //   console.log(track);
-    // } catch (e) {
-    //   toast(`Failed to upload ${metadata.title}!`, {
-    //     type: "error",
-    //   });
-    // }
+    try {
+      const track = await MusicLibrary.uploadTrack(metadata);
+      if (!track) {
+        throw new Error("Failed to create new track in database!");
+      }
+      await MusicLibrary.audio.downloadYoutubeVideo(
+        props.data.video.id,
+        track.id
+      );
+    } catch (e) {
+      console.error(e);
+      toast(`Failed to upload ${metadata.title}!`, {
+        type: "error",
+      });
+      return;
+    }
 
-    // toast(`Completed preupload for ${metadata.title}`, {
-    //   type: "success",
-    // });
+    toast(`Completed preupload for ${metadata.title}`, {
+      type: "success",
+    });
     props.onNavigate("back");
   };
 
   return (
-    <FileContext.Provider value={{ metadata }}>
+    <FileContext.Provider value={metadata}>
       <VerticalSplit
         left={
           <div className="flex flex-col h-full relative">
