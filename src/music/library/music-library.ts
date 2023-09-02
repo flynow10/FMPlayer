@@ -3,11 +3,14 @@ import {
   AudioMethods,
   createAudioMethods,
 } from "@/src/music/library/audio-module";
+import { Music } from "@/src/types/music";
 
 export type MusicLibrary = {
   db: CRUDObjects;
-
   audio: AudioMethods;
+  uploadTrack(
+    metadata: Music.Files.EditableMetadata
+  ): Promise<Music.DB.TableType<"Track"> | null>;
 };
 
 // class PostgresMusicLibrary {
@@ -71,5 +74,35 @@ export const MusicLibrary: MusicLibrary = (function () {
   return {
     db: crud,
     audio: createAudioMethods(),
+    uploadTrack(metadata) {
+      return MusicLibrary.db.track.create({
+        title: metadata.title,
+        artists: {
+          create: metadata.artists.map((a) => ({
+            artist: {
+              connectOrCreate: {
+                create: {
+                  name: a.name,
+                },
+                where: {
+                  name: a.name,
+                },
+              },
+            },
+            artistType: a.type,
+          })),
+        },
+        genre: {
+          connectOrCreate: {
+            create: {
+              name: metadata.genre,
+            },
+            where: {
+              name: metadata.genre,
+            },
+          },
+        },
+      });
+    },
   };
 })();

@@ -5,13 +5,13 @@ import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
 import { Pages } from "@/src/types/pages";
 import { getFileNameFromUrl } from "@/src/utils/url-utils";
 import MetadataEditor from "@/src/components/utils/MetadataEditor";
-// import { MusicLibrary } from "@/src/music/library/music-library";
 import FileList from "@/src/components/pages/upload/FileList";
 import { FileContext } from "@/src/contexts/FileContext";
 import { Music } from "@/src/types/music";
 import { Loader2 } from "lucide-react";
 import { toast } from "react-toastify";
 import VerticalSplit from "@/src/components/utils/VerticalSplit";
+import { MusicLibrary } from "@/src/music/library/music-library";
 
 type FileUploadProps = {
   data: {
@@ -24,10 +24,10 @@ type FileUploadProps = {
 
 export default function FileUpload(props: FileUploadProps) {
   const [files, filesLoaded, setFiles] = useAsyncLoad<
-    Music.Files.PreUploadFile[]
+    Music.Files.EditableFile[]
   >(
     async () => {
-      let files: Music.Files.PreUploadFile[] = [];
+      let files: Music.Files.EditableFile[] = [];
 
       switch (props.data.uploadType) {
         case "file": {
@@ -151,7 +151,6 @@ export default function FileUpload(props: FileUploadProps) {
     setFileStatuses(
       selectedFiles.map((f) => ({ id: f.metadata.id, status: "waiting" }))
     );
-    alert("Uploading is currently not implemented!");
     for (let i = 0; i < selectedFiles.length; i++) {
       const file = selectedFiles[i];
       setFileStatuses((prev) => {
@@ -166,7 +165,26 @@ export default function FileUpload(props: FileUploadProps) {
           }
         });
       });
-      // await MusicLibrary.uploadFile(file);
+      try {
+        const track = await MusicLibrary.uploadTrack(file.metadata);
+        if (!track) {
+          throw new Error(
+            `Failed to create new track '${file.metadata.title}':'${file.metadata.id}' in database`
+          );
+        }
+        if (
+          !(await MusicLibrary.audio.uploadAudioData(file.audioData, track.id))
+        ) {
+          throw new Error(
+            `Failed to upload audio data for '${track.title}':'${track.id}' for conversion`
+          );
+        }
+      } catch (e) {
+        console.error(e);
+        toast(`Failed to complete preupload for ${file.metadata.title}!`, {
+          type: "error",
+        });
+      }
       setFileStatuses((prev) => {
         return prev.map((s) => {
           if (s.id === file.metadata.id) {
@@ -195,12 +213,12 @@ export default function FileUpload(props: FileUploadProps) {
   }
 
   return (
-    <FileContext.Provider value={openFile}>
+    <FileContext.Provider value={openFile?.metadata ?? null}>
       <VerticalSplit
         left={
           <div className="flex flex-col h-full">
             <FileList
-              files={files}
+              files={files.map((f) => f.metadata)}
               onOpenFile={setOpenFileId}
               selectedFiles={selectedFileIds}
               setSelectedFile={selectFile}
