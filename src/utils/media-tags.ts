@@ -17,8 +17,8 @@ export const getTags = (data: Blob | Uint8Array) =>
 
 export const pullMetadataFromTags = (
   tags: TagType
-): Partial<Music.Files.EditableMetadata> => {
-  const metadata: Partial<Music.Files.EditableMetadata> = {};
+): Partial<Music.Files.NewTrackMetadata> => {
+  const metadata: Partial<Music.Files.NewTrackMetadata> = {};
 
   if (tags.tags.title) {
     metadata.title = tags.tags.title;

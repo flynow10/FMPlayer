@@ -61,7 +61,7 @@ export const getPreUploadFileFromData = async (
 ): Promise<Music.Files.EditableFile> => {
   const fileType = await fileTypeFromBuffer(data);
   const tags = await getTags(data);
-  let metadata: Music.Files.EditableMetadata = {
+  let metadata: Music.Files.NewTrackMetadata = {
     id: uuid(),
     title: defaultFileName,
     artists: [],

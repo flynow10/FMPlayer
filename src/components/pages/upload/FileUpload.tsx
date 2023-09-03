@@ -166,7 +166,7 @@ export default function FileUpload(props: FileUploadProps) {
         });
       });
       try {
-        const track = await MusicLibrary.uploadTrack(file.metadata);
+        const track = await MusicLibrary.uploadNewTrack(file.metadata);
         if (!track) {
           throw new Error(
             `Failed to create new track '${file.metadata.title}':'${file.metadata.id}' in database`

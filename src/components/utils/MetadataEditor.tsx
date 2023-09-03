@@ -118,7 +118,7 @@ export default function MetadataEditor(props: MetadataEditorProps) {
             .map((a) => a.name)}
           suggestions={artistsSuggestions}
           setSelectedItems={(arg1) => {
-            const mainArtists: Music.Files.EditableMetadata["artists"] = (
+            const mainArtists: Music.Files.NewTrackMetadata["artists"] = (
               typeof arg1 === "function"
                 ? arg1(
                     file.artists
@@ -155,7 +155,7 @@ export default function MetadataEditor(props: MetadataEditorProps) {
             );
           }}
           setSelectedItems={(arg1) => {
-            const featuredArtists: Music.Files.EditableMetadata["artists"] = (
+            const featuredArtists: Music.Files.NewTrackMetadata["artists"] = (
               typeof arg1 === "function"
                 ? arg1(
                     file.artists
