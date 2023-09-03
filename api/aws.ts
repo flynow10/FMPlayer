@@ -60,6 +60,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return;
       }
 
+      if (IS_LOCAL) {
+        res
+          .status(500)
+          .json("Unable connect to AWS in development environment!");
+        return;
+      }
+
       const key = `${fileId}.${fileExt}`;
 
       const post = await createPresignedPost(s3Client, {
@@ -86,6 +93,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         videoId.match(/^[0-9A-Za-z_-]{10}[048AEIMQUYcgkosw]$/) === null
       ) {
         res.status(400).json("Invalid videoId");
+        return;
+      }
+
+      if (IS_LOCAL) {
+        res
+          .status(500)
+          .json("Unable connect to AWS in development environment!");
         return;
       }
 
