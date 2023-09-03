@@ -1,5 +1,6 @@
 import { Endpoint, VercelAPI } from "@/src/api/vercel-API";
 import { Music } from "@/src/types/music";
+import { IS_LOCAL } from "@/src/utils/vercel-env";
 import { PresignedPost } from "@aws-sdk/s3-presigned-post";
 
 export type AudioMethods = {
@@ -19,6 +20,14 @@ export type AudioMethods = {
   downloadYoutubeVideo(videoId: string, trackId: string): Promise<boolean>;
 };
 
+function localUploadAlert(trackId: string) {
+  alert(
+    `Uploads are not automatic on your local machine.
+    A track has been added to the database, but the audio data will not be accessible.
+    Add a file named ${trackId}.ogg to /static/songs/ to add a song manually.`
+  );
+}
+
 export function createAudioMethods(): AudioMethods {
   return {
     async getAudioFileUrl(trackId) {
@@ -32,6 +41,10 @@ export function createAudioMethods(): AudioMethods {
       return response.url;
     },
     async uploadAudioData(audioData, trackId) {
+      if (IS_LOCAL) {
+        localUploadAlert(trackId);
+        return true;
+      }
       const uploadResult = await VercelAPI.makeRequest<PresignedPost>(
         Endpoint.AWS,
         { fileExt: audioData.fileType.ext, fileId: trackId },
@@ -57,6 +70,10 @@ export function createAudioMethods(): AudioMethods {
       return true;
     },
     async downloadYoutubeVideo(videoId, trackId) {
+      if (IS_LOCAL) {
+        localUploadAlert(trackId);
+        return true;
+      }
       return await VercelAPI.makeRequest(
         Endpoint.AWS,
         { videoId, trackId },
