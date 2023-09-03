@@ -2,44 +2,119 @@ import { VercelRequest, VercelResponse } from "@vercel/node";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { getEnvVar, getVercelEnvironment } from "../api-lib/constants.js";
-import { printRequestType } from "../api-lib/api-utils.js";
-import { s3Client } from "../api-lib/data-clients.js";
+import { handleRequest, printRequestType } from "../api-lib/api-utils.js";
+import { lambdaClient, s3Client } from "../api-lib/data-clients.js";
+import { InvokeCommand } from "@aws-sdk/client-lambda";
+import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
 
 const IS_LOCAL = getVercelEnvironment() === "development";
 
+const S3_SONG_CONVERSION_BUCKET = getEnvVar("S3_SONG_CONVERSION_BUCKET");
+const LAMBDA_YOUTUBE_DOWNLOAD_FUNCTION = getEnvVar(
+  "LAMBDA_YOUTUBE_DOWNLOAD_FUNCTION"
+);
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method !== "GET") {
-    res.status(405).json("Method not allowed");
-    return;
-  }
+  const requestParams = handleRequest(req, res, {
+    expectsPath: ["song-url", "s3-post", "download-video"],
+  });
+  if (requestParams === null) return;
 
-  if (typeof req.query.type !== "string" || req.query.type === "") {
-    res.status(400).json("Missing type");
-    return;
-  }
+  const { path } = requestParams;
 
-  printRequestType("aws", req.query.type);
+  printRequestType("aws", path);
 
-  switch (req.query.type) {
-    case "songUrl": {
-      const { id } = req.query;
+  switch (path) {
+    case "song-url": {
+      const queryParams = handleRequest(req, res, {
+        allowedMethods: "GET",
+        expectedQueryParams: ["trackId"],
+      });
+      if (queryParams === null) break;
+
+      const { trackId: id } = queryParams.query;
 
       if (IS_LOCAL) {
         res.status(200).json({ url: `/static/songs/${id}.ogg` });
         return;
       }
 
-      if (typeof id !== "string" || id === "") {
-        res.status(400).json("Missing song ID!");
+      res.status(200).json({ url: await getSongUrl(id) });
+      return;
+    }
+    case "s3-post": {
+      const bodyParams = handleRequest(req, res, {
+        allowedMethods: "POST",
+        expectedBodyParams: ["fileExt", "fileId"],
+      });
+
+      if (bodyParams === null) return;
+
+      const { fileExt, fileId } = bodyParams.body as {
+        fileExt: string;
+        fileId: string;
+      };
+
+      if (fileExt.match(/^([0-9A-z]{1,4})$/) === null) {
+        res.status(400).json("Invalid file type");
         return;
       }
 
-      res.status(200).json({ url: await getSongUrl(id) });
-      break;
-    }
+      if (IS_LOCAL) {
+        res
+          .status(500)
+          .json("Unable connect to AWS in development environment!");
+        return;
+      }
 
-    default: {
-      res.status(400).json("Invalid type");
+      const key = `${fileId}.${fileExt}`;
+
+      const post = await createPresignedPost(s3Client, {
+        Bucket: S3_SONG_CONVERSION_BUCKET,
+        Key: key,
+      });
+
+      res.status(200).json(post);
+      return;
+    }
+    case "download-video": {
+      const bodyParams = handleRequest(req, res, {
+        allowedMethods: "POST",
+        expectedBodyParams: ["videoId", "trackId"],
+      });
+
+      if (bodyParams === null) return;
+
+      const { videoId, trackId } = bodyParams.body;
+
+      if (
+        typeof videoId !== "string" ||
+        videoId.length !== 11 ||
+        videoId.match(/^[0-9A-Za-z_-]{10}[048AEIMQUYcgkosw]$/) === null
+      ) {
+        res.status(400).json("Invalid videoId");
+        return;
+      }
+
+      if (IS_LOCAL) {
+        res
+          .status(500)
+          .json("Unable connect to AWS in development environment!");
+        return;
+      }
+
+      const command = new InvokeCommand({
+        FunctionName: LAMBDA_YOUTUBE_DOWNLOAD_FUNCTION,
+        InvocationType: "Event",
+        Payload: JSON.stringify({
+          fileId: trackId,
+          videoId: videoId,
+        }),
+      });
+      const output = await lambdaClient.send(command);
+      console.log(output);
+
+      res.status(200).json(output.StatusCode === 200);
       return;
     }
   }

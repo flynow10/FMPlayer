@@ -8,8 +8,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { MyMusicLibrary } from "@/src/music/library/music-library";
-import { Song } from "@prisma/client";
+import { MusicLibrary } from "@/src/music/library/music-library";
 import { useAsyncLoad } from "@/src/hooks/use-async-load";
 import { Music } from "@/src/types/music";
 
@@ -31,10 +30,10 @@ type AudioProps = {
 };
 
 export function Audio(props: AudioProps) {
-  const [song, loadedMetaData] = useAsyncLoad<Song | null>(
+  const [track, loadedMetaData] = useAsyncLoad(
     async () => {
       if (!props.id) return null;
-      return (await MyMusicLibrary.getSong(props.id)) || null;
+      return await MusicLibrary.db.track.get({ id: props.id });
     },
     null,
     [props.id]
@@ -140,8 +139,8 @@ export function Audio(props: AudioProps) {
       <div className="flex flex-col grow text-center">
         {loadedMetaData ? (
           <>
-            <h3 id="song-title">{song?.title}</h3>
-            <h3 id="song-id">{song?.id}</h3>
+            <h3 id="song-title">{track?.title}</h3>
+            <h3 id="song-id">{track?.id}</h3>
           </>
         ) : (
           <Loader2 size={32} className="animate-spin mx-auto my-2" />

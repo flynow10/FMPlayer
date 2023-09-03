@@ -4,6 +4,14 @@
       "source": "/proxy/:path*",
       "destination": "https://suggestqueries.google.com/:path*"
     },
+    {
+      "source": "/api/db/:path",
+      "destination": "/api/db"
+    },
+    {
+      "source": "/api/aws/:path*",
+      "destination": "/api/aws"
+    },
     { "source": "/(.*)", "destination": "/" }
   ]
 }

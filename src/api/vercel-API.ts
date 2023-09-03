@@ -1,5 +1,104 @@
 import { API } from "@/src/types/api";
 
+type RequestMethod<O extends object> = (
+  endpoint: Endpoint,
+  body: O,
+  path: string
+) => Promise<Response>;
+
+type HTTPMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+
+function _urlPath(endpoint: Endpoint, path = "") {
+  return `${endpoint}${path.length > 0 ? "/" : ""}${path}`;
+}
+
+async function _makeJSONRequest<O>(
+  method: HTTPMethod,
+  endpoint: Endpoint,
+  body: O,
+  path: string
+): Promise<Response> {
+  return fetch(`${_urlPath(endpoint, path)}`, {
+    method,
+    body: JSON.stringify(body),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+}
+
+async function _makeGETRequest<O extends object>(
+  endpoint: Endpoint,
+  query: O,
+  path: string
+): Promise<Response> {
+  const requestUrl = `${_urlPath(endpoint, path)}?${VercelAPI.optionsToUrl({
+    ...query,
+  })}`;
+  return fetch(requestUrl, {
+    method: "GET",
+  });
+}
+
+async function makeRequest<T, O extends object = object>(
+  endpoint: Endpoint,
+  body: O,
+  path: string,
+  method: HTTPMethod
+): Promise<T | null>;
+async function makeRequest<T, O extends object = object>(
+  endpoint: Endpoint,
+  body: O,
+  path: string,
+  method: HTTPMethod,
+  defaultResponse: T
+): Promise<T>;
+async function makeRequest<T, O extends object = object>(
+  endpoint: Endpoint,
+  body: O,
+  path = "",
+  method: HTTPMethod,
+  defaultResponse?: T
+): Promise<T | null> {
+  let requestMethod: RequestMethod<O>;
+
+  switch (method) {
+    case "GET": {
+      requestMethod = _makeGETRequest;
+      break;
+    }
+    default: {
+      requestMethod = _makeJSONRequest.bind(null, method);
+      break;
+    }
+  }
+
+  const response = await requestMethod(endpoint, body, path);
+
+  const baseUrlPath = _urlPath(endpoint, path);
+
+  if (response.status === 401) {
+    window.location.href = "/login";
+    throw new Error(
+      `Failed to make call to "${baseUrlPath}" because the user was logged out`
+    );
+  }
+
+  const responseJson: object | string = await response.json();
+
+  if (typeof responseJson === "string") {
+    console.warn(responseJson);
+    if (defaultResponse === undefined) {
+      console.warn(`No default reponse provide for request "${baseUrlPath}"`);
+      return null;
+    }
+
+    return defaultResponse;
+  }
+
+  return responseJson as T;
+}
+
 export const VercelAPI = {
   isLoggedIn: async () => {
     try {
@@ -52,71 +151,7 @@ export const VercelAPI = {
     }
   },
 
-  async makeRequest<T, O = object>(
-    endpoint: Endpoint,
-    type: string,
-    body: O,
-    defaultResponse?: T
-  ): Promise<T> {
-    let response: Response;
-
-    if (endpoint === Endpoint.UPLOAD) {
-      response = await VercelAPI._makePOSTRequest(endpoint, type, body);
-    } else {
-      response = await VercelAPI._makeGETRequest(endpoint, type, body);
-    }
-
-    if (response.status === 401) {
-      window.location.href = "/login";
-      throw new Error(
-        `Failed to make call to "${endpoint}?type=${type}" because the user was logged out`
-      );
-    }
-
-    const responseJson: object | string = await response.json();
-
-    if (typeof responseJson === "string") {
-      console.warn(responseJson);
-
-      if (defaultResponse === undefined) {
-        throw new Error(`Failed to make call to "${endpoint}?type=${type}"`);
-      }
-
-      return defaultResponse;
-    }
-
-    return responseJson as T;
-  },
-  async _makeGETRequest<O>(
-    endpoint: Endpoint,
-    type: string,
-    query: O
-  ): Promise<Response> {
-    const requestUrl = `${endpoint}?${VercelAPI.optionsToUrl({
-      type,
-      ...query,
-    })}`;
-    return fetch(requestUrl, {
-      method: "GET",
-    });
-  },
-
-  async _makePOSTRequest<O>(
-    endpoint: Endpoint,
-    type: string,
-    body: O
-  ): Promise<Response> {
-    const requestUrl = `${endpoint}?${VercelAPI.optionsToUrl({
-      type,
-    })}`;
-    return fetch(requestUrl, {
-      method: "POST",
-      body: JSON.stringify(body),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-  },
+  makeRequest,
 
   optionsToUrl(options: object): string {
     const urlSearchParams = new URLSearchParams(
@@ -140,7 +175,7 @@ export const VercelAPI = {
 };
 
 export enum Endpoint {
-  POSTGRES = "/api/postgres",
+  DB = "/api/db",
   AWS = "/api/aws",
   UPLOAD = "/api/upload",
 }

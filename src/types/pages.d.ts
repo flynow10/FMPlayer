@@ -4,11 +4,11 @@ export namespace Pages {
   export namespace Upload {
     export type FileUploadType = "file" | "url";
     export type SetFileMetadataFunction = <
-      T extends keyof Music.Files.EditableMetadata
+      T extends keyof Music.Files.NewTrackMetadata
     >(
       fileId: string,
       property: T,
-      value: Music.Files.EditableFile[T]
+      value: Music.Files.NewTrackMetadata[T]
     ) => void;
 
     export type FileStatus = {

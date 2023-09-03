@@ -2,7 +2,8 @@ import BaseSuggestionInput from "@/src/components/utils/input-extensions/BaseSug
 import MultiSuggestionInput from "@/src/components/utils/input-extensions/MultiSuggestionInput";
 import { FileContext } from "@/src/contexts/FileContext";
 import { useAsyncLoad } from "@/src/hooks/use-async-load";
-import { MyMusicLibrary } from "@/src/music/library/music-library";
+import { MusicLibrary } from "@/src/music/library/music-library";
+import { Music } from "@/src/types/music";
 import { Pages } from "@/src/types/pages";
 import { pickSuggestions } from "@/src/utils/string-utils";
 import { useContext, useState } from "react";
@@ -15,14 +16,14 @@ export default function MetadataEditor(props: MetadataEditorProps) {
   const file = useContext(FileContext);
   const [allArtists, allArtistsLoaded] = useAsyncLoad(
     () => {
-      return MyMusicLibrary.getArtistList();
+      return MusicLibrary.db.artist.list();
     },
     [],
     []
   );
   const [libraryGenres, libraryGenresLoaded] = useAsyncLoad(
     () => {
-      return MyMusicLibrary.getGenreList();
+      return MusicLibrary.db.genre.list();
     },
     [],
     []
@@ -48,8 +49,7 @@ export default function MetadataEditor(props: MetadataEditorProps) {
         .filter(
           (a) =>
             !(
-              file?.metadata.artists.includes(a) ||
-              file?.metadata.featuring.includes(a) ||
+              file?.artists.map((b) => b.name).includes(a) ||
               newAddedArtists.includes(a)
             )
         )
@@ -61,7 +61,7 @@ export default function MetadataEditor(props: MetadataEditorProps) {
     }
     return pickSuggestions(
       search,
-      libraryGenres.map((g) => g.genre)
+      libraryGenres.map((g) => g.name)
     );
   };
 
@@ -92,38 +92,45 @@ export default function MetadataEditor(props: MetadataEditorProps) {
   };
   return (
     <div className="gap-4 flex flex-col">
-      <h3
-        key={file.metadata.id + "-Title"}
-        className="text-xl relative box-border"
-      >
+      <h3 key={file.id + "-Title"} className="text-xl relative box-border">
         <input
           className="relative z-10 peer w-full focus:opacity-100 bg-transparent opacity-0 outline-none p-2 max-w-full"
-          defaultValue={file.metadata.title}
-          placeholder={file.metadata.title}
+          defaultValue={file.title}
+          placeholder={file.title}
           onChange={(e) => {
             props.setFileMetadata(
-              file.metadata.id,
+              file.id,
               "title",
               e.target.value || "Untitled Song"
             );
           }}
         />
         <span className="whitespace-pre peer-focus:text-transparent inline absolute left-0 top-0 outline max-w-full outline-gray-200 outline-2 box-border rounded-lg p-2 overflow-clip">
-          {file.metadata.title}
+          {file.title}
         </span>
       </h3>
       <div className="flex flex-col">
         <label>Artists</label>
         <MultiSuggestionInput
           {...commonSelectProps}
-          selectedItems={file.metadata.artists}
+          selectedItems={file.artists
+            .filter((a) => a.type === "MAIN")
+            .map((a) => a.name)}
           suggestions={artistsSuggestions}
           setSelectedItems={(arg1) => {
-            props.setFileMetadata(
-              file.metadata.id,
-              "artists",
-              typeof arg1 === "function" ? arg1(file.metadata.artists) : arg1
-            );
+            const mainArtists: Music.Files.NewTrackMetadata["artists"] = (
+              typeof arg1 === "function"
+                ? arg1(
+                    file.artists
+                      .filter((a) => a.type === "MAIN")
+                      .map((a) => a.name)
+                  )
+                : arg1
+            ).map((a) => ({ name: a, type: "MAIN" }));
+            props.setFileMetadata(file.id, "artists", [
+              ...mainArtists,
+              ...file.artists.filter((a) => a.type === "FEATURED"),
+            ]);
           }}
           onSuggestionFetchRequested={(request) => {
             setArtistSuggestions(
@@ -139,18 +146,28 @@ export default function MetadataEditor(props: MetadataEditorProps) {
         <label>Featuring</label>
         <MultiSuggestionInput
           {...commonSelectProps}
-          selectedItems={file.metadata.featuring}
+          selectedItems={file.artists
+            .filter((a) => a.type === "FEATURED")
+            .map((a) => a.name)}
           onSuggestionFetchRequested={(request) => {
             setFeaturingSuggestions(
               filterArtistSuggestions(request.value, request.addedItems)
             );
           }}
           setSelectedItems={(arg1) => {
-            props.setFileMetadata(
-              file.metadata.id,
-              "featuring",
-              typeof arg1 === "function" ? arg1(file.metadata.featuring) : arg1
-            );
+            const featuredArtists: Music.Files.NewTrackMetadata["artists"] = (
+              typeof arg1 === "function"
+                ? arg1(
+                    file.artists
+                      .filter((a) => a.type === "FEATURED")
+                      .map((a) => a.name)
+                  )
+                : arg1
+            ).map((a) => ({ name: a, type: "FEATURED" }));
+            props.setFileMetadata(file.id, "artists", [
+              ...file.artists.filter((a) => a.type === "MAIN"),
+              ...featuredArtists,
+            ]);
           }}
           suggestions={featuringSuggestions}
           onSuggestionClearRequested={() => {
@@ -166,9 +183,9 @@ export default function MetadataEditor(props: MetadataEditorProps) {
           inputProps={{
             className: "input w-full",
             onChange: (event, params) => {
-              props.setFileMetadata(file.metadata.id, "genre", params.newValue);
+              props.setFileMetadata(file.id, "genre", params.newValue);
             },
-            value: file.metadata.genre,
+            value: file.genre,
           }}
           onSuggestionsFetchRequested={(request) => {
             setGenreSuggestions(filterGenreSuggestions(request.value));
@@ -195,7 +212,7 @@ export default function MetadataEditor(props: MetadataEditorProps) {
         >
           {JSON.stringify(
             {
-              metadata: file.metadata,
+              metadata: file,
             },
             null,
             2

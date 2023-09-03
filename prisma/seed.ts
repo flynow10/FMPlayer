@@ -1,35 +1,62 @@
 import { PrismaClient } from "@prisma/client";
-import { v4 as uuid } from "uuid";
 
 const prisma = new PrismaClient();
+
+const PIANO_GUYS_ALBUM_ID = "c2119c55-3e03-4b21-8c89-57efaeebdf6a";
 
 type SongStub = {
   id: string;
   title: string;
 };
 async function main() {
-  await prisma.song.deleteMany({});
-  await prisma.album.deleteMany({});
-  await prisma.artist.deleteMany({});
-  await prisma.playlist.deleteMany({});
-
-  const pianoGuysArtist = await prisma.artist.create({
-    data: {
+  const pianoGuysArtist = await prisma.artist.upsert({
+    create: {
       name: "The Piano Guys",
     },
+    where: {
+      name: "The Piano Guys",
+    },
+    update: {},
   });
-  const pianoGuysAlbum = await prisma.album.create({
-    data: {
-      id: uuid(),
+  const classicalGenre = await prisma.genre.upsert({
+    create: {
+      name: "Classical",
+    },
+    where: {
+      name: "Classical",
+    },
+    update: {},
+  });
+
+  const pianoGuysAlbum = await prisma.album.upsert({
+    update: {},
+    where: {
+      id: PIANO_GUYS_ALBUM_ID,
+    },
+    create: {
+      id: PIANO_GUYS_ALBUM_ID,
       title: "The Piano Guys",
-      artists: {
+      genre: {
         connect: {
-          id: pianoGuysArtist.id,
+          id: classicalGenre.id,
         },
       },
-      genre: "Classical",
+      trackList: {
+        create: {},
+      },
+      artists: {
+        create: {
+          artistType: "MAIN",
+          artist: {
+            connect: {
+              id: pianoGuysArtist.id,
+            },
+          },
+        },
+      },
     },
   });
+
   const pianoGuysAlbumSongs: SongStub[] = [
     {
       id: "b0820e12-4582-4b9f-bd19-3c29d30b64c4",
@@ -98,25 +125,37 @@ async function main() {
   ];
   for (let i = 0; i < pianoGuysAlbumSongs.length; i++) {
     const song = pianoGuysAlbumSongs[i];
-
-    await prisma.song.create({
-      data: {
+    await prisma.track.upsert({
+      create: {
         id: song.id,
         title: song.title,
-        album: {
-          connect: {
-            id: pianoGuysAlbum.id,
+        listConnections: {
+          create: {
+            trackNumber: i + 1,
+            trackList: {
+              connect: {
+                id: pianoGuysAlbum.trackListId,
+              },
+            },
           },
         },
-        genre: "Classical",
-        artists: {
+        genre: {
           connect: {
-            id: pianoGuysArtist.id,
+            id: classicalGenre.id,
           },
         },
-        audioUploaded: new Date(),
-        trackNumber: i + 1,
+        audioSource: {
+          create: {
+            durationMS: 0, //PLACEHOLDER VALUE! // TODO: Remove Placeholder,
+            integratedLoudness: 0, //PLACEHOLDER VALUE! // TODO: Remove Placeholder,
+            sourceType: "YOUTUBE",
+          },
+        },
       },
+      where: {
+        id: song.id,
+      },
+      update: {},
     });
   }
 }

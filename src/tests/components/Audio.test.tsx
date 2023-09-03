@@ -1,30 +1,40 @@
 import { Audio } from "@/src/components/layout/Audio";
-import { PostgresRequest } from "@/src/types/postgres-request";
+import { Music } from "@/src/types/music";
 import { waitFor } from "@testing-library/react";
 import { render } from "@testing-library/react";
 import { v4 } from "uuid";
 
 jest.mock("@/src/music/library/music-library", () => ({
-  MyMusicLibrary: {
-    getSong: jest.fn(
-      (id: string): Promise<PostgresRequest.SongWithRelations> => {
-        return new Promise((r) =>
-          r({
-            id,
-            title: "Test song",
-            albumId: null,
-            album: null,
-            artists: [],
-            featuring: [],
-            genre: "Test",
-            trackNumber: 1,
-            createdOn: new Date(),
-            modifiedOn: new Date(),
-            audioUploaded: null,
-          })
-        );
-      }
-    ),
+  MusicLibrary: {
+    db: {
+      track: {
+        get: jest.fn(
+          ({ id }: { id: string }): Promise<Music.DB.TableType<"Track">> => {
+            return new Promise((r) =>
+              r({
+                id,
+                title: "Test track",
+                artists: [],
+                genre: {
+                  id: "",
+                  name: "Test Genre",
+                  createdOn: new Date(),
+                  modifiedOn: new Date(),
+                },
+                artwork: null,
+                artworkId: null,
+                audioSource: null,
+                genreId: "",
+                listConnections: [],
+                tags: [],
+                createdOn: new Date(),
+                modifiedOn: new Date(),
+              })
+            );
+          }
+        ),
+      },
+    },
   },
 }));
 
@@ -43,7 +53,7 @@ describe("<Audio/>", () => {
     );
     await waitFor(() => {
       expect(document.getElementById("song-title")?.textContent).toBe(
-        "Test song"
+        "Test track"
       );
     });
   });

@@ -2,70 +2,219 @@ generator client {
   provider = "prisma-client-js"
 }
 
+generator docs {
+  provider = "prisma-dbml-generator"
+}
+
 datasource db {
   provider  = "mysql"
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_DATABASE_URL")
 }
 
-model Song {
-  // Id
-  id String @id @default(uuid()) @db.VarChar(36)
-
-  // Metadata
-  title     String   @db.VarChar(256)
-  artists   Artist[] @relation("artistsSong")
-  featuring Artist[] @relation("featuringSong")
-  genre     String   @default("Unknown") @db.VarChar(64)
-
-  // Album Info
-  album       Album?  @relation(fields: [albumId], references: [id])
-  albumId     String? @db.VarChar(36)
-  trackNumber Int     @default(1)
-
-  // Timestamps
-  modifiedOn DateTime @default(now()) @updatedAt
-  createdOn  DateTime @default(now())
-
-  // AWS Info
-  audioUploaded DateTime?
+enum ArtistType {
+  MAIN
+  FEATURED
 }
 
-model Artist {
-  id               Int     @id @default(autoincrement())
-  name             String  @unique @db.VarChar(64)
-  artistOfSongs    Song[]  @relation("artistsSong")
-  featuredOnSongs  Song[]  @relation("featuringSong")
-  artistOfAlbums   Album[] @relation("artistsAlbum")
-  featuredOnAlbums Album[] @relation("featuringAlbum")
+enum SourceType {
+  FILE
+  YOUTUBE
+}
+
+model TagType {
+  id String @id @default(uuid()) @db.VarChar(36)
+
+  name        String  @unique @db.VarChar(256)
+  description String? @db.Text
+
+  tags Tag[]
+
+  modifiedOn DateTime @default(now()) @updatedAt
+  createdOn  DateTime @default(now())
+}
+
+model Tag {
+  id String @id @default(uuid()) @db.VarChar(36)
+
+  name        String  @unique @db.VarChar(256)
+  description String? @db.Text
+
+  tagType   TagType @relation(fields: [tagTypeId], references: [id])
+  tagTypeId String  @db.VarChar(36)
+
+  tracks    Track[]
+  albums    Album[]
+  functions Function[]
+  playlists Playlist[]
+
+  modifiedOn DateTime @default(now()) @updatedAt
+  createdOn  DateTime @default(now())
+}
+
+model Genre {
+  id String @id @default(uuid()) @db.VarChar(36)
+
+  name   String  @unique @db.VarChar(256)
+  tracks Track[]
+  albums Album[]
+
+  modifiedOn DateTime @default(now()) @updatedAt
+  createdOn  DateTime @default(now())
+}
+
+model Artwork {
+  id String @id @default(uuid()) @db.VarChar(36)
+
+  tracks    Track[]
+  albums    Album[]
+  functions Function[]
+  playlists Playlist[]
+
+  modifiedOn DateTime @default(now()) @updatedAt
+  createdOn  DateTime @default(now())
+}
+
+model Track {
+  id String @id @default(uuid()) @db.VarChar(36)
+
+  title     String        @db.VarChar(256)
+  artists   TrackArtist[]
+  genre     Genre         @relation(fields: [genreId], references: [id])
+  genreId   String        @db.VarChar(36)
+  artwork   Artwork?      @relation(fields: [artworkId], references: [id])
+  artworkId String?       @db.VarChar(36)
+  tags      Tag[]
+
+  listConnections TrackInList[]
+  audioSource     AudioSource?
+
+  modifiedOn DateTime @default(now()) @updatedAt
+  createdOn  DateTime @default(now())
+}
+
+model TrackArtist {
+  track    Track  @relation(fields: [trackId], references: [id])
+  trackId  String @db.VarChar(36)
+  artist   Artist @relation(fields: [artistId], references: [id])
+  artistId String @db.VarChar(36)
+
+  artistType ArtistType
+
+  modifiedOn DateTime @default(now()) @updatedAt
+
+  @@id([trackId, artistId])
+}
+
+model TrackInList {
+  track       Track     @relation(fields: [trackId], references: [id])
+  trackId     String    @db.VarChar(36)
+  trackList   TrackList @relation(fields: [trackListId], references: [id])
+  trackListId String    @db.VarChar(36)
+
+  trackNumber Int
+
+  modifiedOn DateTime @default(now()) @updatedAt
+
+  @@id([trackId, trackListId])
+}
+
+model AudioSource {
+  track   Track  @relation(fields: [trackId], references: [id])
+  trackId String @id @db.VarChar(36)
+
+  sourceType SourceType
+  sourceId   String?
+
+  durationMS         Int
+  integratedLoudness Float
+
+  modifiedOn DateTime @default(now()) @updatedAt
+  createdOn  DateTime @default(now())
 }
 
 model Album {
-  // Id
   id String @id @default(uuid()) @db.VarChar(36)
 
-  // Metadata
+  title     String        @db.VarChar(256)
+  artists   AlbumArtist[]
+  genre     Genre         @relation(fields: [genreId], references: [id])
+  genreId   String        @db.VarChar(36)
+  artwork   Artwork?      @relation(fields: [artworkId], references: [id])
+  artworkId String?       @db.VarChar(36)
+  tags      Tag[]
+
+  trackList   TrackList @relation(fields: [trackListId], references: [id])
+  trackListId String    @unique @db.VarChar(36)
+
+  modifiedOn DateTime @default(now()) @updatedAt
+  createdOn  DateTime @default(now())
+}
+
+model AlbumArtist {
+  album    Album  @relation(fields: [albumId], references: [id])
+  albumId  String @db.VarChar(36)
+  artist   Artist @relation(fields: [artistId], references: [id])
+  artistId String @db.VarChar(36)
+
+  artistType ArtistType
+
+  modifiedOn DateTime @default(now()) @updatedAt
+
+  @@id([albumId, artistId])
+}
+
+model TrackList {
+  id String @id @default(uuid()) @db.VarChar(36)
+
+  trackConnections TrackInList[]
+
+  integratedLoudness Float?
+
+  album    Album?
+  playlist Playlist?
+
+  modifiedOn DateTime @default(now()) @updatedAt
+  createdOn  DateTime @default(now())
+}
+
+model Artist {
+  id String @id @default(uuid()) @db.VarChar(36)
+
+  name String @unique @db.VarChar(256)
+
+  tracks TrackArtist[]
+  albums AlbumArtist[]
+
+  modifiedOn DateTime @default(now()) @updatedAt
+  createdOn  DateTime @default(now())
+}
+
+model Function {
+  id String @id @default(uuid()) @db.VarChar(36)
+
   title     String   @db.VarChar(256)
-  artists   Artist[] @relation("artistsAlbum")
-  featuring Artist[] @relation("featuringAlbum")
-  genre     String   @default("Unknown") @db.VarChar(64)
+  artwork   Artwork? @relation(fields: [artworkId], references: [id])
+  artworkId String?  @db.VarChar(36)
+  tags      Tag[]
 
-  // Song Info
-  songs Song[]
+  functionData Json
 
-  // Timestamps
   modifiedOn DateTime @default(now()) @updatedAt
   createdOn  DateTime @default(now())
 }
 
 model Playlist {
-  // Id
   id String @id @default(uuid()) @db.VarChar(36)
 
-  // Metadata
-  title String @db.VarChar(256)
+  title     String   @db.VarChar(256)
+  artwork   Artwork? @relation(fields: [artworkId], references: [id])
+  artworkId String?  @db.VarChar(36)
+  tags      Tag[]
 
-  // Timestamps
+  trackList   TrackList @relation(fields: [trackListId], references: [id])
+  trackListId String    @unique @db.VarChar(36)
+
   modifiedOn DateTime @default(now()) @updatedAt
-  createdOn  DateTime @default(now()) @updatedAt
+  createdOn  DateTime @default(now())
 }
