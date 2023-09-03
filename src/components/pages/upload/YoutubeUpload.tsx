@@ -22,7 +22,7 @@ type YoutubeUploadProps = {
 };
 
 export default function YoutubeUpload(props: YoutubeUploadProps) {
-  const [metadata, setMetadata] = useState<Music.Files.EditableMetadata>(() => {
+  const [metadata, setMetadata] = useState<Music.Files.NewTrackMetadata>(() => {
     return {
       id: uuid(),
       title: props.data.video.snippet.title,
@@ -79,7 +79,7 @@ export default function YoutubeUpload(props: YoutubeUploadProps) {
     youtubeRef.current?.internalPlayer?.stopVideo();
     setIsUploading(true);
     try {
-      const track = await MusicLibrary.uploadTrack(metadata);
+      const track = await MusicLibrary.uploadNewTrack(metadata);
       if (!track) {
         throw new Error("Failed to create new track in database!");
       }

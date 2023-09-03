@@ -144,7 +144,7 @@ export namespace Music {
   }
   export namespace Files {
     export type EditableFile = {
-      metadata: EditableMetadata;
+      metadata: NewTrackMetadata;
       audioData: AudioData;
     };
     export type AudioData = {
@@ -152,7 +152,7 @@ export namespace Music {
       buffer: Uint8Array;
     };
 
-    export type EditableMetadata = {
+    export type NewTrackMetadata = {
       id: string;
       title: string;
       artists: {

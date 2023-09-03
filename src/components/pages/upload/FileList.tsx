@@ -6,7 +6,7 @@ import { Check, CheckSquare, Loader2, MinusSquare, Square } from "lucide-react";
 import { useContext, useState } from "react";
 
 type FileListProps = {
-  files: Music.Files.EditableMetadata[];
+  files: Music.Files.NewTrackMetadata[];
   selectedFiles: string[];
   ableToSelect: boolean;
   fileStatuses: Pages.Upload.FileStatus[];
@@ -20,7 +20,7 @@ export default function FileList(props: FileListProps) {
 
   const onSelectFile = (
     event: React.MouseEvent<HTMLElement, MouseEvent>,
-    file: Music.Files.EditableMetadata,
+    file: Music.Files.NewTrackMetadata,
     fileIndex: number
   ) => {
     event.preventDefault();

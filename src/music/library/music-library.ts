@@ -8,8 +8,8 @@ import { Music } from "@/src/types/music";
 export type MusicLibrary = {
   db: CRUDObjects;
   audio: AudioMethods;
-  uploadTrack(
-    metadata: Music.Files.EditableMetadata
+  uploadNewTrack(
+    metadata: Music.Files.NewTrackMetadata
   ): Promise<Music.DB.TableType<"Track"> | null>;
 };
 
@@ -55,18 +55,6 @@ export type MusicLibrary = {
 //       method: "POST",
 //     });
 //   }
-
-//   public async getMusicFileUrl(id: string): Promise<string | undefined> {
-//     const url = (
-//       await VercelAPI.makeRequest<{ url: string }>(
-//         Endpoint.AWS,
-//         "songUrl",
-//         { id },
-//         { url: "" }
-//       )
-//     ).url;
-//     return url !== "" ? url : undefined;
-//   }
 // }
 
 export const MusicLibrary: MusicLibrary = (function () {
@@ -74,7 +62,7 @@ export const MusicLibrary: MusicLibrary = (function () {
   return {
     db: crud,
     audio: createAudioMethods(),
-    uploadTrack(metadata) {
+    uploadNewTrack(metadata) {
       return MusicLibrary.db.track.create({
         title: metadata.title,
         artists: {
