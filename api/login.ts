@@ -1,29 +1,28 @@
+import { handleRequest } from "../api-lib/api-utils.js";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { setUserCookie } from "../api-lib/auth.js";
 
-function checkAuthorization(request: VercelRequest): boolean {
-  const hash = request.body.hash,
-    correctHash = process.env.PASSWORD_HASH;
+function checkAuthorization(hash: string): boolean {
+  const correctHash = process.env.PASSWORD_HASH;
 
   if (!correctHash) {
     throw Error("Missing correct hash variable!");
-  }
-
-  if (!hash || typeof hash !== "string") {
-    return false;
   }
 
   return hash === correctHash;
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method !== "POST") {
-    return res
-      .status(405)
-      .json({ success: false, error: "Method not allowed" });
+  const requestParams = handleRequest(req, res, {
+    expectedBodyParams: ["hash"],
+    allowedMethods: "POST",
+  });
+
+  if (requestParams === null) {
+    return;
   }
 
-  if (checkAuthorization(req)) {
+  if (checkAuthorization(requestParams.body.hash as string)) {
     return (await setUserCookie(res)).status(200).json({ success: true });
   }
 

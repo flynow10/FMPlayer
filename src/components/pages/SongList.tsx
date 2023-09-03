@@ -1,11 +1,11 @@
-import { MyMusicLibrary } from "@/src/music/library/music-library";
+import { MusicLibrary } from "@/src/music/library/music-library";
 import { useAsyncLoad } from "@/src/hooks/use-async-load";
 import { ChevronDown, ChevronUp, Play } from "lucide-react";
 import { Blur } from "@/src/components/utils/loading-pages/Blur";
 import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
 import { useState } from "react";
 import { Pages } from "@/src/types/pages";
-import { PostgresRequest } from "@/src/types/postgres-request";
+import { Music } from "@/src/types/music";
 
 type SongListProps = {
   onPlayMedia: Pages.PlayByID;
@@ -14,16 +14,9 @@ type SongListProps = {
 
 type Column = {
   name: string;
-} & (
-  | {
-      prop: PostgresRequest.SongSortFields;
-      sortable: true;
-    }
-  | {
-      prop: keyof PostgresRequest.SongWithRelations;
-      sortable: false;
-    }
-);
+  prop: keyof Music.DB.TableType<"Track">;
+  sortable: boolean;
+};
 
 const columns: Column[] = [
   {
@@ -44,15 +37,28 @@ const columns: Column[] = [
 ];
 
 export default function SongList(props: SongListProps) {
-  const [sortBy, setSortBy] = useState<PostgresRequest.SongSortFields>("title");
-  const [sort, setSort] = useState<PostgresRequest.SortType>("asc");
-  const [songList, loaded] = useAsyncLoad(
-    () => MyMusicLibrary.getSongList({ sortDirection: sort, sortBy }),
+  const [sortBy, setSortBy] = useState<Column["prop"]>("title");
+  const [sort, setSort] = useState<"asc" | "desc">("asc");
+  const [trackList, loaded] = useAsyncLoad(
+    async () => {
+      return (await MusicLibrary.db.track.list()).sort((a, b) => {
+        let aValue = a[sortBy];
+        let bValue = b[sortBy];
+        if (sort == "desc") {
+          [aValue, bValue] = [bValue, aValue];
+        }
+
+        if (aValue instanceof Date && bValue instanceof Date) {
+          return aValue.getTime() - bValue.getTime();
+        }
+        return JSON.stringify(aValue).localeCompare(JSON.stringify(bValue));
+      });
+    },
     [],
     [sortBy, sort]
   );
 
-  const onSort = (prop: PostgresRequest.SongSortFields) => {
+  const onSort = (prop: Column["prop"]) => {
     if (sortBy === prop) {
       setSort((value) => (value === "desc" ? "asc" : "desc"));
     } else {
@@ -61,7 +67,7 @@ export default function SongList(props: SongListProps) {
     }
   };
 
-  if (songList.length === 0 && !loaded) {
+  if (trackList.length === 0 && !loaded) {
     return <FullCover />;
   }
 
@@ -97,30 +103,36 @@ export default function SongList(props: SongListProps) {
             </tr>
           </thead>
           <tbody className="relative">
-            {songList.map((song) => (
-              <tr key={song.id}>
+            {trackList.map((track) => (
+              <tr key={track.id}>
                 <td
                   role="button"
                   className="p-2"
                   onClick={() => {
-                    props.onPlayMedia(song.id, "song");
+                    props.onPlayMedia(track.id, "track");
                   }}
                 >
                   <Play />
                 </td>
                 {columns.map((column) => {
-                  let value = song[column.prop];
+                  let value = track[column.prop];
 
                   if (value instanceof Date) {
                     value = value.toISOString();
                   }
 
                   if (column.prop === "artists") {
+                    const artists = track[column.prop].filter(
+                      (a) => a.artistType === "MAIN"
+                    );
+                    const featured = track[column.prop].filter(
+                      (a) => a.artistType === "FEATURED"
+                    );
                     value =
-                      song[column.prop].map((a) => a.name).join(", ") +
-                      (song.featuring.length > 0
+                      artists.map((a) => a.artist.name).join(", ") +
+                      (featured.length > 0
                         ? " (feat. " +
-                          song["featuring"].map((a) => a.name).join(", ") +
+                          featured.map((a) => a.artist.name).join(", ") +
                           ")"
                         : "");
                   }
@@ -129,8 +141,16 @@ export default function SongList(props: SongListProps) {
                     value = value.join(", ");
                   }
 
+                  if (value === null) {
+                    value = "";
+                  }
+
                   if (typeof value === "object") {
-                    value = value?.title ?? "";
+                    if ("name" in value) {
+                      value = value.name ?? "";
+                    } else {
+                      value = "";
+                    }
                   }
 
                   return (

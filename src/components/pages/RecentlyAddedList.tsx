@@ -1,11 +1,11 @@
-import { MyMusicLibrary } from "@/src/music/library/music-library";
+import { MusicLibrary } from "@/src/music/library/music-library";
 import { useAsyncLoad } from "@/src/hooks/use-async-load";
 import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
 import { MediaCard } from "@/src/components/media-displays/MediaCard";
 import { Pages } from "@/src/types/pages";
-import { Album, Song } from "@prisma/client";
 import { MediaCarousel } from "@/src/components/media-displays/MediaCarousel";
 import { slugify } from "@/src/utils/string-utils";
+import { Music } from "@/src/types/music";
 
 export type RecentlyAddedListProps = {
   onPlayMedia: Pages.PlayByID;
@@ -48,26 +48,30 @@ const getRelativeTime = (d1: number, d2?: number) => {
   return "less than a second ago";
 };
 
-type AlbumWithType = Album & { type: "album" };
-type SongWithType = Song & { type: "song" };
+// type ArrayElement<ArrayType extends readonly unknown[]> = ArrayType extends readonly (infer ElementType)[] ? ElementType : never;
+type Album = Music.DB.TableType<"Album">;
+type Track = Music.DB.TableType<"Track">;
 
 export default function RecentlyAddedList(props: RecentlyAddedListProps) {
   const [recent, loaded] = useAsyncLoad(
     async () => {
-      const albums = await MyMusicLibrary.getAlbumList({
-        sortBy: "createdOn",
-        sortDirection: "asc",
-      });
-      const songs = await MyMusicLibrary.getSongList({
-        sortBy: "createdOn",
-        sortDirection: "asc",
-      });
-      const albumsAndSongs: (AlbumWithType | SongWithType)[] = [];
+      const albums = await MusicLibrary.db.album.list();
+      const tracks = await MusicLibrary.db.track.list();
+      const albumsAndSongs: (
+        | (Album & { type: "album" })
+        | (Track & { type: "track" })
+      )[] = [];
       albumsAndSongs.push(
-        ...albums.map<AlbumWithType>((a) => ({ ...a, type: "album" }))
+        ...albums.map<Album & { type: "album" }>((a) => ({
+          ...a,
+          type: "album",
+        }))
       );
       albumsAndSongs.push(
-        ...songs.map<SongWithType>((a) => ({ ...a, type: "song" }))
+        ...tracks.map<Track & { type: "track" }>((a) => ({
+          ...a,
+          type: "track",
+        }))
       );
       albumsAndSongs.sort((a, b) => {
         const aTime = new Date(a.createdOn).getTime();
@@ -79,8 +83,10 @@ export default function RecentlyAddedList(props: RecentlyAddedListProps) {
       return groupBy(
         albumsAndSongs
           .filter((media) => {
-            if (media.type === "song") {
-              return media.albumId === null;
+            if (media.type === "track") {
+              return media.listConnections.every(
+                (connection) => connection.trackList.album === null
+              );
             }
             return true;
           })
