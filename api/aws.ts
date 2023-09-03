@@ -16,7 +16,7 @@ const LAMBDA_YOUTUBE_DOWNLOAD_FUNCTION = getEnvVar(
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const requestParams = handleRequest(req, res, {
-    expectsPath: ["song", "s3-post", "download-video"],
+    expectsPath: ["song-url", "s3-post", "download-video"],
   });
   if (requestParams === null) return;
 
@@ -25,7 +25,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   printRequestType("aws", path);
 
   switch (path) {
-    case "song": {
+    case "song-url": {
       const queryParams = handleRequest(req, res, {
         allowedMethods: "GET",
         expectedQueryParams: ["trackId"],

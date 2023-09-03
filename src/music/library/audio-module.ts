@@ -34,7 +34,7 @@ export function createAudioMethods(): AudioMethods {
       const response = await VercelAPI.makeRequest(
         Endpoint.AWS,
         { trackId },
-        "song",
+        "song-url",
         "GET",
         { url: null }
       );
