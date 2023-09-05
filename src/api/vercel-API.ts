@@ -18,8 +18,8 @@ async function _makeJSONRequest<O>(
   body: O,
   path: string
 ): Promise<Response> {
-  return fetch(`${_urlPath(endpoint, path)}`, {
-    method,
+  return fetch(`${_urlPath(endpoint, path)}?method=${method}`, {
+    method: "POST",
     body: JSON.stringify(body),
     headers: {
       "Content-Type": "application/json",
@@ -27,18 +27,18 @@ async function _makeJSONRequest<O>(
   });
 }
 
-async function _makeGETRequest<O extends object>(
-  endpoint: Endpoint,
-  query: O,
-  path: string
-): Promise<Response> {
-  const requestUrl = `${_urlPath(endpoint, path)}?${VercelAPI.optionsToUrl({
-    ...query,
-  })}`;
-  return fetch(requestUrl, {
-    method: "GET",
-  });
-}
+// async function _makeGETRequest<O extends object>(
+//   endpoint: Endpoint,
+//   query: O,
+//   path: string
+// ): Promise<Response> {
+//   const requestUrl = `${_urlPath(endpoint, path)}?${VercelAPI.optionsToUrl({
+//     ...query,
+//   })}`;
+//   return fetch(requestUrl, {
+//     method: "GET",
+//   });
+// }
 
 async function makeRequest<T, O extends object = object>(
   endpoint: Endpoint,
@@ -63,10 +63,10 @@ async function makeRequest<T, O extends object = object>(
   let requestMethod: RequestMethod<O>;
 
   switch (method) {
-    case "GET": {
-      requestMethod = _makeGETRequest;
-      break;
-    }
+    // case "GET": {
+    //   requestMethod = _makeGETRequest;
+    //   break;
+    // }
     default: {
       requestMethod = _makeJSONRequest.bind(null, method);
       break;

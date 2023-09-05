@@ -39,6 +39,7 @@
     "ajv-formats": "^2.1.1",
     "classnames": "^2.3.2",
     "cookie": "^0.5.0",
+    "fm-player-shared": "^3.0.0",
     "iso8601-duration": "^2.1.1",
     "jose": "^4.14.4",
     "jsmediatags": "^3.9.7",
@@ -54,7 +55,6 @@
   "devDependencies": {
     "@commitlint/cli": "^17.6.5",
     "@commitlint/config-conventional": "^17.6.5",
-    "@fm-player/shared": "git+https://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:x-oauth-basic@github.com/flynow10/FMPlayer-Shared.git",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^14.0.0",
     "@testing-library/user-event": "^14.4.3",

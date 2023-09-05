@@ -1,37 +1,22 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { getEnvVar } from "../api-lib/constants.js";
 import Ably from "ably";
-import { handleRequest } from "../api-lib/api-utils.js";
-
-const ABLY_ROOT_KEY = getEnvVar("ABLY_ROOT_KEY");
-
-const rest = new Ably.Rest({ key: ABLY_ROOT_KEY });
+import { AblyMessage } from "fm-player-shared";
+import { ablyRest } from "../api-lib/data-clients.js";
 
 async function getAblyToken(): Promise<Ably.Types.TokenRequest> {
-  return new Promise((resolve, reject) => {
-    rest.auth.createTokenRequest(
-      {
-        capability: {
-          ["file-upload"]: ["subscribe"],
-        },
-      },
-      (err, tokenRequest) => {
-        if (err || !tokenRequest) {
-          reject(err);
-        } else {
-          resolve(tokenRequest);
-        }
-      }
-    );
+  return ablyRest.auth.createTokenRequest({
+    capability: {
+      [AblyMessage.Channel.FileUpload]: ["subscribe"],
+      [AblyMessage.Channel.DatabaseChanges]: ["subscribe"],
+    },
   });
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  const request = handleRequest(req, res, {
-    allowedMethods: "GET",
-  });
-  if (request === null) {
-    return;
+  if (req.method !== "GET") {
+    return res
+      .status(405)
+      .json("Method not allowed! Send a GET request instead");
   }
 
   try {
