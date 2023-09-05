@@ -28,11 +28,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     case "song-url": {
       const queryParams = handleRequest(req, res, {
         allowedMethods: "GET",
-        expectedQueryParams: ["trackId"],
+        expectedBodyParams: ["trackId"],
       });
       if (queryParams === null) break;
 
-      const { trackId: id } = queryParams.query;
+      const { trackId: id } = queryParams.body;
+      if (typeof id !== "string") {
+        res
+          .status(400)
+          .json(`Expected trackId to be a string, but it was '${typeof id}'`);
+        return;
+      }
 
       if (IS_LOCAL) {
         res.status(200).json({ url: `/static/songs/${id}.ogg` });
