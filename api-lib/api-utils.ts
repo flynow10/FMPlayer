@@ -61,6 +61,7 @@ type RequestParams<
 > = {
   query: Paramters<Query>;
   body: Paramters<Body, unknown>;
+  method: Method;
 } & (HasPath extends false
   ? Path extends null
     ? object
@@ -94,14 +95,27 @@ export const handleRequest = <
     typeof opts.allowedMethods === "string"
       ? [opts.allowedMethods]
       : opts.allowedMethods;
+  if (req.method !== "POST") {
+    res
+      .status(405)
+      .json(
+        `Vercel dev server currently has a bug making http methods not work correctly. Please send a POST request with the http method included as a query parameter.`
+      );
+    return null;
+  }
 
-  if (!(req.method && parsedAllowedMethods.includes(req.method as Method))) {
+  let queryMethod = req.query.method as Method;
+  if (!(req.query.method && typeof req.query.method === "string")) {
+    queryMethod = "POST";
+  }
+
+  if (!parsedAllowedMethods.includes(queryMethod)) {
     res
       .status(405)
       .json(
         `Method not allowed! Allowed methods include ${parsedAllowedMethods.join(
           ", "
-        )}.`
+        )}. Vercel dev server currently has a bug making http methods not work correctly. Please send a POST request with the http method included as a query parameter.`
       );
     return null;
   }
@@ -146,6 +160,7 @@ export const handleRequest = <
   return {
     body: bodyParams,
     query: queryParams,
+    method: queryMethod,
     ...(pathAddon as HasPath extends false
       ? Path extends null
         ? object

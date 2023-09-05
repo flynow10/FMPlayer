@@ -94,9 +94,9 @@ model Track {
 }
 
 model TrackArtist {
-  track    Track  @relation(fields: [trackId], references: [id])
+  track    Track  @relation(fields: [trackId], references: [id], onDelete: Cascade)
   trackId  String @db.VarChar(36)
-  artist   Artist @relation(fields: [artistId], references: [id])
+  artist   Artist @relation(fields: [artistId], references: [id], onDelete: Cascade)
   artistId String @db.VarChar(36)
 
   artistType ArtistType
@@ -107,9 +107,9 @@ model TrackArtist {
 }
 
 model TrackInList {
-  track       Track     @relation(fields: [trackId], references: [id])
+  track       Track     @relation(fields: [trackId], references: [id], onDelete: Cascade)
   trackId     String    @db.VarChar(36)
-  trackList   TrackList @relation(fields: [trackListId], references: [id])
+  trackList   TrackList @relation(fields: [trackListId], references: [id], onDelete: Cascade)
   trackListId String    @db.VarChar(36)
 
   trackNumber Int
@@ -120,7 +120,7 @@ model TrackInList {
 }
 
 model AudioSource {
-  track   Track  @relation(fields: [trackId], references: [id])
+  track   Track  @relation(fields: [trackId], references: [id], onDelete: Cascade)
   trackId String @id @db.VarChar(36)
 
   sourceType SourceType
@@ -152,9 +152,9 @@ model Album {
 }
 
 model AlbumArtist {
-  album    Album  @relation(fields: [albumId], references: [id])
+  album    Album  @relation(fields: [albumId], references: [id], onDelete: Cascade)
   albumId  String @db.VarChar(36)
-  artist   Artist @relation(fields: [artistId], references: [id])
+  artist   Artist @relation(fields: [artistId], references: [id], onDelete: Cascade)
   artistId String @db.VarChar(36)
 
   artistType ArtistType

@@ -1,7 +1,7 @@
 import BaseSuggestionInput from "@/src/components/utils/input-extensions/BaseSuggestionInput";
 import MultiSuggestionInput from "@/src/components/utils/input-extensions/MultiSuggestionInput";
 import { FileContext } from "@/src/contexts/FileContext";
-import { useAsyncLoad } from "@/src/hooks/use-async-load";
+import { DataState, useDatabase } from "@/src/hooks/use-database";
 import { MusicLibrary } from "@/src/music/library/music-library";
 import { Music } from "@/src/types/music";
 import { Pages } from "@/src/types/pages";
@@ -14,19 +14,19 @@ type MetadataEditorProps = {
 
 export default function MetadataEditor(props: MetadataEditorProps) {
   const file = useContext(FileContext);
-  const [allArtists, allArtistsLoaded] = useAsyncLoad(
+  const [allArtists, allArtistsLoaded] = useDatabase(
     () => {
       return MusicLibrary.db.artist.list();
     },
     [],
-    []
+    ["Artist"]
   );
-  const [libraryGenres, libraryGenresLoaded] = useAsyncLoad(
+  const [libraryGenres, libraryGenresLoaded] = useDatabase(
     () => {
       return MusicLibrary.db.genre.list();
     },
     [],
-    []
+    ["Genre"]
   );
   const [artistsSuggestions, setArtistSuggestions] = useState<string[]>([]);
   const [featuringSuggestions, setFeaturingSuggestions] = useState<string[]>(
@@ -39,7 +39,7 @@ export default function MetadataEditor(props: MetadataEditorProps) {
     search: string,
     newAddedArtists: string[] = []
   ): string[] => {
-    if (!allArtistsLoaded) {
+    if (allArtistsLoaded === DataState.Loading) {
       return [];
     }
     return pickSuggestions(
@@ -56,7 +56,7 @@ export default function MetadataEditor(props: MetadataEditorProps) {
     );
   };
   const filterGenreSuggestions = (search: string) => {
-    if (!libraryGenresLoaded) {
+    if (libraryGenresLoaded === DataState.Loading) {
       return [];
     }
     return pickSuggestions(

@@ -9,8 +9,8 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { MusicLibrary } from "@/src/music/library/music-library";
-import { useAsyncLoad } from "@/src/hooks/use-async-load";
 import { Music } from "@/src/types/music";
+import { DataState, useDatabase } from "@/src/hooks/use-database";
 
 type AudioProps = {
   id: string | null;
@@ -30,12 +30,13 @@ type AudioProps = {
 };
 
 export function Audio(props: AudioProps) {
-  const [track, loadedMetaData] = useAsyncLoad(
+  const [track, loadedMetaData] = useDatabase(
     async () => {
       if (!props.id) return null;
       return await MusicLibrary.db.track.get({ id: props.id });
     },
     null,
+    ["Track"],
     [props.id]
   );
 
@@ -137,7 +138,7 @@ export function Audio(props: AudioProps) {
         </div>
       </div>
       <div className="flex flex-col grow text-center">
-        {loadedMetaData ? (
+        {loadedMetaData !== DataState.Loading ? (
           <>
             <h3 id="song-title">{track?.title}</h3>
             <h3 id="song-id">{track?.id}</h3>

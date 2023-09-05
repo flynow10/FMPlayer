@@ -1,11 +1,11 @@
 import { MusicLibrary } from "@/src/music/library/music-library";
-import { useAsyncLoad } from "@/src/hooks/use-async-load";
 import { ChevronDown, ChevronUp, Play } from "lucide-react";
 import { Blur } from "@/src/components/utils/loading-pages/Blur";
 import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
 import { useState } from "react";
 import { Pages } from "@/src/types/pages";
 import { Music } from "@/src/types/music";
+import { DataState, useDatabase } from "@/src/hooks/use-database";
 
 type SongListProps = {
   onPlayMedia: Pages.PlayByID;
@@ -39,7 +39,7 @@ const columns: Column[] = [
 export default function SongList(props: SongListProps) {
   const [sortBy, setSortBy] = useState<Column["prop"]>("title");
   const [sort, setSort] = useState<"asc" | "desc">("asc");
-  const [trackList, loaded] = useAsyncLoad(
+  const [trackList, loadedState] = useDatabase(
     async () => {
       return (await MusicLibrary.db.track.list()).sort((a, b) => {
         let aValue = a[sortBy];
@@ -55,6 +55,7 @@ export default function SongList(props: SongListProps) {
       });
     },
     [],
+    ["Track"],
     [sortBy, sort]
   );
 
@@ -67,7 +68,7 @@ export default function SongList(props: SongListProps) {
     }
   };
 
-  if (trackList.length === 0 && !loaded) {
+  if (trackList.length === 0 && loadedState === DataState.Loading) {
     return <FullCover />;
   }
 
@@ -161,7 +162,7 @@ export default function SongList(props: SongListProps) {
                 })}
               </tr>
             ))}
-            {!loaded && (
+            {!loadedState && (
               <tr className="h-full">
                 <td colSpan={columns.length}>
                   <Blur />
