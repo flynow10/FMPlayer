@@ -1,8 +1,9 @@
-import { prismaClient } from "../api-lib/data-clients.js";
+import { ablyRest, prismaClient } from "../api-lib/data-clients.js";
 import { VercelRequest, VercelResponse } from "@vercel/node";
 import { Prisma } from "@prisma/client";
 import { Operation } from "@prisma/client/runtime/library.js";
-import { printRequestType } from "../api-lib/api-utils.js";
+import { handleRequest, printRequestType } from "../api-lib/api-utils.js";
+import { AblyMessage } from "fm-player-shared";
 
 type ModelSymbol = Exclude<keyof typeof prismaClient, `$${string}` | symbol>;
 
@@ -305,15 +306,11 @@ async function list<S extends ModelSymbol>(modelName: S, whereArgs: unknown) {
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
-    const { path: table, ...query } = req.query as { [key: string]: string };
-
-    if (!(table && typeof table === "string")) {
-      throw new Error("Request is missing the table parameter!");
-    }
-
-    // if (!(requestMethod && typeof requestMethod === "string")) {
-    //   throw new Error("Request is missing method query parameter");
-    // }
+    const requestParams = handleRequest(req, res, {
+      expectsPath: true,
+    });
+    if (requestParams === null) return;
+    const { path: table, method: requestMethod } = requestParams;
 
     const prismaClientModelName = (table[0].toLowerCase() +
       table.substring(1)) as ModelSymbol;
@@ -325,30 +322,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       throw new Error("Requested table is invalid!");
     }
 
-    if (!(req.body instanceof Object) && req.method !== "GET") {
+    if (!(req.body instanceof Object)) {
       throw new Error("Request body is not an object!");
     }
 
-    printRequestType("db", req.method?.toLowerCase() + table);
+    printRequestType("db", requestMethod.toLowerCase() + table);
 
-    let body = req.body as unknown;
+    const body = req.body as unknown;
 
     let method;
 
-    // if (requestMethod === "GET") {
-    //   if (req.method !== "GET") {
-    //     throw new Error(
-    //       `Method query param was 'GET' but HTTP method was ${req.method}'`
-    //     );
-    //   }
-    // } else if (req.method !== "POST") {
-    //   throw new Error("Request HTTP method should be 'POST'");
-    // }
-
-    switch (req.method) {
+    switch (requestMethod) {
       case "GET": {
         method = Methods.LIST;
-        body = query;
         break;
       }
       case "POST": {
@@ -371,7 +357,29 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         throw new Error("Request method is invalid!");
       }
     }
-    res.json(await modelSwitch(method, prismaClientModelName, body));
+    const result = await modelSwitch(method, prismaClientModelName, body);
+
+    const ablyMessageMapping = {
+      [Methods.CREATE]: AblyMessage.DatabaseChanges.ChangeType.CREATE,
+      [Methods.UPDATE]: AblyMessage.DatabaseChanges.ChangeType.UPDATE,
+      [Methods.DELETE]: AblyMessage.DatabaseChanges.ChangeType.DELETE,
+    };
+    if (method in ablyMessageMapping) {
+      const message: AblyMessage.DatabaseChanges.UpdateMessage = {
+        changeType:
+          ablyMessageMapping[
+            method as Methods.CREATE | Methods.UPDATE | Methods.DELETE
+          ],
+        model: table,
+        timestamp: Date.now(),
+      };
+      const channel = ablyRest.channels.get(
+        AblyMessage.Channel.DatabaseChanges,
+        { modes: ["PUBLISH"] }
+      );
+      await channel.publish("status", message);
+    }
+    res.json(result);
   } catch (e) {
     console.error(e);
     let message;
