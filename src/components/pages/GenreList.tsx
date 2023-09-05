@@ -1,9 +1,9 @@
-import { useAsyncLoad } from "@/src/hooks/use-async-load";
 import { MusicLibrary } from "@/src/music/library/music-library";
 import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
 import { MediaCard } from "@/src/components/media-displays/MediaCard";
 import { MediaCarousel } from "@/src/components/media-displays/MediaCarousel";
 import { Pages } from "@/src/types/pages";
+import { DataState, useDatabase } from "@/src/hooks/use-database";
 
 type GenreListProps = {
   onPlayMedia: Pages.PlayByID;
@@ -11,15 +11,15 @@ type GenreListProps = {
 };
 
 export default function GenreList(props: GenreListProps) {
-  const [genreMedia, loaded] = useAsyncLoad(
+  const [genreMedia, loadedState] = useDatabase(
     async () => {
       return await MusicLibrary.db.genre.list();
     },
     [],
-    []
+    ["Genre", "Album", "Track"]
   );
 
-  if (!loaded) {
+  if (loadedState === DataState.Loading) {
     return <FullCover />;
   }
 
