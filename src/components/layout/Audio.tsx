@@ -138,7 +138,7 @@ export function Audio(props: AudioProps) {
         </div>
       </div>
       <div className="flex flex-col grow text-center">
-        {loadedMetaData === DataState.Loading ? (
+        {loadedMetaData !== DataState.Loading ? (
           <>
             <h3 id="song-title">{track?.title}</h3>
             <h3 id="song-id">{track?.id}</h3>
