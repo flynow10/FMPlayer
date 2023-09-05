@@ -1,8 +1,8 @@
 import { MusicLibrary } from "@/src/music/library/music-library";
-import { useAsyncLoad } from "@/src/hooks/use-async-load";
 import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
 import { MediaCard } from "@/src/components/media-displays/MediaCard";
 import { Pages } from "@/src/types/pages";
+import { DataState, useDatabase } from "@/src/hooks/use-database";
 
 type AlbumListProps = {
   onPlayMedia: Pages.PlayByID;
@@ -10,15 +10,15 @@ type AlbumListProps = {
 };
 
 export default function AlbumList(props: AlbumListProps) {
-  const [albumList, loaded] = useAsyncLoad(
+  const [albumList, loadedState] = useDatabase(
     () => {
       return MusicLibrary.db.album.list();
     },
     [],
-    []
+    ["Album"]
   );
 
-  if (!loaded) {
+  if (loadedState === DataState.Loading) {
     return <FullCover />;
   }
 

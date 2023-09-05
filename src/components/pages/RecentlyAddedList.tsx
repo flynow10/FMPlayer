@@ -1,5 +1,4 @@
 import { MusicLibrary } from "@/src/music/library/music-library";
-// import { useAsyncLoad } from "@/src/hooks/use-async-load";
 import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
 import { MediaCard } from "@/src/components/media-displays/MediaCard";
 import { Pages } from "@/src/types/pages";
@@ -54,7 +53,7 @@ type Album = Music.DB.TableType<"Album">;
 type Track = Music.DB.TableType<"Track">;
 
 export default function RecentlyAddedList(props: RecentlyAddedListProps) {
-  const [recent, state] = useDatabase(
+  const [recent, loadedState] = useDatabase(
     async () => {
       const albums = await MusicLibrary.db.album.list();
       const tracks = await MusicLibrary.db.track.list();
@@ -111,7 +110,7 @@ export default function RecentlyAddedList(props: RecentlyAddedListProps) {
     ["Album", "Track"]
   );
 
-  if (state === DataState.Loading) {
+  if (loadedState === DataState.Loading) {
     return <FullCover />;
   }
 
