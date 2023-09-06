@@ -7,7 +7,6 @@ import {
   useLoaderData,
 } from "react-router-dom";
 import ReactDOM from "react-dom/client";
-import { ToastContainer } from "react-toastify";
 import React, { Suspense } from "react";
 
 import App from "@/src/components/App";
@@ -19,6 +18,7 @@ import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
 
 import "react-toastify/dist/ReactToastify.min.css";
 import "@/src/assets/sass/index.scss";
+import ToastManager from "@/src/components/layout/ToastContainer";
 
 const router = createBrowserRouter([
   {
@@ -52,14 +52,7 @@ if (!root) {
 ReactDOM.createRoot(root).render(
   <React.StrictMode>
     <RouterProvider router={router} />
-    <ToastContainer
-      className="dark:invert"
-      position="bottom-right"
-      draggable={true}
-      draggableDirection="x"
-      limit={5}
-      theme="colored"
-    />
+    <ToastManager />
   </React.StrictMode>
 );
 
