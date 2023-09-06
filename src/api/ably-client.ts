@@ -36,14 +36,14 @@ class AblyChannelWrapper<T> {
 
 type StateChangeListener = (stateChange: Types.ConnectionStateChange) => void;
 class ConnectionStateManager {
-  public _state: Types.ConnectionState = "initialized";
+  public state: Types.ConnectionState = "initialized";
   public _stateChangeListeners: {
     state: Types.ConnectionState | "all";
     listener: StateChangeListener;
   }[] = [];
 
   public _onNewState(stateChange: Types.ConnectionStateChange) {
-    this._state = stateChange.current;
+    this.state = stateChange.current;
     this._stateChangeListeners.forEach((value) => {
       if (value.state === stateChange.current || value.state === "all") {
         value.listener(stateChange);
