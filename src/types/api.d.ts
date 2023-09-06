@@ -8,14 +8,6 @@ export namespace API {
         };
   }
 
-  export namespace Ably {
-    export type ConnectionStatus =
-      | "pending"
-      | "connected"
-      | "timeout"
-      | "failed";
-  }
-
   export namespace Youtube {
     export type ResourceId = {
       kind: "youtube#video";
