@@ -5,6 +5,7 @@ import { ChevronLeft } from "lucide-react";
 import classNames from "classnames";
 import { Pages } from "@/src/types/pages";
 import ToastTest from "@/src/components/utils/ToastTest";
+import AblyStatusSymbol from "@/src/components/utils/AblyStatusSymbol";
 
 type MainProps = {
   onPlayMedia?: Pages.PlayByID;
@@ -106,27 +107,30 @@ export default function Main(props: MainProps) {
   return (
     <div className="main overflow-clip flex flex-col">
       <div className="py-3 border-b-2 px-4">
-        <div className="flex items-center">
-          <button
-            className={classNames(
-              "p-1",
-              "mr-1",
-              "align-middle",
-              "hover:bg-gray-100",
-              "rounded-lg",
-              {
-                "text-gray-500 hover:bg-inherit":
-                  tabs[props.location].length === 1,
-              }
-            )}
-            disabled={tabs[props.location].length === 1}
-            onClick={() => {
-              onNavigate(props.location, "back");
-            }}
-          >
-            <ChevronLeft />
-          </button>
-          <h3 className="text-2xl inline-block">{pageTitle}</h3>
+        <div className="flex items-center w-full">
+          <div className="flex items-center grow">
+            <button
+              className={classNames(
+                "p-1",
+                "mr-1",
+                "align-middle",
+                "hover:bg-gray-100",
+                "rounded-lg",
+                {
+                  "text-gray-500 hover:bg-inherit":
+                    tabs[props.location].length === 1,
+                }
+              )}
+              disabled={tabs[props.location].length === 1}
+              onClick={() => {
+                onNavigate(props.location, "back");
+              }}
+            >
+              <ChevronLeft />
+            </button>
+            <h3 className="text-2xl inline-block">{pageTitle}</h3>
+          </div>
+          <AblyStatusSymbol />
         </div>
         <div className="flex flex-row gap-2">
           <UUID />
