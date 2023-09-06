@@ -34,30 +34,42 @@ const columns: Column[] = [
     prop: "artists",
     sortable: false,
   },
+  {
+    name: "Date Modified",
+    prop: "modifiedOn",
+    sortable: true,
+  },
+  {
+    name: "Date Added",
+    prop: "createdOn",
+    sortable: true,
+  },
 ];
 
 export default function SongList(props: SongListProps) {
   const [sortBy, setSortBy] = useState<Column["prop"]>("title");
   const [sort, setSort] = useState<"asc" | "desc">("asc");
   const [trackList, loadedState] = useDatabase(
-    async () => {
-      return (await MusicLibrary.db.track.list()).sort((a, b) => {
-        let aValue = a[sortBy];
-        let bValue = b[sortBy];
-        if (sort == "desc") {
-          [aValue, bValue] = [bValue, aValue];
-        }
-
-        if (aValue instanceof Date && bValue instanceof Date) {
-          return aValue.getTime() - bValue.getTime();
-        }
-        return JSON.stringify(aValue).localeCompare(JSON.stringify(bValue));
-      });
+    () => {
+      return MusicLibrary.db.track.list();
     },
     [],
     ["Track"],
-    [sortBy, sort]
+    []
   );
+
+  const sortedTrackList = trackList.sort((a, b) => {
+    let aValue = a[sortBy];
+    let bValue = b[sortBy];
+    if (sort == "desc") {
+      [aValue, bValue] = [bValue, aValue];
+    }
+
+    if (aValue instanceof Date && bValue instanceof Date) {
+      return aValue.getTime() - bValue.getTime();
+    }
+    return JSON.stringify(aValue).localeCompare(JSON.stringify(bValue));
+  });
 
   const onSort = (prop: Column["prop"]) => {
     if (sortBy === prop) {
@@ -76,7 +88,7 @@ export default function SongList(props: SongListProps) {
     <>
       <div className="mx-8">
         <table className="text-left w-full border-separate border-spacing-0">
-          <thead className="sticky top-0 bg-white">
+          <thead className="sticky top-0 z-10 bg-white">
             <tr>
               <th className="p-1 border-b-2"></th>
               {columns.map((column) => (
@@ -104,7 +116,7 @@ export default function SongList(props: SongListProps) {
             </tr>
           </thead>
           <tbody className="relative">
-            {trackList.map((track) => (
+            {sortedTrackList.map((track) => (
               <tr key={track.id}>
                 <td
                   role="button"
@@ -119,7 +131,7 @@ export default function SongList(props: SongListProps) {
                   let value = track[column.prop];
 
                   if (value instanceof Date) {
-                    value = value.toISOString();
+                    value = value.toLocaleString();
                   }
 
                   if (column.prop === "artists") {
@@ -162,7 +174,7 @@ export default function SongList(props: SongListProps) {
                 })}
               </tr>
             ))}
-            {!loadedState && (
+            {loadedState === DataState.Stale && (
               <tr className="h-full">
                 <td colSpan={columns.length}>
                   <Blur />
