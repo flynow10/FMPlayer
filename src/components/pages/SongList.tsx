@@ -76,7 +76,7 @@ export default function SongList(props: SongListProps) {
     <>
       <div className="mx-8">
         <table className="text-left w-full border-separate border-spacing-0">
-          <thead className="sticky top-0 bg-white">
+          <thead className="sticky top-0 z-10 bg-white">
             <tr>
               <th className="p-1 border-b-2"></th>
               {columns.map((column) => (
