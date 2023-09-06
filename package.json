@@ -31,7 +31,6 @@
     "@aws-sdk/s3-presigned-post": "^3.327.0",
     "@aws-sdk/s3-request-presigner": "^3.328.0",
     "@prisma/client": "^5.2.0",
-    "@supabase/supabase-js": "^2.25.0",
     "@vercel/edge": "^0.3.4",
     "@vercel/node": "^2.14.1",
     "ably": "^1.2.40",
