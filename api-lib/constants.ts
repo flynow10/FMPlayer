@@ -12,9 +12,14 @@ export function getVercelEnvironment(): VercelEnv {
   return getEnvVar("VERCEL_ENV") as VercelEnv;
 }
 
-export function getEnvVar(variableName: string): string {
+export function getEnvVar(variableName: string, defaultValue?: string): string {
   const environmentVariable = process.env[variableName];
-  if (environmentVariable === undefined || environmentVariable.length === 0)
-    throw new Error(`The environment variable ${variableName} is not set.`);
+  if (environmentVariable === undefined || environmentVariable.length === 0) {
+    if (defaultValue === undefined) {
+      throw new Error(`The environment variable ${variableName} is not set.`);
+    } else {
+      return defaultValue;
+    }
+  }
   return environmentVariable;
 }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { Audio } from "@/src/components/layout/Audio";
 import { MusicLibrary } from "@/src/music/library/music-library";
 import { Playlist } from "@/src/music/playlists/playlist";
@@ -10,7 +10,8 @@ import { PlaySongAction } from "@/src/music/actions/play-song-action";
 import { PlaylistHelper } from "@/src/music/utils/playlist-helper";
 import { Music } from "@/src/types/music";
 import { Pages } from "@/src/types/pages";
-// import { useLoaderData } from "react-router-dom";
+import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
+import { Await, useLoaderData } from "react-router-dom";
 
 export default function App() {
   const [queue, setQueue] = useState<Playlist>(new Playlist());
@@ -19,7 +20,9 @@ export default function App() {
   const [location, setLocation] = useState<Pages.Location>("Recently Added");
   const [searchString, setSearchString] = useState("");
   const [isSearching, setIsSearching] = useState(false);
-  // const data = useLoaderData();
+  const routerLoadingData = useLoaderData() as {
+    [key: string]: Promise<unknown>;
+  };
 
   const songId = queue.isBlank()
     ? null
@@ -116,66 +119,70 @@ export default function App() {
     </div>
   );
   return (
-    <div className="app-container grid grid-cols-6 grid-rows-[minmax(0,6fr)_minmax(0,1fr)] h-full max-h-full">
-      <Sidebar
-        location={location}
-        isSearching={isSearching}
-        onSelectTab={(toLocation) => {
-          setLocation(toLocation);
-          setIsSearching(false);
-        }}
-        onSearch={(newSearch) => {
-          if (newSearch === "") {
-            setIsSearching(false);
-          } else {
-            setIsSearching(true);
-          }
-
-          setSearchString(newSearch);
-        }}
-      />
-      <Main
-        location={location}
-        searchString={searchString}
-        isSearching={isSearching}
-        onPlayMedia={async (id, type) => {
-          let playlist;
-
-          switch (type) {
-            case "album": {
-              const album = await MusicLibrary.db.album.get({ id });
-
-              if (album) {
-                playlist = PlaylistHelper.getPlaylistFromAlbum(album);
+    <Suspense fallback={<FullCover />}>
+      <Await resolve={Promise.all(Object.values(routerLoadingData))}>
+        <div className="app-container grid grid-cols-6 grid-rows-[minmax(0,6fr)_minmax(0,1fr)] h-full max-h-full">
+          <Sidebar
+            location={location}
+            isSearching={isSearching}
+            onSelectTab={(toLocation) => {
+              setLocation(toLocation);
+              setIsSearching(false);
+            }}
+            onSearch={(newSearch) => {
+              if (newSearch === "") {
+                setIsSearching(false);
+              } else {
+                setIsSearching(true);
               }
 
-              break;
-            }
+              setSearchString(newSearch);
+            }}
+          />
+          <Main
+            location={location}
+            searchString={searchString}
+            isSearching={isSearching}
+            onPlayMedia={async (id, type) => {
+              let playlist;
 
-            case "track": {
-              const track = await MusicLibrary.db.track.get({ id });
+              switch (type) {
+                case "album": {
+                  const album = await MusicLibrary.db.album.get({ id });
 
-              if (track) {
-                playlist = new Playlist().addAction(
-                  new PlaySongAction(track.id)
-                );
+                  if (album) {
+                    playlist = PlaylistHelper.getPlaylistFromAlbum(album);
+                  }
+
+                  break;
+                }
+
+                case "track": {
+                  const track = await MusicLibrary.db.track.get({ id });
+
+                  if (track) {
+                    playlist = new Playlist().addAction(
+                      new PlaySongAction(track.id)
+                    );
+                  }
+
+                  break;
+                }
+                // case "playlist":
+                //   playlist = MyMusicLibrary.getPlaylist(id);
+                //   break;
               }
 
-              break;
-            }
-            // case "playlist":
-            //   playlist = MyMusicLibrary.getPlaylist(id);
-            //   break;
-          }
-
-          if (playlist) {
-            setQueue(playlist);
-            setCurrentSongIndex(0);
-            audioPlayer.startPlayback();
-          }
-        }}
-      />
-      {audioComponent}
-    </div>
+              if (playlist) {
+                setQueue(playlist);
+                setCurrentSongIndex(0);
+                audioPlayer.startPlayback();
+              }
+            }}
+          />
+          {audioComponent}
+        </div>
+      </Await>
+    </Suspense>
   );
 }
