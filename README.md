@@ -1,5 +1,9 @@
 <p align="center" >
-  <img src="https://music.wagologies.com/favicon-dark-mode.svg" width="96" color="white">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://music.wagologies.com/favicon-dark-mode.svg">
+    <source media="(prefers-color-scheme: light)" srcset="https://music.wagologies.com/favicon-light-mode.svg">
+    <img alt="Functional Music Player logo" src="https://music.wagologies.com/icon.svg" width="96" color="white">
+  </picture>
   <h3 align="center">The Functional Music Player</h3>
 </p>
 
