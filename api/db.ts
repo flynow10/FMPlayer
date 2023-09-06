@@ -364,7 +364,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       [Methods.UPDATE]: AblyMessage.DatabaseChanges.ChangeType.UPDATE,
       [Methods.DELETE]: AblyMessage.DatabaseChanges.ChangeType.DELETE,
     };
-    if (method in ablyMessageMapping) {
+    if (method in ablyMessageMapping && ablyRest !== null) {
       const message: AblyMessage.DatabaseChanges.UpdateMessage = {
         changeType:
           ablyMessageMapping[
