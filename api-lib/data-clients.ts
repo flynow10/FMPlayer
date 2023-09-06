@@ -9,10 +9,11 @@ export const prismaClient = new PrismaClient({
   errorFormat: IS_LOCAL ? "pretty" : "minimal",
 });
 
-const ABLY_ROOT_KEY = getEnvVar("ABLY_ROOT_KEY");
+const ABLY_ROOT_KEY = getEnvVar("ABLY_ROOT_KEY", "");
 
 export const s3Client = new S3Client({});
 
 export const lambdaClient = new LambdaClient({});
 
-export const ablyRest = new Ably.Rest.Promise({ key: ABLY_ROOT_KEY });
+export const ablyRest =
+  ABLY_ROOT_KEY !== "" ? new Ably.Rest.Promise({ key: ABLY_ROOT_KEY }) : null;
