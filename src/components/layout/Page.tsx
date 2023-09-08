@@ -7,6 +7,7 @@ import FileUpload from "@/src/components/pages/upload/FileUpload";
 import { Pages } from "@/src/types/pages";
 import YoutubeUpload from "@/src/components/pages/upload/YoutubeUpload";
 import TestingPage from "@/src/components/pages/TestingPage";
+import { ErrorBoundary } from "react-error-boundary";
 
 type PageProps = {
   location: string;
@@ -28,72 +29,78 @@ export default function Page(props: PageProps) {
   return (
     <div className={pageClass}>
       <div className="h-full overflow-auto relative">
-        {(() => {
-          switch (props.type) {
-            case "recent list": {
-              return (
-                <RecentlyAddedList
-                  onPlayMedia={props.onPlayMedia}
-                  onNavigate={props.onNavigate}
-                />
-              );
-            }
-
-            case "file search": {
-              return <UploadSearch onNavigate={props.onNavigate} />;
-            }
-
-            case "file upload": {
-              return (
-                <FileUpload data={props.data} onNavigate={props.onNavigate} />
-              );
-            }
-
-            case "youtube upload": {
-              return (
-                <YoutubeUpload
-                  data={props.data}
-                  onNavigate={props.onNavigate}
-                />
-              );
-            }
-
-            case "album list": {
-              return (
-                <AlbumList
-                  onPlayMedia={props.onPlayMedia}
-                  onNavigate={props.onNavigate}
-                />
-              );
-            }
-
-            case "song list": {
-              return (
-                <SongList
-                  onPlayMedia={props.onPlayMedia}
-                  onNavigate={props.onNavigate}
-                />
-              );
-            }
-
-            case "genre list": {
-              return (
-                <GenreList
-                  onPlayMedia={props.onPlayMedia}
-                  onNavigate={props.onNavigate}
-                />
-              );
-            }
-
-            case "testing page": {
-              return <TestingPage />;
-            }
-
-            default: {
-              return `Page Missing! Type: ${props.type}`;
-            }
+        <ErrorBoundary
+          fallback={
+            <span>This page failed to load! Check the console for details</span>
           }
-        })()}
+        >
+          {(() => {
+            switch (props.type) {
+              case "recent list": {
+                return (
+                  <RecentlyAddedList
+                    onPlayMedia={props.onPlayMedia}
+                    onNavigate={props.onNavigate}
+                  />
+                );
+              }
+
+              case "file search": {
+                return <UploadSearch onNavigate={props.onNavigate} />;
+              }
+
+              case "file upload": {
+                return (
+                  <FileUpload data={props.data} onNavigate={props.onNavigate} />
+                );
+              }
+
+              case "youtube upload": {
+                return (
+                  <YoutubeUpload
+                    data={props.data}
+                    onNavigate={props.onNavigate}
+                  />
+                );
+              }
+
+              case "album list": {
+                return (
+                  <AlbumList
+                    onPlayMedia={props.onPlayMedia}
+                    onNavigate={props.onNavigate}
+                  />
+                );
+              }
+
+              case "song list": {
+                return (
+                  <SongList
+                    onPlayMedia={props.onPlayMedia}
+                    onNavigate={props.onNavigate}
+                  />
+                );
+              }
+
+              case "genre list": {
+                return (
+                  <GenreList
+                    onPlayMedia={props.onPlayMedia}
+                    onNavigate={props.onNavigate}
+                  />
+                );
+              }
+
+              case "testing page": {
+                return <TestingPage />;
+              }
+
+              default: {
+                return <span>`Page Missing! Type: ${props.type}`</span>;
+              }
+            }
+          })()}
+        </ErrorBoundary>
       </div>
     </div>
   );
