@@ -13,50 +13,6 @@ export type MusicLibrary = {
   ): Promise<Music.DB.TableType<"Track"> | null>;
 };
 
-// class PostgresMusicLibrary {
-
-//   public async uploadFile(file: Music.Files.PreUploadFile): Promise<Song> {
-//     const uploadResult = await VercelAPI.makeRequest<
-//       PostgresRequest.UploadFileResponse,
-//       PostgresRequest.UploadFileBody
-//     >(Endpoint.UPLOAD, "uploadFile", {
-//       file: file.audioData.fileType,
-//       metadata: file.metadata,
-//     });
-//     this.sendS3Post(uploadResult.post, file.audioData);
-//     return uploadResult.song;
-//   }
-
-//   public async downloadYoutubeVideo(
-//     videoId: string,
-//     metadata: Music.Files.EditableMetadata
-//   ): Promise<Song> {
-//     const { song }: PostgresRequest.DownloadYoutubeVideoResponse =
-//       await VercelAPI.makeRequest<
-//         PostgresRequest.DownloadYoutubeVideoResponse,
-//         PostgresRequest.DownloadYoutubeVideoBody
-//       >(Endpoint.UPLOAD, "downloadYoutubeVideo", {
-//         video: {
-//           id: videoId,
-//         },
-//         metadata: metadata,
-//       });
-//     return song;
-//   }
-
-//   private async sendS3Post(post: PresignedPost, body: Music.Files.AudioData) {
-//     const form = new FormData();
-//     Object.entries(post.fields).forEach(([field, value]) => {
-//       form.append(field, value);
-//     });
-//     form.append("file", new Blob([body.buffer], { type: body.fileType.mime }));
-//     await fetch(post.url, {
-//       body: form,
-//       method: "POST",
-//     });
-//   }
-// }
-
 export const MusicLibrary: MusicLibrary = (function () {
   const crud = createCRUDModule();
   return {

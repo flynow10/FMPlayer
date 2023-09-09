@@ -5,6 +5,8 @@ import "react-toastify/dist/ReactToastify.min.css";
 import "@/src/assets/sass/index.scss";
 import ToastManager from "@/src/components/layout/ToastContainer";
 import Router from "@/src/Router";
+import { RealtimeStatus } from "@/src/api/ably-client";
+import { YoutubeAPI } from "@/src/api/youtube-API";
 const root = document.getElementById("root");
 
 if (!root) {
@@ -17,3 +19,5 @@ ReactDOM.createRoot(root).render(
     createElement(ToastManager, { key: "toast-manager" }),
   ])
 );
+YoutubeAPI.load();
+RealtimeStatus.connect();
