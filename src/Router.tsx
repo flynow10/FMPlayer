@@ -4,6 +4,7 @@ import { YoutubeAPI } from "@/src/api/youtube-API";
 import App from "@/src/components/App";
 import { Login } from "@/src/components/auth/Login";
 import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
+import { getApplicationDebugConfig } from "@/config/app";
 import { Suspense } from "react";
 import {
   Await,
@@ -35,6 +36,14 @@ const router = createBrowserRouter([
   {
     path: "/login",
     element: <Login />,
+    loader: () => {
+      const debug = getApplicationDebugConfig();
+      console.log(debug);
+      if (debug && !debug.useLogin) {
+        return redirect("/");
+      }
+      return null;
+    },
   },
 ]);
 
