@@ -1,11 +1,11 @@
-import { UUID } from "@/src/components/utils/UUID";
 import { ReactNode, useEffect, useState } from "react";
 import Page from "@/src/components/layout/Page";
 import { ChevronLeft } from "lucide-react";
 import classNames from "classnames";
 import { Pages } from "@/src/types/pages";
-import ToastTest from "@/src/components/utils/ToastTest";
 import AblyStatusSymbol from "@/src/components/utils/AblyStatusSymbol";
+import DebugToolbar from "@/src/components/layout/DebugToolbar";
+import { getApplicationDebugConfig } from "@/config/app";
 
 type MainProps = {
   onPlayMedia?: Pages.PlayByID;
@@ -24,6 +24,7 @@ const DEFAULT_PAGES: Record<Pages.Location, Pages.PageStore> = {
   "Edit Playlists": { type: "album display" }, // no page created yet
   "Recently Added": { type: "recent list" },
 };
+const debug = getApplicationDebugConfig();
 
 export default function Main(props: MainProps) {
   const [tabs, updateTabs] = useState<
@@ -132,20 +133,9 @@ export default function Main(props: MainProps) {
           </div>
           <AblyStatusSymbol />
         </div>
-        <div className="flex flex-row gap-2">
-          <UUID />
-          <ToastTest />
-          <div>
-            <button
-              className="px-2 border-2 rounded-md"
-              onClick={() =>
-                onNavigate(props.location, "new", { type: "testing page" })
-              }
-            >
-              Go To Testing Page
-            </button>
-          </div>
-        </div>
+        {debug && debug.showDebugToolBar && (
+          <DebugToolbar onNavigate={onNavigate} location={props.location} />
+        )}
       </div>
       {pageElements}
     </div>
