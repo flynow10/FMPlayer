@@ -1,5 +1,5 @@
-import { getVercelEnvironment } from "@/api-lib/constants";
-import { getDebugConfig } from "./debug.config";
+import { getVercelEnvironment } from "../api-lib/constants.js";
+import { getDebugConfig } from "./debug.config.js";
 
 export function getApiDebugConfig() {
   if (getVercelEnvironment() === "development") {
