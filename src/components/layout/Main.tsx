@@ -4,7 +4,7 @@ import { ChevronLeft } from "lucide-react";
 import classNames from "classnames";
 import { Pages } from "@/src/types/pages";
 import AblyStatusSymbol from "@/src/components/utils/AblyStatusSymbol";
-import DebugToolbar from "@/src/components/layout/DebugToolbar";
+import DebugToolbar from "@/src/components/utils/DebugToolbar";
 import { getApplicationDebugConfig } from "@/config/app";
 
 type MainProps = {
