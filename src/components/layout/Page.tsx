@@ -96,7 +96,7 @@ export default function Page(props: PageProps) {
               }
 
               default: {
-                return <span>`Page Missing! Type: ${props.type}`</span>;
+                return <span>Page Missing! Type: {props.type}</span>;
               }
             }
           })()}
