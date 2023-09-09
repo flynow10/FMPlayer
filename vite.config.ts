@@ -21,6 +21,10 @@ export default defineConfig({
         find: "@/api-lib",
         replacement: path.resolve(__dirname, "api-lib"),
       },
+      {
+        find: "@/config",
+        replacement: path.resolve(__dirname, "config"),
+      },
     ],
   },
   build: {

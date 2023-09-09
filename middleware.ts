@@ -1,3 +1,4 @@
+import { getApiDebugConfig } from "./config/api";
 import { verifyAuth } from "./api-lib/auth";
 
 // Run middleware on all paths following /api/* except for the /api/tryAuth
@@ -6,6 +7,11 @@ export const config = {
 };
 
 export default async function middleware(req: Request) {
+  const debug = getApiDebugConfig();
+  if (debug && !debug.useLogin) {
+    return;
+  }
+
   // validate the user is authenticated
   const verifiedToken = await verifyAuth(req).catch((err) => {
     console.error(err.message);
