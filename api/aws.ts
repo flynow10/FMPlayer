@@ -9,10 +9,21 @@ import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
 
 const IS_LOCAL = getVercelEnvironment() === "development";
 
-const S3_SONG_CONVERSION_BUCKET = getEnvVar("S3_SONG_CONVERSION_BUCKET");
+const S3_SONGS_BUCKET = getEnvVar("S3_SONGS_BUCKET", "");
+const S3_SONG_CONVERSION_BUCKET = getEnvVar("S3_SONG_CONVERSION_BUCKET", "");
 const LAMBDA_YOUTUBE_DOWNLOAD_FUNCTION = getEnvVar(
-  "LAMBDA_YOUTUBE_DOWNLOAD_FUNCTION"
+  "LAMBDA_YOUTUBE_DOWNLOAD_FUNCTION",
+  ""
 );
+
+let isAWSConfigured = true;
+if (
+  S3_SONGS_BUCKET === "" ||
+  S3_SONG_CONVERSION_BUCKET === "" ||
+  LAMBDA_YOUTUBE_DOWNLOAD_FUNCTION === ""
+) {
+  isAWSConfigured = false;
+}
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const requestParams = handleRequest(req, res, {
@@ -23,6 +34,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const { path } = requestParams;
 
   printRequestType("aws", path);
+
+  if (!(isAWSConfigured || IS_LOCAL)) {
+    return res
+      .status(500)
+      .json(
+        `An AWS environment variable is missing in production! Cannot complete action ${path}`
+      );
+  }
 
   switch (path) {
     case "song-url": {
@@ -125,8 +144,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
   }
 }
-
-const S3_SONGS_BUCKET = getEnvVar("S3_SONGS_BUCKET");
 
 const urlCache = new Map<string, { time: number; url: string }>();
 const expirationTimeS = 60 * 60 * 3; // 3 hours
