@@ -1,13 +1,13 @@
-import { expectParameters, handleRequest } from "../api-lib/api-utils";
+import { expectParameters, handleRequest } from "../api-lib/api-utils.js";
 import { VercelRequest, VercelResponse } from "@vercel/node";
 import {
   authenticateUser,
   AuthError,
   refreshSession,
   setCookie,
-} from "../api-lib/auth";
+} from "../api-lib/auth.js";
 import cookie from "cookie";
-import { USER_TOKEN } from "../api-lib/constants";
+import { USER_TOKEN } from "../api-lib/constants.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const requestParams = handleRequest(req, res, {
