@@ -1,6 +1,6 @@
 export function getDebugConfig() {
   return {
-    useLogin: false,
+    useLogin: true,
     showDebugToolBar: true,
   };
 }

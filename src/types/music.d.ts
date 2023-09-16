@@ -3,7 +3,7 @@ import { ArtistType, Prisma, PrismaClient } from "@prisma/client";
 
 export namespace Music {
   export namespace DB {
-    type IncludeParameter<Key extends Prisma.ModelName> = {
+    type IncludeParameter<Key extends TableName> = {
       album: {
         artists: {
           include: {
@@ -128,7 +128,9 @@ export namespace Music {
       };
     }[Uncapitalize<Key>];
 
-    export type TableType<Key extends Prisma.ModelName> = NonNullable<
+    export type TableName = Exclude<Prisma.ModelName, "Session">;
+
+    export type TableType<Key extends TableName> = NonNullable<
       Prisma.Result<
         PrismaClient[Uncapitalize<Key>],
         {
@@ -139,7 +141,7 @@ export namespace Music {
     >;
 
     export type TableTypes = {
-      [Key in Prisma.ModelName]: TableType<Key>;
+      [Key in TableName]: TableType<Key>;
     };
   }
   export namespace Files {

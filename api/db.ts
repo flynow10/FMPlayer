@@ -5,7 +5,10 @@ import { Operation } from "@prisma/client/runtime/library.js";
 import { handleRequest, printRequestType } from "../api-lib/api-utils.js";
 import { AblyMessage } from "fm-player-shared";
 
-type ModelSymbol = Exclude<keyof typeof prismaClient, `$${string}` | symbol>;
+type ModelSymbol = Exclude<
+  keyof typeof prismaClient,
+  `$${string}` | symbol | "session"
+>;
 
 type Include<S extends ModelSymbol> = Prisma.Args<
   (typeof prismaClient)[S],
