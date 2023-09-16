@@ -1,6 +1,6 @@
 import { RealtimeStatus } from "@/src/api/ably-client";
 import { useAsyncLoad } from "@/src/hooks/use-async-load";
-import { Prisma } from "@prisma/client";
+import { Music } from "@/src/types/music";
 import { useEffect, useState } from "react";
 
 export enum DataState {
@@ -12,7 +12,7 @@ export enum DataState {
 export function useDatabase<T>(
   load: () => Promise<T>,
   initialValue: T,
-  tableNames: Prisma.ModelName | Prisma.ModelName[],
+  tableNames: Music.DB.TableName | Music.DB.TableName[],
   deps?: React.DependencyList
 ): [T, DataState] {
   const [lastReloadTime, setLastReloadTime] = useState(0);
@@ -26,7 +26,7 @@ export function useDatabase<T>(
       typeof tableNames === "string" ? [tableNames] : tableNames;
     const unsubscribe = RealtimeStatus.databaseUpdatesChannel.subscribe(
       (message) => {
-        if (tableNamesArray.includes(message.model as Prisma.ModelName)) {
+        if (tableNamesArray.includes(message.model as Music.DB.TableName)) {
           setLastReloadTime(message.timestamp);
         }
       },
