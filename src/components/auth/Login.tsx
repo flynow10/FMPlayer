@@ -13,11 +13,16 @@ export function Login() {
     e.preventDefault();
     setIsSubmitting(true);
     VercelAPI.loginWithPassword(password).then((loginResponse) => {
+      console.log(loginResponse);
       if (loginResponse.success) {
         navigate("/");
       } else {
         setIsSubmitting(false);
-        addError(loginResponse.error);
+        if (loginResponse.error instanceof Error) {
+          addError(loginResponse.error.message);
+        } else {
+          addError(loginResponse.error);
+        }
       }
     });
   };

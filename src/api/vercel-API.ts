@@ -140,30 +140,37 @@ async function refreshToken() {
 }
 
 async function sendTokenRequest(type: "login" | "refresh", body: string) {
-  const response = await fetch(`/api/token/${type}`, {
-    method: "POST",
-    body: JSON.stringify({
-      [type === "login" ? "pHash" : "refreshToken"]: body,
-    }),
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-  const responseJson = await response.json();
+  try {
+    const response = await fetch(`/api/token/${type}`, {
+      method: "POST",
+      body: JSON.stringify({
+        [type === "login" ? "pHash" : "refreshToken"]: body,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    const responseJson = await response.json();
 
-  if (!response.ok) {
+    if (!response.ok) {
+      return {
+        success: false,
+        error: responseJson,
+      };
+    }
+
+    window.localStorage.setItem(REFRESH_TOKEN_ID, responseJson.refreshToken);
+
+    return {
+      success: true,
+      error: null,
+    };
+  } catch (e) {
     return {
       success: false,
-      error: responseJson,
+      error: e,
     };
   }
-
-  window.localStorage.setItem(REFRESH_TOKEN_ID, responseJson.refreshToken);
-
-  return {
-    success: true,
-    error: null,
-  };
 }
 
 export const VercelAPI = {
