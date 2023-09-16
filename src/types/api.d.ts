@@ -1,13 +1,4 @@
 export namespace API {
-  export namespace Vercel {
-    export type LoginResponse =
-      | { success: true }
-      | {
-          success: false;
-          error?: string;
-        };
-  }
-
   export namespace Youtube {
     export type ResourceId = {
       kind: "youtube#video";
