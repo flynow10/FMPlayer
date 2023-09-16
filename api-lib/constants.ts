@@ -1,6 +1,8 @@
-export const USER_TOKEN = "user-token";
+export const USER_TOKEN = "access-token";
 
 export const DEFAULT_PAGE_LIMIT = 2e9;
+
+export const REFRESH_TOKEN_EXPIRATION = 7 * 24 * 60;
 
 export function getJwtSecretKey(): string {
   return getEnvVar("JWT_SECRET_KEY");

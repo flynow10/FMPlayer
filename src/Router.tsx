@@ -11,6 +11,8 @@ import {
   RouterProvider,
   useLoaderData,
 } from "react-router-dom";
+import { YoutubeAPI } from "@/src/api/youtube-API";
+import { RealtimeStatus } from "@/src/api/ably-client";
 
 const router = createBrowserRouter([
   {
@@ -21,6 +23,9 @@ const router = createBrowserRouter([
       if (!(await VercelAPI.isLoggedIn())) {
         return redirect("/login");
       }
+
+      YoutubeAPI.load();
+      RealtimeStatus.connect();
 
       return null;
     },

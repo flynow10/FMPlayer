@@ -12,6 +12,10 @@
       "source": "/api/aws/:path*",
       "destination": "/api/aws"
     },
+    {
+      "source": "/api/token/:path*",
+      "destination": "/api/token"
+    },
     { "source": "/(.*)", "destination": "/" }
   ]
 }

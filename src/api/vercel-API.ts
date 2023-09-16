@@ -1,5 +1,4 @@
-import { API } from "@/src/types/api";
-
+const REFRESH_TOKEN_ID = "refresh-token";
 type RequestMethod<O extends object> = (
   endpoint: Endpoint,
   body: O,
@@ -26,6 +25,31 @@ async function _makeJSONRequest<O>(
     },
   });
 }
+
+/* Unused code from before switch to query parameter method specification */
+
+// DO NOT REMOVE!
+// May find a work around that allows use of this code again
+
+// function optionsToUrl(options: object): string {
+//   const urlSearchParams = new URLSearchParams(
+//     Object.entries(options).reduce((obj, val) => {
+//       if (typeof val[1] === "number") {
+//         obj[val[0]] = val[1].toString(10);
+//       } else if (!Array.isArray(val[1])) {
+//         obj[val[0]] = val[1];
+//       }
+
+//       return obj;
+//     }, {} as Record<string, string>)
+//   );
+//   Object.entries(options).forEach(([key, value]) => {
+//     if (Array.isArray(value)) {
+//       value.forEach((v) => urlSearchParams.append(key, v));
+//     }
+//   });
+//   return urlSearchParams.toString();
+// }
 
 // async function _makeGETRequest<O extends object>(
 //   endpoint: Endpoint,
@@ -78,10 +102,18 @@ async function makeRequest<T, O extends object = object>(
   const baseUrlPath = _urlPath(endpoint, path);
 
   if (response.status === 401) {
-    window.location.href = "/login";
-    throw new Error(
-      `Failed to make call to "${baseUrlPath}" because the user was logged out`
-    );
+    if (await refreshToken()) {
+      if (defaultResponse === undefined) {
+        return makeRequest(endpoint, body, path, method);
+      } else {
+        return makeRequest(endpoint, body, path, method, defaultResponse);
+      }
+    } else {
+      window.location.href = "/login";
+      throw new Error(
+        `Failed to make call to "${baseUrlPath}" because the user was logged out`
+      );
+    }
   }
 
   const responseJson: object | string = await response.json();
@@ -99,14 +131,45 @@ async function makeRequest<T, O extends object = object>(
   return responseJson as T;
 }
 
+async function refreshToken() {
+  const refreshToken = window.localStorage.getItem(REFRESH_TOKEN_ID);
+  if (!refreshToken) {
+    return false;
+  }
+  return (await sendTokenRequest("refresh", refreshToken)).success;
+}
+
+async function sendTokenRequest(type: "login" | "refresh", body: string) {
+  const response = await fetch(`/api/token/${type}`, {
+    method: "POST",
+    body: JSON.stringify({
+      [type === "login" ? "pHash" : "refreshToken"]: body,
+    }),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  const responseJson = await response.json();
+
+  if (!response.ok) {
+    return {
+      success: false,
+      error: responseJson,
+    };
+  }
+
+  window.localStorage.setItem(REFRESH_TOKEN_ID, responseJson.refreshToken);
+
+  return {
+    success: true,
+    error: null,
+  };
+}
+
 export const VercelAPI = {
   isLoggedIn: async () => {
     try {
-      const heartbeatResponse = await (await fetch("/api/heartbeat")).json();
-
-      if (typeof heartbeatResponse === "string") {
-        return true;
-      }
+      return await refreshToken();
     } catch (e) {
       console.error(e);
     }
@@ -114,68 +177,20 @@ export const VercelAPI = {
     return false;
   },
 
-  loginWithPassword: async (
-    password: string
-  ): Promise<API.Vercel.LoginResponse> => {
+  loginWithPassword: async (password: string) => {
     const utf8 = new TextEncoder().encode(password);
     const hashBuffer = await crypto.subtle.digest("SHA-256", utf8);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     const hashHex = hashArray
       .map((bytes) => bytes.toString(16).padStart(2, "0"))
       .join("");
-    return await VercelAPI.loginWithHash(hashHex);
-  },
-
-  loginWithHash: async (hash: string): Promise<API.Vercel.LoginResponse> => {
-    try {
-      const responseJson: API.Vercel.LoginResponse = await (
-        await fetch(`/api/login`, {
-          method: "POST",
-          body: JSON.stringify({ hash }),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        })
-      ).json();
-
-      if (!responseJson.success) {
-        console.warn(responseJson.error);
-      }
-
-      return responseJson;
-    } catch (e) {
-      return {
-        success: false,
-        error: e?.toString(),
-      };
-    }
+    return await sendTokenRequest("login", hashHex);
   },
 
   makeRequest,
-
-  optionsToUrl(options: object): string {
-    const urlSearchParams = new URLSearchParams(
-      Object.entries(options).reduce((obj, val) => {
-        if (typeof val[1] === "number") {
-          obj[val[0]] = val[1].toString(10);
-        } else if (!Array.isArray(val[1])) {
-          obj[val[0]] = val[1];
-        }
-
-        return obj;
-      }, {} as Record<string, string>)
-    );
-    Object.entries(options).forEach(([key, value]) => {
-      if (Array.isArray(value)) {
-        value.forEach((v) => urlSearchParams.append(key, v));
-      }
-    });
-    return urlSearchParams.toString();
-  },
 };
 
 export enum Endpoint {
   DB = "/api/db",
   AWS = "/api/aws",
-  UPLOAD = "/api/upload",
 }

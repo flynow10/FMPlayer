@@ -218,3 +218,8 @@ model Playlist {
   modifiedOn DateTime @default(now()) @updatedAt
   createdOn  DateTime @default(now())
 }
+
+model Session {
+  refreshToken String   @id @db.Char(64)
+  expiresOn    DateTime
+}
