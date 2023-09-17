@@ -1,6 +1,18 @@
 import SuggestionSearch from "@/src/components/utils/input-extensions/SuggestionSearch";
 import { Pages } from "@/src/types/pages";
-import { Search } from "lucide-react";
+import classNames from "classnames";
+import {
+  Clock3,
+  Disc3,
+  Drama,
+  FolderInput,
+  GalleryVerticalEnd,
+  ListMusic,
+  LucideIcon,
+  Mic2,
+  Pencil,
+  Search,
+} from "lucide-react";
 
 type SidebarProps = {
   location: Pages.Location;
@@ -8,49 +20,68 @@ type SidebarProps = {
   onSelectTab?: (location: Pages.Location) => void;
   onSearch?: (search: string) => void;
 };
+const libraryButtons: Pages.Location[] = [
+  "Recently Added",
+  "Artists",
+  "Albums",
+  "Songs",
+  "Playlists",
+  "Genres",
+];
+
+const managementButtons: Pages.Location[] = ["Import Media", "Edit Playlists"];
+
+const disabled: Pages.Location[] = ["Playlists", "Edit Playlists", "Artists"];
+
+const iconMap: { location: Pages.Location; icon: LucideIcon }[] = [
+  { location: "Recently Added", icon: Clock3 },
+  { location: "Artists", icon: Mic2 },
+  { location: "Albums", icon: GalleryVerticalEnd },
+  { location: "Songs", icon: Disc3 },
+  { location: "Playlists", icon: ListMusic },
+  { location: "Genres", icon: Drama },
+  { location: "Import Media", icon: FolderInput },
+  { location: "Edit Playlists", icon: Pencil },
+];
 
 export default function Sidebar(props: SidebarProps) {
-  const notDisabled: Pages.Location[] = [
-    "Recently Added",
-    "Albums",
-    "Songs",
-    // Pages.Location.Playlist,
-    "Import Media",
-    "Genres",
-  ];
-  const libraryButtons: Pages.Location[] = [
-    "Recently Added",
-    "Artists",
-    "Albums",
-    "Songs",
-    "Playlists",
-    "Genres",
-  ];
-
-  const managementButtons: Pages.Location[] = [
-    "Import Media",
-    "Edit Playlists",
-  ];
-
-  const createNavigationLink = (location: Pages.Location) => (
-    <li key={location}>
-      <button
-        role="button"
-        className={
-          "text-lg block disabled:text-gray-400 disabled:hover:bg-inherit hover:bg-gray-300 rounded-lg my-1 px-2" +
-          (location === props.location && !props.isSearching
-            ? " bg-gray-300"
-            : "")
-        }
-        disabled={!notDisabled.includes(location)}
-        onClick={() => {
-          props.onSelectTab?.(location);
-        }}
-      >
-        {location}
-      </button>
-    </li>
-  );
+  const createNavigationLink = (location: Pages.Location) => {
+    const LucideIcon = iconMap.find(
+      (locationIcon) => locationIcon.location === location
+    )?.icon;
+    return (
+      <li key={location}>
+        <button
+          role="button"
+          className={classNames(
+            "text-lg",
+            "block",
+            "disabled:text-gray-400",
+            "disabled:hover:bg-inherit",
+            "hover:bg-gray-300",
+            "rounded-lg",
+            "my-1",
+            "px-2",
+            "py-1",
+            "flex",
+            "gap-1",
+            {
+              "bg-gray-300": location === props.location && !props.isSearching,
+            }
+          )}
+          disabled={disabled.includes(location)}
+          onClick={() => {
+            props.onSelectTab?.(location);
+          }}
+        >
+          {LucideIcon && (
+            <LucideIcon size={20} className="my-auto text-accent dark:invert" />
+          )}
+          <span className="">{location}</span>
+        </button>
+      </li>
+    );
+  };
 
   return (
     <div className="sidebar flex flex-col border-r-2">
@@ -79,20 +110,6 @@ export default function Sidebar(props: SidebarProps) {
           buttonText: () => <Search />,
         }}
       />
-      {/* <input
-          placeholder="Search"
-          className="border-2 rounded-md my-2 px-2"
-          onFocus={(target) => {
-            const value = target.currentTarget.value;
-
-            if (value !== "") {
-              props.onSearch?.(value);
-            }
-          }}
-          onChange={(target) => {
-            props.onSearch?.(target.currentTarget.value);
-          }}
-        /> */}
       <div className="p-3 pl-5 flex flex-col flex-1 justify-between">
         <div>
           <h5 className="text-sm text-gray-400 font-bold">Library</h5>
