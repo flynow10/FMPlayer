@@ -8,6 +8,7 @@ import { Pages } from "@/src/types/pages";
 import YoutubeUpload from "@/src/components/pages/upload/YoutubeUpload";
 import TestingPage from "@/src/components/pages/TestingPage";
 import { ErrorBoundary } from "react-error-boundary";
+import AlbumDisplay from "@/src/components/pages/AlbumDisplay";
 
 type PageProps = {
   location: string;
@@ -93,6 +94,16 @@ export default function Page(props: PageProps) {
 
               case "testing page": {
                 return <TestingPage />;
+              }
+
+              case "album display": {
+                return (
+                  <AlbumDisplay
+                    onPlayMedia={props.onPlayMedia}
+                    onNavigate={props.onNavigate}
+                    albumId={props.data as string}
+                  />
+                );
               }
 
               default: {
