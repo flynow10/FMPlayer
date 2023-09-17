@@ -48,7 +48,7 @@ export default function AlbumDisplay(props: AlbumDisplayProps) {
             <div></div>
             <div className="flex flex-col">
               <span className="text-2xl font-extrabold">{album.title}</span>
-              <span className="text-xl text-cyan-600 dark:invert">
+              <span className="text-xl text-accent dark:invert">
                 {album.artists.map((artist) => artist.artist.name).join(", ")}
               </span>
               <span className="text-xs font-semibold">
@@ -77,7 +77,7 @@ export default function AlbumDisplay(props: AlbumDisplayProps) {
               ].map(({ icon, name, clickHandler }) => (
                 <button
                   onClick={clickHandler}
-                  className="bg-cyan-600 active:bg-cyan-500 dark:invert text-white px-8 py-1 rounded-md gap-1 flex"
+                  className="bg-accent active:bg-accent-highlighted dark:invert text-white px-8 py-1 rounded-md gap-1 flex"
                   key={name}
                 >
                   {icon} {name}

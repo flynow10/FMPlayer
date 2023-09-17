@@ -42,7 +42,7 @@
     "iso8601-duration": "^2.1.1",
     "jose": "^4.14.4",
     "jsmediatags": "^3.9.7",
-    "lucide-react": "^0.112.0",
+    "lucide-react": "^0.279.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-error-boundary": "^4.0.11",

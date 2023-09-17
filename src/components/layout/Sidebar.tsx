@@ -10,19 +10,12 @@ type SidebarProps = {
 };
 
 export default function Sidebar(props: SidebarProps) {
-  const notDisabled: Pages.Location[] = [
-    "Recently Added",
-    "Albums",
-    "Songs",
-    // Pages.Location.Playlist,
-    "Import Media",
-    "Genres",
-  ];
+  const disabled: Pages.Location[] = ["Playlists", "Edit Playlists"];
   const libraryButtons: Pages.Location[] = [
     "Recently Added",
     "Artists",
     "Albums",
-    "Songs",
+    "Tracks",
     "Playlists",
     "Genres",
   ];
@@ -42,7 +35,7 @@ export default function Sidebar(props: SidebarProps) {
             ? " bg-gray-300"
             : "")
         }
-        disabled={!notDisabled.includes(location)}
+        disabled={disabled.includes(location)}
         onClick={() => {
           props.onSelectTab?.(location);
         }}
@@ -79,20 +72,6 @@ export default function Sidebar(props: SidebarProps) {
           buttonText: () => <Search />,
         }}
       />
-      {/* <input
-          placeholder="Search"
-          className="border-2 rounded-md my-2 px-2"
-          onFocus={(target) => {
-            const value = target.currentTarget.value;
-
-            if (value !== "") {
-              props.onSearch?.(value);
-            }
-          }}
-          onChange={(target) => {
-            props.onSearch?.(target.currentTarget.value);
-          }}
-        /> */}
       <div className="p-3 pl-5 flex flex-col flex-1 justify-between">
         <div>
           <h5 className="text-sm text-gray-400 font-bold">Library</h5>

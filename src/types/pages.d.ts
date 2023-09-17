@@ -22,7 +22,7 @@ export namespace Pages {
     | "Recently Added"
     | "Albums"
     | "Artists"
-    | "Songs"
+    | "Tracks"
     | "Playlists"
     | "Genres"
     | "Import Media"
@@ -31,14 +31,15 @@ export namespace Pages {
   export type PageType =
     | "search results"
     | "album list"
-    | "song list"
+    | "track list"
     | "playlist list"
-    | "album display"
-    | "file search"
     | "genre list"
     | "recent list"
+    | "artist list"
+    | "file search"
     | "file upload"
     | "youtube upload"
+    | "album display"
     | "testing page";
 
   export type NavigationType = "new" | "back";
