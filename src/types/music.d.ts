@@ -1,8 +1,13 @@
 import { FileType } from "@/src/types/file-type";
 import { ArtistType, Prisma, PrismaClient } from "@prisma/client";
+import { Operation } from "@prisma/client/runtime/library";
 
 export namespace Music {
   export namespace DB {
+    export type PrismaArgs<
+      T extends keyof Music.DB.TableTypes,
+      O extends Operation
+    > = Prisma.Args<PrismaClient[Uncapitalize<T>], O>;
     type IncludeParameter<Key extends TableName> = {
       album: {
         artists: {
@@ -130,11 +135,17 @@ export namespace Music {
 
     export type TableName = Exclude<Prisma.ModelName, "Session">;
 
-    export type TableType<Key extends TableName> = NonNullable<
+    export type TableType<
+      Key extends TableName,
+      Include extends PrismaArgs<
+        Key,
+        "findUnique"
+      >["include"] = IncludeParameter<Key>
+    > = NonNullable<
       Prisma.Result<
         PrismaClient[Uncapitalize<Key>],
         {
-          include: IncludeParameter<Key>;
+          include: Include;
         },
         "findUnique"
       >
