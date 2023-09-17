@@ -1,29 +1,40 @@
 import { Endpoint, VercelAPI } from "@/src/api/vercel-API";
 import { Music } from "@/src/types/music";
 import { Prisma, PrismaClient } from "@prisma/client";
-import { Operation } from "@prisma/client/runtime/library";
-
-type PrismaArgs<
-  T extends keyof Music.DB.TableTypes,
-  O extends Operation
-> = Prisma.Args<PrismaClient[Uncapitalize<T>], O>;
 
 type CreateMethod<T extends keyof Music.DB.TableTypes> = (
-  data: PrismaArgs<T, "create">["data"]
+  data: Music.DB.PrismaArgs<T, "create">["data"]
 ) => Promise<Music.DB.TableTypes[T] | null>;
 type GetMethod<T extends keyof Music.DB.TableTypes> = (
-  where: PrismaArgs<T, "findUnique">["where"]
+  where: Music.DB.PrismaArgs<T, "findUnique">["where"]
 ) => Promise<Music.DB.TableTypes[T] | null>;
 type UpdateMethod<T extends keyof Music.DB.TableTypes> = (
-  where: PrismaArgs<T, "update">["where"],
-  data: PrismaArgs<T, "update">["data"]
+  where: Music.DB.PrismaArgs<T, "update">["where"],
+  data: Music.DB.PrismaArgs<T, "update">["data"]
 ) => Promise<Music.DB.TableTypes[T] | null>;
 type DeleteMethod<T extends keyof Music.DB.TableTypes> = (
-  where: PrismaArgs<T, "delete">["where"]
+  where: Music.DB.PrismaArgs<T, "delete">["where"]
 ) => Promise<Music.DB.TableTypes[T] | null>;
-type ListMethod<T extends keyof Music.DB.TableTypes> = (
-  where?: PrismaArgs<T, "findMany">["where"]
-) => Promise<Music.DB.TableTypes[T][]>;
+type IncludeResult<
+  T extends keyof Music.DB.TableTypes,
+  I extends
+    | NonNullable<Music.DB.PrismaArgs<T, "findMany">["include"]>
+    | undefined = undefined
+> = Prisma.Result<
+  PrismaClient[Uncapitalize<T>],
+  {
+    include: I extends undefined ? Music.DB.IncludeParameter<T> : I;
+  },
+  "findMany"
+>;
+type ListMethod<T extends keyof Music.DB.TableTypes> = <
+  I extends
+    | NonNullable<Music.DB.PrismaArgs<T, "findMany">["include"]>
+    | undefined = undefined
+>(
+  where?: Music.DB.PrismaArgs<T, "findMany">["where"],
+  include?: I
+) => Promise<NonNullable<IncludeResult<T, I>>>;
 
 type CRUDMethods<T extends keyof Music.DB.TableTypes> = {
   create: CreateMethod<T>;
@@ -148,10 +159,21 @@ function deleteMethodFactory<T extends keyof Music.DB.TableTypes>(
 function listMethodFactory<T extends keyof Music.DB.TableTypes>(
   table: T
 ): ListMethod<T> {
-  return async function (where = {}) {
+  return async function <
+    I extends
+      | NonNullable<Music.DB.PrismaArgs<T, "findMany">["include"]>
+      | undefined = undefined
+  >(where = {}, include?: I) {
+    let body: object = { where };
+    if (include) {
+      body = {
+        where,
+        include,
+      };
+    }
     return (
-      await VercelAPI.makeRequest(Endpoint.DB, { ...where }, table, "GET", [])
-    ).map((value) => fixJsonDateStrings(value));
+      await VercelAPI.makeRequest(Endpoint.DB, body, table, "GET", [])
+    ).map((value) => fixJsonDateStrings(value)) as IncludeResult<T, I>;
   };
 }
 

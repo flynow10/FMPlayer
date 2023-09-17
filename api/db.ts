@@ -296,14 +296,15 @@ async function deleteMethod<S extends ModelSymbol>(
   });
 }
 
-async function list<S extends ModelSymbol>(modelName: S, whereArgs: unknown) {
+async function list<S extends ModelSymbol>(modelName: S, body: unknown) {
+  const { where, include } = body as { where: unknown; include: unknown };
   return await (
     prismaClient[modelName].findMany as (
       args: object & { where: ListArgs<S>["where"]; include: Include<S> }
     ) => object
   )({
-    where: whereArgs as ListArgs<S>["where"],
-    include: getIncludes(modelName),
+    where: where as ListArgs<S>["where"],
+    include: (include as Include<S> | undefined) ?? getIncludes(modelName),
   });
 }
 
