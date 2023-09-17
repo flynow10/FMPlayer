@@ -16,7 +16,7 @@ const config = {
           }
           return [
             valid,
-            "Work in progress notes should be put at the end, lowercase, and in parenthesis",
+            "Work in progress notes should be put at the end, lowercase, and in parentheses",
           ];
         },
       },
