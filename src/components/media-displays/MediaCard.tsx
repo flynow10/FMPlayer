@@ -40,10 +40,12 @@ export function MediaCard(props: MediaCardProps) {
           className="h-12 mt-1 overflow-ellipsis overflow-clip break-words hover:underline"
           role="link"
           onClick={() => {
-            props.onNavigate("new", {
-              type: "album display",
-              data: props.id,
-            });
+            if (props.mediaType === "album") {
+              props.onNavigate("new", {
+                type: "album display",
+                data: props.id,
+              });
+            }
           }}
         >
           {props.title}

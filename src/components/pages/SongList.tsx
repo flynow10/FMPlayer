@@ -87,10 +87,10 @@ export default function SongList(props: SongListProps) {
   return (
     <>
       <div className="mx-8">
-        <table className="text-left w-full border-separate border-spacing-0">
+        <table className="table-fixed text-left w-full border-separate border-spacing-0">
           <thead className="sticky top-0 z-10 bg-white">
             <tr>
-              <th className="p-1 border-b-2"></th>
+              <th className="p-1 border-b-2 w-12"></th>
               {columns.map((column) => (
                 <th
                   key={column.name}
