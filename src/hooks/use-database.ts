@@ -16,10 +16,16 @@ export function useDatabase<T>(
   deps?: React.DependencyList
 ): [T, DataState] {
   const [lastReloadTime, setLastReloadTime] = useState(0);
-  const [data, isLoaded] = useAsyncLoad(load, initialValue, [
-    lastReloadTime,
-    ...(deps ?? []),
-  ]);
+  const [hasLoaded, setHasLoaded] = useState(false);
+  const [data, isLoaded] = useAsyncLoad(
+    async () => {
+      const data = await load();
+      setHasLoaded(true);
+      return data;
+    },
+    initialValue,
+    [lastReloadTime, ...(deps ?? [])]
+  );
 
   useEffect(() => {
     const tableNamesArray =
@@ -36,10 +42,9 @@ export function useDatabase<T>(
       unsubscribe();
     };
   }, [tableNames]);
-
   return [
     data,
-    lastReloadTime === 0 && !isLoaded
+    !hasLoaded && !isLoaded
       ? DataState.Loading
       : isLoaded
       ? DataState.Loaded
