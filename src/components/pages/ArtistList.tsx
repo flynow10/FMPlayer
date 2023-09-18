@@ -4,9 +4,9 @@ import { MusicLibrary } from "@/src/music/library/music-library";
 import { Music } from "@/src/types/music";
 import { Pages } from "@/src/types/pages";
 import classNames from "classnames";
-import { LucideIcon, Mic2, User2 /*Users*/ } from "lucide-react";
+import { LucideIcon, Mic2, Play, User2 /*Users*/ } from "lucide-react";
 import { useState } from "react";
-import OrderedTrackList from "@/src/components/media-displays/OrderedSongList";
+import OrderedTrackList from "@/src/components/media-displays/OrderedTrackList";
 import { MediaCard } from "@/src/components/media-displays/MediaCard";
 
 type ArtistListProps = {
@@ -49,11 +49,7 @@ export default function ArtistList(props: ArtistListProps) {
               track: {
                 include: {
                   genre: true,
-                  listConnections: {
-                    include: {
-                      trackList: true,
-                    },
-                  },
+                  listConnections: true,
                 },
               },
             },
@@ -77,7 +73,7 @@ export default function ArtistList(props: ArtistListProps) {
   }
   return (
     <div className="flex h-full">
-      <div className="flex flex-col border-r-2 max-w-1/5 min-w-1/6">
+      <div className="flex flex-col overflow-auto border-r-2 max-w-1/5 min-w-1/6">
         {createArtistListItem(
           {
             albums: [],
@@ -133,6 +129,7 @@ function createArtistMusicList(
         include: {
           track: {
             include: {
+              listConnections: true;
               genre: true;
             };
           };
@@ -159,6 +156,9 @@ function createArtistMusicList(
     }
   >
 ) {
+  const filteredArtistTracks = artist.tracks.filter(
+    ({ track }) => track.listConnections.length === 0
+  );
   return (
     <div className="flex flex-col relative px-8" key={artist.id}>
       <div className="top-0 sticky z-10 bg-white pt-8 pb-1">
@@ -169,6 +169,10 @@ function createArtistMusicList(
             {
               name: "Albums",
               count: artist.albums.length,
+            },
+            {
+              name: "Tracks",
+              count: filteredArtistTracks.length,
             },
           ]
             .filter((obj) => obj.count > 0)
@@ -213,6 +217,29 @@ function createArtistMusicList(
               </div>
             </div>
           ))}
+        {filteredArtistTracks.length > 0 && (
+          <div className="flex flex-col p-4">
+            <span className="text-lg font-bold">Standalone Tracks</span>
+            <div className="flex flex-col w-full">
+              {filteredArtistTracks.map(({ track }) => (
+                <div
+                  key={track.id}
+                  className="flex border-t-2 last:border-b-2 p-2 gap-4"
+                >
+                  <button
+                    className="w-6 h-6"
+                    onClick={() => {
+                      onPlayMedia(track.id, "track");
+                    }}
+                  >
+                    <Play className="block m-0 p-0" />
+                  </button>
+                  <div>{track.title}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
