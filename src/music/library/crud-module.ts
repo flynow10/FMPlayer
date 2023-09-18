@@ -86,6 +86,13 @@ function fixJsonDateStrings<TypeWithDate extends object>(
       return;
     }
     if (typeof value === "string") {
+      if (
+        typeof key !== "string" ||
+        !["modifiedOn", "createdOn"].includes(key)
+      ) {
+        output[key] = value as TypeWithDate[typeof key];
+        return;
+      }
       // https://stackoverflow.com/a/14322189
       if (
         value.match(
