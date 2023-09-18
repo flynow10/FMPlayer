@@ -98,6 +98,7 @@ export default function Page(props: PageProps) {
                   <ArtistList
                     onPlayMedia={props.onPlayMedia}
                     onNavigate={props.onNavigate}
+                    artistId={props.data}
                   />
                 );
               }

@@ -5,6 +5,7 @@ import { Pages } from "@/src/types/pages";
 import placeholder from "@/src/assets/imgs/square-placeholder.jpg";
 import { CircleEllipsis, Play } from "lucide-react";
 import { Blur } from "@/src/components/utils/loading-pages/Blur";
+import OrderedTrackList from "@/src/components/media-displays/OrderedSongList";
 
 type AlbumDisplayProps = {
   onPlayMedia: Pages.PlayByID;
@@ -49,7 +50,19 @@ export default function AlbumDisplay(props: AlbumDisplayProps) {
             <div className="flex flex-col">
               <span className="text-2xl font-extrabold">{album.title}</span>
               <span className="text-xl text-accent dark:invert">
-                {album.artists.map((artist) => artist.artist.name).join(", ")}
+                {album.artists.map(({ artist }) => (
+                  <a
+                    key={artist.id}
+                    onClick={() => {
+                      props.onNavigate("new", {
+                        type: "artist list",
+                        data: artist.id,
+                      });
+                    }}
+                  >
+                    {artist.name}
+                  </a>
+                ))}
               </span>
               <span className="text-xs font-semibold">
                 {album.genre.name.toUpperCase()} &bull;{" "}
@@ -94,27 +107,10 @@ export default function AlbumDisplay(props: AlbumDisplayProps) {
             </div>
           </div>
         </div>
-        <div className="flex flex-col w-full">
-          {album.trackList.trackConnections.map((connection, index) => (
-            <div
-              key={index}
-              className="flex border-t-2 last:border-b-2 p-2 gap-4 group"
-            >
-              <button
-                className="w-6 h-6"
-                onClick={() => {
-                  props.onPlayMedia(connection.trackId, "track");
-                }}
-              >
-                <Play className="group-hover:block hidden m-0 p-0" />
-                <span className="group-hover:hidden">
-                  {connection.trackNumber}
-                </span>
-              </button>
-              <div>{connection.track.title}</div>
-            </div>
-          ))}
-        </div>
+        <OrderedTrackList
+          onPlayMedia={props.onPlayMedia}
+          trackConnections={album.trackList.trackConnections}
+        />
         <div className="font-light text-sm text-gray-500">
           <span>
             Created on {album.createdOn.toLocaleDateString()} at{" "}
