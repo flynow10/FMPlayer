@@ -5,7 +5,7 @@ import { Pages } from "@/src/types/pages";
 import placeholder from "@/src/assets/imgs/square-placeholder.jpg";
 import { CircleEllipsis, Play } from "lucide-react";
 import { Blur } from "@/src/components/utils/loading-pages/Blur";
-import OrderedTrackList from "@/src/components/media-displays/OrderedSongList";
+import OrderedTrackList from "@/src/components/media-displays/OrderedTrackList";
 
 type AlbumDisplayProps = {
   onPlayMedia: Pages.PlayByID;
