@@ -1,3 +1,5 @@
+import { getApplicationDebugConfig } from "@/config/app";
+
 const REFRESH_TOKEN_ID = "refresh-token";
 type RequestMethod<O extends object> = (
   endpoint: Endpoint,
@@ -175,6 +177,10 @@ async function sendTokenRequest(type: "login" | "refresh", body: string) {
 
 export const VercelAPI = {
   isLoggedIn: async () => {
+    const config = getApplicationDebugConfig();
+    if (config !== null && !config.useLogin) {
+      return true;
+    }
     try {
       return await refreshToken();
     } catch (e) {

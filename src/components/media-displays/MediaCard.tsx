@@ -17,11 +17,8 @@ export function MediaCard(props: MediaCardProps) {
 
   if (size !== "small") {
     return (
-      <div
-        className={"flex flex-col" + (size === "large" ? " w-96" : " w-52")}
-        role="button"
-      >
-        <div
+      <div className={"flex flex-col" + (size === "large" ? " w-96" : " w-52")}>
+        <button
           className="group relative aspect-square overflow-hidden shadow-[0_3px_10px_rgb(0,0,0,0.2)] rounded-2xl"
           onClick={() => {
             props.onPlayMedia(props.id, props.mediaType);
@@ -35,9 +32,9 @@ export function MediaCard(props: MediaCardProps) {
             size={48}
             className="opacity-0 group-hover:opacity-100 transition-opacity absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
           />
-        </div>
+        </button>
         <a
-          className="h-12 mt-1 overflow-ellipsis overflow-clip break-words hover:underline"
+          className="mt-1 overflow-ellipsis overflow-clip break-words hover:underline"
           role="link"
           onClick={() => {
             if (props.mediaType === "album") {
