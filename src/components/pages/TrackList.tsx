@@ -7,7 +7,7 @@ import { Pages } from "@/src/types/pages";
 import { Music } from "@/src/types/music";
 import { DataState, useDatabase } from "@/src/hooks/use-database";
 
-type SongListProps = {
+type TrackListProps = {
   onPlayMedia: Pages.PlayByID;
   onNavigate: Pages.NavigationMethod;
 };
@@ -46,7 +46,7 @@ const columns: Column[] = [
   },
 ];
 
-export default function SongList(props: SongListProps) {
+export default function TrackList(props: TrackListProps) {
   const [sortBy, setSortBy] = useState<Column["prop"]>("title");
   const [sort, setSort] = useState<"asc" | "desc">("asc");
   const [trackList, loadedState] = useDatabase(
@@ -131,7 +131,15 @@ export default function SongList(props: SongListProps) {
                   let value = track[column.prop];
 
                   if (value instanceof Date) {
-                    value = value.toLocaleString();
+                    if (value.getTime() + 24 * 60 * 60 * 1000 < Date.now()) {
+                      value = value.toLocaleDateString();
+                    } else {
+                      value = value.toLocaleTimeString("en-us", {
+                        hour: "numeric",
+                        minute: "numeric",
+                        hour12: true,
+                      });
+                    }
                   }
 
                   if (column.prop === "artists") {
@@ -167,7 +175,10 @@ export default function SongList(props: SongListProps) {
                   }
 
                   return (
-                    <td className="p-1" key={column.name}>
+                    <td
+                      className="p-1 whitespace-nowrap overflow-hidden overflow-ellipsis"
+                      key={column.name}
+                    >
                       {value}
                     </td>
                   );
