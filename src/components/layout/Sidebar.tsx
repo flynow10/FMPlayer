@@ -24,20 +24,20 @@ const libraryButtons: Pages.Location[] = [
   "Recently Added",
   "Artists",
   "Albums",
-  "Songs",
+  "Tracks",
   "Playlists",
   "Genres",
 ];
 
 const managementButtons: Pages.Location[] = ["Import Media", "Edit Playlists"];
 
-const disabled: Pages.Location[] = ["Playlists", "Edit Playlists", "Artists"];
+const disabled: Pages.Location[] = ["Playlists", "Edit Playlists"];
 
 const iconMap: { location: Pages.Location; icon: LucideIcon }[] = [
   { location: "Recently Added", icon: Clock3 },
   { location: "Artists", icon: Mic2 },
   { location: "Albums", icon: GalleryVerticalEnd },
-  { location: "Songs", icon: Disc3 },
+  { location: "Tracks", icon: Disc3 },
   { location: "Playlists", icon: ListMusic },
   { location: "Genres", icon: Drama },
   { location: "Import Media", icon: FolderInput },

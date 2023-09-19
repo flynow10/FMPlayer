@@ -21,7 +21,9 @@ module.exports = {
   theme: {
     extend: {
       maxWidth: sizeFractions,
+      minWidth: sizeFractions,
       maxHeight: sizeFractions,
+      minHeight: sizeFractions,
       colors: {
         accent: "rgb(8 145 178)",
         "accent-highlighted": "rgb(6 182 212)",

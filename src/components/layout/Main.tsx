@@ -16,11 +16,11 @@ type MainProps = {
 const DEFAULT_PAGES: Record<Pages.Location, Pages.PageStore> = {
   Search: { type: "search results" },
   Albums: { type: "album list" },
-  Songs: { type: "song list" },
+  Tracks: { type: "track list" },
   Playlists: { type: "playlist list" },
   Genres: { type: "genre list" },
   "Import Media": { type: "file search" },
-  Artists: { type: "album display" }, // no page created yet
+  Artists: { type: "artist list" }, // no page created yet
   "Edit Playlists": { type: "album display" }, // no page created yet
   "Recently Added": { type: "recent list" },
 };
@@ -38,7 +38,7 @@ export default function Main(props: MainProps) {
     Playlists: [],
     "Recently Added": [],
     Search: [],
-    Songs: [],
+    Tracks: [],
   });
 
   useEffect(() => {
