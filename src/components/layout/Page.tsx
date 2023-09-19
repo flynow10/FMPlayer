@@ -1,6 +1,6 @@
 import UploadSearch from "@/src/components/pages/upload/UploadSearch";
 import AlbumList from "@/src/components/pages/AlbumList";
-import SongList from "@/src/components/pages/SongList";
+import TrackList from "@/src/components/pages/TrackList";
 import GenreList from "@/src/components/pages/GenreList";
 import RecentlyAddedList from "@/src/components/pages/RecentlyAddedList";
 import FileUpload from "@/src/components/pages/upload/FileUpload";
@@ -77,7 +77,7 @@ export default function Page(props: PageProps) {
 
               case "track list": {
                 return (
-                  <SongList
+                  <TrackList
                     onPlayMedia={props.onPlayMedia}
                     onNavigate={props.onNavigate}
                   />
