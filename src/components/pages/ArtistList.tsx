@@ -156,8 +156,14 @@ function createArtistMusicList(
     }
   >
 ) {
-  const filteredArtistTracks = artist.tracks.filter(
-    ({ track }) => track.listConnections.length === 0
+  const filteredArtistTracks = artist.tracks.filter(({ track }) =>
+    track.listConnections.every(
+      (trackConnection) =>
+        !artist.albums.some(
+          (albumConnection) =>
+            albumConnection.album.trackListId === trackConnection.trackListId
+        )
+    )
   );
   return (
     <div className="flex flex-col relative px-8" key={artist.id}>
