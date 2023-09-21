@@ -1,9 +1,10 @@
-import { MediaCard } from "@/src/components/media-displays/MediaCard";
+import MediaCard, {
+  DisplayableMediaType,
+} from "@/src/components/media-displays/MediaCard";
 import { MediaCarousel } from "@/src/components/media-displays/MediaCarousel";
 import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
 import { useAsyncLoad } from "@/src/hooks/use-async-load";
 import { MusicLibrary } from "@/src/music/library/music-library";
-import { Music } from "@/src/types/music";
 import { Pages } from "@/src/types/pages";
 
 type SearchResultsProps = {
@@ -34,12 +35,9 @@ export default function SearchResults(props: SearchResultsProps) {
             return (
               <MediaCard
                 key={media.id}
-                id={media.id}
-                mediaType={type.slice(0, -1) as Music.MediaType}
-                onNavigate={props.onNavigate}
-                onPlayMedia={props.onPlayMedia}
-                title={media.title}
-                size="medium"
+                data={media}
+                type={type.slice(0, -1) as "track" | "album"}
+                style="cover-card"
               />
             );
           })}
@@ -49,10 +47,43 @@ export default function SearchResults(props: SearchResultsProps) {
   };
   return (
     <div className="flex flex-col">
-      <span className="p-4 text-gray-400">
+      <span className="px-4 pt-4 pb-2 text-gray-400">
         Showing results for: &quot;
         <span className="text-black">{props.searchString}</span>&quot;
       </span>
+      <div className="flex flex-col p-4">
+        <span className="text-2xl pb-4">Top Results</span>
+        <div className="flex flex-row gap-4">
+          {searchResults.results
+            .filter((result) =>
+              ["track", "album", "artist", "playlist"].includes(result.type)
+            )
+            .slice(0, 3)
+            .map((result) => {
+              const data = searchResults[
+                (result.type + "s") as
+                  | "tracks"
+                  | "albums"
+                  | "artists"
+                  | "playlists"
+              ].find((media) => result.id === media.id);
+              if (data === undefined) {
+                throw new Error(
+                  "Couldn't find data for media card in search results!"
+                );
+              }
+              return (
+                <MediaCard
+                  key={result.id}
+                  style="tab-card"
+                  type={result.type as DisplayableMediaType}
+                  data={data}
+                  shouldDisplayType={true}
+                />
+              );
+            })}
+        </div>
+      </div>
       {searchResults.albums.length > 0 && createMediaDisplay("albums")}
       {searchResults.tracks.length > 0 && createMediaDisplay("tracks")}
       {/* <pre>{JSON.stringify(searchResults, null, 2)}</pre> */}

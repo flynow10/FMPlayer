@@ -61,8 +61,26 @@ export namespace Music {
         tags: true;
       };
       genre: {
-        albums: true;
-        tracks: true;
+        albums: {
+          include: {
+            artists: {
+              include: {
+                artist: true;
+              };
+            };
+            artwork: true;
+          };
+        };
+        tracks: {
+          include: {
+            artists: {
+              include: {
+                artist: true;
+              };
+            };
+            artwork: true;
+          };
+        };
       };
       playlist: {
         artwork: true;

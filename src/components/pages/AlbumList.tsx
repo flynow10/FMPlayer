@@ -1,15 +1,9 @@
 import { MusicLibrary } from "@/src/music/library/music-library";
 import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
-import { MediaCard } from "@/src/components/media-displays/MediaCard";
-import { Pages } from "@/src/types/pages";
+import MediaCard from "@/src/components/media-displays/MediaCard";
 import { DataState, useDatabase } from "@/src/hooks/use-database";
 
-type AlbumListProps = {
-  onPlayMedia: Pages.PlayByID;
-  onNavigate: Pages.NavigationMethod;
-};
-
-export default function AlbumList(props: AlbumListProps) {
+export default function AlbumList() {
   const [albumList, loadedState] = useDatabase(
     () => {
       return MusicLibrary.db.album.list();
@@ -27,12 +21,9 @@ export default function AlbumList(props: AlbumListProps) {
       {albumList.map((album) => (
         <MediaCard
           key={album.id}
-          id={album.id}
-          title={album.title}
-          size={"medium"}
-          mediaType={"album"}
-          onNavigate={props.onNavigate}
-          onPlayMedia={props.onPlayMedia}
+          data={album}
+          style="cover-card"
+          type="album"
         />
       ))}
     </div>
