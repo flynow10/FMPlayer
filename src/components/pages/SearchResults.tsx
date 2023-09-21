@@ -24,7 +24,7 @@ export default function SearchResults(props: SearchResultsProps) {
   if (!isLoaded || searchResults === null) {
     return <FullCover />;
   }
-  const createMediaDisplay = (type: "albums" | "tracks") => {
+  const createMediaDisplay = (type: "albums" | "tracks" | "artists") => {
     return (
       <div className="flex flex-col p-4">
         <span className="text-xl pb-4">
@@ -36,7 +36,7 @@ export default function SearchResults(props: SearchResultsProps) {
               <MediaCard
                 key={media.id}
                 data={media}
-                type={type.slice(0, -1) as "track" | "album"}
+                type={type.slice(0, -1) as "track" | "album" | "artist"}
                 style="cover-card"
               />
             );
@@ -86,6 +86,7 @@ export default function SearchResults(props: SearchResultsProps) {
       </div>
       {searchResults.albums.length > 0 && createMediaDisplay("albums")}
       {searchResults.tracks.length > 0 && createMediaDisplay("tracks")}
+      {searchResults.artists.length > 0 && createMediaDisplay("artists")}
       {/* <pre>{JSON.stringify(searchResults, null, 2)}</pre> */}
       <span className="px-4 py-8">
         Can&apos;t find what you&apos;re looking for?{" "}
