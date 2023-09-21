@@ -7,7 +7,7 @@ import classNames from "classnames";
 import { LucideIcon, Mic2, Play, User2 /*Users*/ } from "lucide-react";
 import { useState } from "react";
 import OrderedTrackList from "@/src/components/media-displays/OrderedTrackList";
-import { MediaCard } from "@/src/components/media-displays/MediaCard";
+import MediaCard from "@/src/components/media-displays/MediaCard";
 
 type ArtistListProps = {
   onNavigate: Pages.NavigationMethod;
@@ -26,7 +26,12 @@ export default function ArtistList(props: ArtistListProps) {
             include: {
               album: {
                 include: {
-                  artists: true,
+                  artists: {
+                    include: {
+                      artist: true,
+                    },
+                  },
+                  artwork: true,
                   genre: true,
                   trackList: {
                     include: {
@@ -140,6 +145,12 @@ function createArtistMusicList(
           album: {
             include: {
               genre: true;
+              artists: {
+                include: {
+                  artist: true;
+                };
+              };
+              artwork: true;
               trackList: {
                 include: {
                   trackConnections: {
@@ -192,12 +203,10 @@ function createArtistMusicList(
           .map(({ album }) => (
             <div key={album.id} className="flex p-4 gap-10">
               <MediaCard
-                id={album.id}
-                mediaType="album"
-                title=""
-                onNavigate={onNavigate}
-                size="medium"
-                onPlayMedia={onPlayMedia}
+                data={album}
+                type="album"
+                style="cover-card"
+                hideLinks={true}
               />
               <div className="flex flex-col grow gap-4">
                 <div className="flex flex-col">

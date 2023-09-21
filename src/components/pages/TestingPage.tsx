@@ -1,5 +1,5 @@
-import { MediaCard } from "@/src/components/media-displays/MediaCard";
-import NewMediaCard from "@/src/components/media-displays/NewMediaCard";
+import { MediaCard } from "@/src/components/media-displays/OldMediaCard";
+import NewMediaCard from "@/src/components/media-displays/MediaCard";
 import { Music } from "@/src/types/music";
 
 export default function TestingPage() {
