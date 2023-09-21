@@ -1,16 +1,10 @@
 import { MusicLibrary } from "@/src/music/library/music-library";
 import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
 import MediaCard from "@/src/components/media-displays/MediaCard";
-import { Pages } from "@/src/types/pages";
 import { MediaCarousel } from "@/src/components/media-displays/MediaCarousel";
 import { slugify } from "@/src/utils/string-utils";
 import { Music } from "@/src/types/music";
 import { DataState, useDatabase } from "@/src/hooks/use-database";
-
-export type RecentlyAddedListProps = {
-  onPlayMedia: Pages.PlayByID;
-  onNavigate: Pages.NavigationMethod;
-};
 
 const groupBy = <T, K extends string | number | symbol>(
   arr: T[],
