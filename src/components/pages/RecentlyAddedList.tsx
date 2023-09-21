@@ -1,16 +1,10 @@
 import { MusicLibrary } from "@/src/music/library/music-library";
 import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
-import { MediaCard } from "@/src/components/media-displays/MediaCard";
-import { Pages } from "@/src/types/pages";
+import MediaCard from "@/src/components/media-displays/MediaCard";
 import { MediaCarousel } from "@/src/components/media-displays/MediaCarousel";
 import { slugify } from "@/src/utils/string-utils";
 import { Music } from "@/src/types/music";
 import { DataState, useDatabase } from "@/src/hooks/use-database";
-
-export type RecentlyAddedListProps = {
-  onPlayMedia: Pages.PlayByID;
-  onNavigate: Pages.NavigationMethod;
-};
 
 const groupBy = <T, K extends string | number | symbol>(
   arr: T[],
@@ -52,7 +46,7 @@ const getRelativeTime = (d1: number, d2?: number) => {
 type Album = Music.DB.TableType<"Album">;
 type Track = Music.DB.TableType<"Track">;
 
-export default function RecentlyAddedList(props: RecentlyAddedListProps) {
+export default function RecentlyAddedList() {
   const [recent, loadedState] = useDatabase(
     async () => {
       const albums = await MusicLibrary.db.album.list();
@@ -119,17 +113,14 @@ export default function RecentlyAddedList(props: RecentlyAddedListProps) {
       {Object.entries(recent).map(([timeClass, mediaData]) => {
         return (
           <div className="flex flex-col mb-12" key={slugify(timeClass)}>
-            <h1 className="text-xl pb-2">{timeClass}</h1>
+            <span className="text-xl pb-2">{timeClass}</span>
             <MediaCarousel>
               {mediaData.map((media) => (
                 <MediaCard
                   key={media.id}
-                  id={media.id}
-                  title={media.title}
-                  size={"medium"}
-                  mediaType={media.type}
-                  onNavigate={props.onNavigate}
-                  onPlayMedia={props.onPlayMedia}
+                  type={media.type}
+                  data={media}
+                  style="cover-card"
                 />
               ))}
             </MediaCarousel>

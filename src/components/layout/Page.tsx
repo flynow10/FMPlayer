@@ -10,6 +10,7 @@ import TestingPage from "@/src/components/pages/TestingPage";
 import { ErrorBoundary } from "react-error-boundary";
 import AlbumDisplay from "@/src/components/pages/AlbumDisplay";
 import ArtistList from "@/src/components/pages/ArtistList";
+import SearchResults from "@/src/components/pages/SearchResults";
 
 type PageProps = {
   location: string;
@@ -39,16 +40,16 @@ export default function Page(props: PageProps) {
           {(() => {
             switch (props.type) {
               case "recent list": {
-                return (
-                  <RecentlyAddedList
-                    onPlayMedia={props.onPlayMedia}
-                    onNavigate={props.onNavigate}
-                  />
-                );
+                return <RecentlyAddedList />;
               }
 
               case "file search": {
-                return <UploadSearch onNavigate={props.onNavigate} />;
+                return (
+                  <UploadSearch
+                    onNavigate={props.onNavigate}
+                    initialSearch={props.data}
+                  />
+                );
               }
 
               case "file upload": {
@@ -67,12 +68,7 @@ export default function Page(props: PageProps) {
               }
 
               case "album list": {
-                return (
-                  <AlbumList
-                    onPlayMedia={props.onPlayMedia}
-                    onNavigate={props.onNavigate}
-                  />
-                );
+                return <AlbumList />;
               }
 
               case "track list": {
@@ -85,12 +81,7 @@ export default function Page(props: PageProps) {
               }
 
               case "genre list": {
-                return (
-                  <GenreList
-                    onPlayMedia={props.onPlayMedia}
-                    onNavigate={props.onNavigate}
-                  />
-                );
+                return <GenreList />;
               }
 
               case "artist list": {
@@ -109,6 +100,15 @@ export default function Page(props: PageProps) {
                     onPlayMedia={props.onPlayMedia}
                     onNavigate={props.onNavigate}
                     albumId={props.data as string}
+                  />
+                );
+              }
+
+              case "search results": {
+                return (
+                  <SearchResults
+                    onNavigate={props.onNavigate}
+                    searchString={props.data}
                   />
                 );
               }

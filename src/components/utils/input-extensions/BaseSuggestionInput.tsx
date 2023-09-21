@@ -340,7 +340,6 @@ export default function BaseSuggestionInput<S>(
         !justSelectedSuggestion.current &&
         !justClickedOnSuggestionContainer.current
       ) {
-        console.log("Focused!");
         const value = props.inputProps.value;
         const shouldRender = shouldRenderSuggestions(value, "input-focused");
         setIsInputFocused(true);

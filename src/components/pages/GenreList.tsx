@@ -1,16 +1,10 @@
 import { MusicLibrary } from "@/src/music/library/music-library";
 import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
-import { MediaCard } from "@/src/components/media-displays/MediaCard";
+import MediaCard from "@/src/components/media-displays/MediaCard";
 import { MediaCarousel } from "@/src/components/media-displays/MediaCarousel";
-import { Pages } from "@/src/types/pages";
 import { DataState, useDatabase } from "@/src/hooks/use-database";
 
-type GenreListProps = {
-  onPlayMedia: Pages.PlayByID;
-  onNavigate: Pages.NavigationMethod;
-};
-
-export default function GenreList(props: GenreListProps) {
+export default function GenreList() {
   const [genreMedia, loadedState] = useDatabase(
     async () => {
       return await MusicLibrary.db.genre.list();
@@ -37,12 +31,9 @@ export default function GenreList(props: GenreListProps) {
                     return (
                       <MediaCard
                         key={album.id}
-                        id={album.id}
-                        mediaType={"album"}
-                        title={album.title}
-                        size={"medium"}
-                        onPlayMedia={props.onPlayMedia}
-                        onNavigate={props.onNavigate}
+                        type="album"
+                        data={album}
+                        style="cover-card"
                       />
                     );
                   })}
@@ -57,12 +48,9 @@ export default function GenreList(props: GenreListProps) {
                     return (
                       <MediaCard
                         key={track.id}
-                        id={track.id}
-                        mediaType={"track"}
-                        size={"medium"}
-                        title={track.title}
-                        onPlayMedia={props.onPlayMedia}
-                        onNavigate={props.onNavigate}
+                        data={track}
+                        style="cover-card"
+                        type="track"
                       />
                     );
                   })}

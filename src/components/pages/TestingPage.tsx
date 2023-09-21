@@ -1,69 +1,80 @@
-import MultiSuggestionInput from "@/src/components/utils/input-extensions/MultiSuggestionInput";
-import { pickSuggestions } from "@/src/utils/string-utils";
-import { useState } from "react";
-
-const options = [
-  "Acoustic",
-  "Anime",
-  "Classical",
-  "EDM",
-  "Heavy Metal",
-  "Hip Hop",
-  "Mashup",
-  "Metal",
-  "Movie",
-  "Nightcore",
-  "Orchestral",
-  "Rock",
-  "TV Show",
-  "Video Game",
-];
+import { MediaCard } from "@/src/components/media-displays/OldMediaCard";
+import NewMediaCard from "@/src/components/media-displays/MediaCard";
+import { Music } from "@/src/types/music";
 
 export default function TestingPage() {
-  const [selectedItems, setSelectedItems] = useState<string[]>([]);
-  const [suggestions, setSuggestions] = useState<string[]>([]);
-  const reloadSuggestions = (value: string, newItems: string[]) => {
-    console.log(newItems);
-    setSuggestions(
-      pickSuggestions(
-        value,
-        options.filter(
-          (s) => !newItems.includes(s) && !selectedItems.includes(s)
-        )
-      )
-    );
+  const testAlbum: Music.DB.TableType<"Album"> = {
+    id: "",
+    title:
+      "The Greatest Showman (Original Motion Picture Soundtrack) [Sing-A-Long Edition]",
+    artists: [
+      {
+        albumId: "",
+        artist: {
+          id: "",
+          name: "Benj Pasek",
+          createdOn: new Date(),
+          modifiedOn: new Date(),
+        },
+        artistId: "",
+        artistType: "MAIN",
+        modifiedOn: new Date(),
+      },
+    ],
+    artwork: null,
+    artworkId: null,
+    genre: {
+      id: "",
+      name: "Classical",
+      createdOn: new Date(),
+      modifiedOn: new Date(),
+    },
+    genreId: "",
+    tags: [],
+    trackList: {
+      id: "",
+      integratedLoudness: 0,
+      trackConnections: [],
+      createdOn: new Date(),
+      modifiedOn: new Date(),
+    },
+    trackListId: "",
+    modifiedOn: new Date(),
+    createdOn: new Date(),
+  };
+  const testArtist: Music.DB.TableType<"Artist"> = {
+    id: "",
+    name: "The Piano Guys",
+    tracks: [],
+    albums: [],
+    createdOn: new Date(),
+    modifiedOn: new Date(),
   };
   return (
-    <div className="flex flex-col gap-3 m-3 w-1/3">
-      <pre>{JSON.stringify(selectedItems)}</pre>
-      <div>
-        <label>New Version</label>
-        <MultiSuggestionInput
-          selectedItems={selectedItems}
-          setSelectedItems={setSelectedItems}
-          suggestions={suggestions}
-          getSuggestionValue={(s) => s}
-          renderSuggestion={(s, { isHighlighted }) => (
-            <span
-              className={
-                "flex flex-row my-1 px-1" +
-                (isHighlighted ? " bg-gray-400" : "")
-              }
-            >
-              {s}
-            </span>
-          )}
-          suggestionsContainerProps={{
-            className: "border-2 rounded-lg p-2",
+    <div className="flex flex-col gap-4 p-4">
+      <div className="flex flex-col gap-4">
+        <span>Old</span>
+        <MediaCard
+          id=""
+          mediaType="album"
+          title="The Greatest Showman (Original Motion Picture Soundtrack) [Sing-A-Long Edition]"
+          onNavigate={() => {
+            return;
           }}
-          onSuggestionFetchRequested={(params) => {
-            reloadSuggestions(params.value, params.addedItems ?? []);
+          onPlayMedia={() => {
+            return;
           }}
-          onSuggestionClearRequested={() => {
-            setSuggestions([]);
-          }}
-          shouldRenderSuggestions={() => true}
+          size="medium"
         />
+      </div>
+      <div className="flex flex-col gap-4">
+        <span>New</span>
+        <div className="flex flex-row gap-4">
+          <NewMediaCard type="album" style="tab-card" data={testAlbum} />
+          <NewMediaCard type="artist" style="tab-card" data={testArtist} />
+          <NewMediaCard type="album" style="cover-card" data={testAlbum} />
+          <NewMediaCard type="artist" style="cover-card" data={testArtist} />
+        </div>
       </div>
     </div>
   );

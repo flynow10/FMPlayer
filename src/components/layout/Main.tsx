@@ -11,7 +11,6 @@ type MainProps = {
   onPlayMedia?: Pages.PlayByID;
   location: Pages.Location;
   searchString: string;
-  isSearching: boolean;
 };
 const DEFAULT_PAGES: Record<Pages.Location, Pages.PageStore> = {
   Search: { type: "search results" },
@@ -50,9 +49,18 @@ export default function Main(props: MainProps) {
     }
   }, [props.location, tabs]);
 
-  const pageTitle = props.isSearching
-    ? "Search: " + props.searchString
-    : props.location;
+  // Reset Search Location on search
+
+  useEffect(() => {
+    if (props.searchString !== "") {
+      updateTabs((prev) => ({
+        ...prev,
+        Search: [DEFAULT_PAGES.Search],
+      }));
+    }
+  }, [props.searchString]);
+
+  const pageTitle = props.location;
 
   const pageElements: ReactNode[] = [];
 
@@ -92,9 +100,11 @@ export default function Main(props: MainProps) {
             index={index}
             location={location}
             type={page.type}
-            data={page.data}
+            data={
+              page.type === "search results" ? props.searchString : page.data
+            }
             locationPageCount={pageList.length}
-            currentLocation={props.isSearching ? "Search" : props.location}
+            currentLocation={props.location}
             key={location + index + page.type + JSON.stringify(page.data)}
             onNavigate={onNavigate.bind(null, location)}
             onPlayMedia={(id, type) => {

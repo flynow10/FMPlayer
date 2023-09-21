@@ -2,10 +2,10 @@ import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
 import { useDatabase, DataState } from "@/src/hooks/use-database";
 import { MusicLibrary } from "@/src/music/library/music-library";
 import { Pages } from "@/src/types/pages";
-import placeholder from "@/src/assets/imgs/square-placeholder.jpg";
 import { CircleEllipsis, Play } from "lucide-react";
 import { Blur } from "@/src/components/utils/loading-pages/Blur";
 import OrderedTrackList from "@/src/components/media-displays/OrderedTrackList";
+import Artwork from "@/src/components/media-displays/Artwork";
 
 type AlbumDisplayProps = {
   onPlayMedia: Pages.PlayByID;
@@ -35,14 +35,11 @@ export default function AlbumDisplay(props: AlbumDisplayProps) {
     <>
       <div className="flex flex-col p-8 gap-8 overflow-auto h-full">
         <div className="flex flex-row gap-10">
-          <div className="flex-none overflow-hidden aspect-square w-1/5 rounded-2xl">
-            <img
-              src={
-                album.artwork === null
-                  ? placeholder
-                  : "" /* Artwork not handled yet album.artwork.id + ".jpg" */
-              }
-              className=""
+          <div className="flex-none overflow-hidden w-1/5">
+            <Artwork
+              id={album.artwork?.id ?? null}
+              rounded={false}
+              className="rounded-2xl"
             />
           </div>
           <div className="grow flex flex-col justify-between">
