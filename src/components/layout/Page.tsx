@@ -10,6 +10,7 @@ import TestingPage from "@/src/components/pages/TestingPage";
 import { ErrorBoundary } from "react-error-boundary";
 import AlbumDisplay from "@/src/components/pages/AlbumDisplay";
 import ArtistList from "@/src/components/pages/ArtistList";
+import SearchResults from "@/src/components/pages/SearchResults";
 
 type PageProps = {
   location: string;
@@ -109,6 +110,16 @@ export default function Page(props: PageProps) {
                     onPlayMedia={props.onPlayMedia}
                     onNavigate={props.onNavigate}
                     albumId={props.data as string}
+                  />
+                );
+              }
+
+              case "search results": {
+                return (
+                  <SearchResults
+                    onPlayMedia={props.onPlayMedia}
+                    onNavigate={props.onNavigate}
+                    searchString={props.data}
                   />
                 );
               }
