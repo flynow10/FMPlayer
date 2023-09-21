@@ -8,6 +8,7 @@ import SuggestionSearch from "@/src/components/utils/input-extensions/Suggestion
 
 type YoutubeSearchProps = {
   onClickDownload: (video: API.Youtube.Video) => void;
+  initialSearch?: string;
 };
 
 const loadCompletions = async (text: string) => {
@@ -56,6 +57,7 @@ export default function YoutubeSearch(props: YoutubeSearchProps) {
   return (
     <>
       <SuggestionSearch
+        initalValue={props.initialSearch}
         completions={completions}
         getCompletionValue={(s) => s}
         inputProps={{

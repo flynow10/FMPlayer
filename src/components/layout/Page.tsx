@@ -49,7 +49,12 @@ export default function Page(props: PageProps) {
               }
 
               case "file search": {
-                return <UploadSearch onNavigate={props.onNavigate} />;
+                return (
+                  <UploadSearch
+                    onNavigate={props.onNavigate}
+                    initialSearch={props.data}
+                  />
+                );
               }
 
               case "file upload": {
