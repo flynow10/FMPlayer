@@ -16,10 +16,11 @@ type SuggestionSearchProps<S> = {
   searchButtonProps?: InputExtensions.Search.SearchButtonProps;
   suggestionContainerProps?: HTMLAttributes<HTMLUListElement>;
   onChange?: InputExtensions.ChangeEventHandler;
+  initalValue?: string;
 };
 
 export default function SuggestionSearch<S>(props: SuggestionSearchProps<S>) {
-  const [search, setSearchText] = useState("");
+  const [search, setSearchText] = useState(props.initalValue ?? "");
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const { buttonText, ...buttonAttributes } = props.searchButtonProps ?? {};
