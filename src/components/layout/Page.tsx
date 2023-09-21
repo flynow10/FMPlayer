@@ -40,12 +40,7 @@ export default function Page(props: PageProps) {
           {(() => {
             switch (props.type) {
               case "recent list": {
-                return (
-                  <RecentlyAddedList
-                    onPlayMedia={props.onPlayMedia}
-                    onNavigate={props.onNavigate}
-                  />
-                );
+                return <RecentlyAddedList />;
               }
 
               case "file search": {
@@ -73,12 +68,7 @@ export default function Page(props: PageProps) {
               }
 
               case "album list": {
-                return (
-                  <AlbumList
-                    onPlayMedia={props.onPlayMedia}
-                    onNavigate={props.onNavigate}
-                  />
-                );
+                return <AlbumList />;
               }
 
               case "track list": {
@@ -91,12 +81,7 @@ export default function Page(props: PageProps) {
               }
 
               case "genre list": {
-                return (
-                  <GenreList
-                    onPlayMedia={props.onPlayMedia}
-                    onNavigate={props.onNavigate}
-                  />
-                );
+                return <GenreList />;
               }
 
               case "artist list": {
@@ -122,7 +107,6 @@ export default function Page(props: PageProps) {
               case "search results": {
                 return (
                   <SearchResults
-                    onPlayMedia={props.onPlayMedia}
                     onNavigate={props.onNavigate}
                     searchString={props.data}
                   />

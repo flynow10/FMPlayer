@@ -8,7 +8,6 @@ import { MusicLibrary } from "@/src/music/library/music-library";
 import { Pages } from "@/src/types/pages";
 
 type SearchResultsProps = {
-  onPlayMedia: Pages.PlayByID;
   onNavigate: Pages.NavigationMethod;
   searchString: string;
 };
