@@ -4,10 +4,15 @@ import {
   createAudioMethods,
 } from "@/src/music/library/audio-module";
 import { Music } from "@/src/types/music";
+import {
+  createSearchMethods,
+  SearchMethods,
+} from "@/src/music/library/search-module";
 
 export type MusicLibrary = {
   db: CRUDObjects;
   audio: AudioMethods;
+  search: SearchMethods;
   uploadNewTrack(
     metadata: Music.Files.NewTrackMetadata
   ): Promise<Music.DB.TableType<"Track"> | null>;
@@ -18,6 +23,7 @@ export const MusicLibrary: MusicLibrary = (function () {
   return {
     db: crud,
     audio: createAudioMethods(),
+    search: createSearchMethods(crud),
     uploadNewTrack(metadata) {
       return MusicLibrary.db.track.create({
         title: metadata.title,

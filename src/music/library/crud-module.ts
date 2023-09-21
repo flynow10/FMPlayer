@@ -1,20 +1,29 @@
 import { Endpoint, VercelAPI } from "@/src/api/vercel-API";
 import { Music } from "@/src/types/music";
+import hash from "object-hash";
 import { Prisma, PrismaClient } from "@prisma/client";
+import {
+  cacheResponse,
+  findCachedResponse,
+} from "@/src/music/library/crud-cache";
 
 type CreateMethod<T extends keyof Music.DB.TableTypes> = (
   data: Music.DB.PrismaArgs<T, "create">["data"]
 ) => Promise<Music.DB.TableTypes[T] | null>;
-type GetMethod<T extends keyof Music.DB.TableTypes> = (
+
+export type GetMethod<T extends keyof Music.DB.TableTypes> = (
   where: Music.DB.PrismaArgs<T, "findUnique">["where"]
 ) => Promise<Music.DB.TableTypes[T] | null>;
+
 type UpdateMethod<T extends keyof Music.DB.TableTypes> = (
   where: Music.DB.PrismaArgs<T, "update">["where"],
   data: Music.DB.PrismaArgs<T, "update">["data"]
 ) => Promise<Music.DB.TableTypes[T] | null>;
+
 type DeleteMethod<T extends keyof Music.DB.TableTypes> = (
   where: Music.DB.PrismaArgs<T, "delete">["where"]
 ) => Promise<Music.DB.TableTypes[T] | null>;
+
 type IncludeResult<
   T extends keyof Music.DB.TableTypes,
   I extends
@@ -25,9 +34,9 @@ type IncludeResult<
   {
     include: I extends undefined ? Music.DB.IncludeParameter<T> : I;
   },
-  "findMany"
->;
-type ListMethod<T extends keyof Music.DB.TableTypes> = <
+  "findUniqueOrThrow"
+>[];
+export type ListMethod<T extends keyof Music.DB.TableTypes> = <
   I extends
     | NonNullable<Music.DB.PrismaArgs<T, "findMany">["include"]>
     | undefined = undefined
@@ -112,12 +121,21 @@ function getMethodFactory<T extends keyof Music.DB.TableTypes>(
   table: T
 ): GetMethod<T> {
   return async function (where) {
-    const request: ReplaceTypes<Music.DB.TableTypes[T], Date, string> | null =
+    const requestHash = hash(where);
+
+    const cachedResponse = findCachedResponse(table, "get", requestHash);
+    if (cachedResponse !== null) {
+      return cachedResponse;
+    }
+    const response: ReplaceTypes<Music.DB.TableTypes[T], Date, string> | null =
       await VercelAPI.makeRequest(Endpoint.DB, { ...where }, table, "POST");
-    if (request === null) {
+    if (response === null) {
       return null;
     }
-    return fixJsonDateStrings(request);
+    const fixedRequest = fixJsonDateStrings(response);
+
+    cacheResponse(table, "get", requestHash, fixedRequest);
+    return fixedRequest;
   };
 }
 
@@ -178,9 +196,35 @@ function listMethodFactory<T extends keyof Music.DB.TableTypes>(
         include,
       };
     }
-    return (
-      await VercelAPI.makeRequest(Endpoint.DB, body, table, "GET", [])
-    ).map((value) => fixJsonDateStrings(value)) as IncludeResult<T, I>;
+    const requestHash = hash(body);
+    const cachedResponse = findCachedResponse(table, "list", requestHash);
+    if (cachedResponse !== null) {
+      return cachedResponse as IncludeResult<T, I>;
+    }
+
+    type ArrayElement<A> = A extends Array<infer Element> ? Element : never;
+    const response:
+      | ReplaceTypes<ArrayElement<IncludeResult<T, I>>, Date, string>[]
+      | null = await VercelAPI.makeRequest(Endpoint.DB, body, table, "GET");
+    if (response === null) {
+      return [];
+    }
+    const fixedDates = response.map((value) => {
+      return fixJsonDateStrings(value);
+    });
+    cacheResponse(
+      table,
+      "list",
+      requestHash,
+      fixedDates as IncludeResult<
+        T,
+        | NonNullable<
+            Prisma.Args<PrismaClient[Uncapitalize<T>], "findMany">["include"]
+          >
+        | undefined
+      >
+    );
+    return fixedDates;
   };
 }
 

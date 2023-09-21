@@ -17,7 +17,6 @@ export default function App() {
   const [repeatMode, setRepeatMode] = useState<Music.RepeatMode>("none");
   const [location, setLocation] = useState<Pages.Location>("Recently Added");
   const [searchString, setSearchString] = useState("");
-  const [isSearching, setIsSearching] = useState(false);
 
   const songId = queue.isBlank()
     ? null
@@ -117,25 +116,28 @@ export default function App() {
     <div className="app-container grid grid-cols-6 grid-rows-[minmax(0,6fr)_minmax(0,1fr)] h-full max-h-full">
       <Sidebar
         location={location}
-        isSearching={isSearching}
+        isSearching={location === "Search"}
         onSelectTab={(toLocation) => {
           setLocation(toLocation);
-          setIsSearching(false);
+        }}
+        onFocusSearch={() => {
+          if (MusicLibrary.search.hasNotLoaded()) {
+            MusicLibrary.search.loadDocuments();
+          }
+          if (searchString !== "") {
+            setLocation("Search");
+          }
         }}
         onSearch={(newSearch) => {
-          if (newSearch === "") {
-            setIsSearching(false);
-          } else {
-            setIsSearching(true);
+          if (newSearch !== "") {
+            setLocation("Search");
+            setSearchString(newSearch);
           }
-
-          setSearchString(newSearch);
         }}
       />
       <Main
         location={location}
         searchString={searchString}
-        isSearching={isSearching}
         onPlayMedia={async (id, type) => {
           let playlist;
 
