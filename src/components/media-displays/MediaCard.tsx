@@ -1,7 +1,7 @@
 import { Play } from "lucide-react";
-import placeholder from "@/src/assets/imgs/square-placeholder.jpg";
 import { Music } from "@/src/types/music";
 import { Pages } from "@/src/types/pages";
+import Artwork from "@/src/components/media-displays/Artwork";
 
 export type MediaCardProps = {
   id: string;
@@ -19,14 +19,14 @@ export function MediaCard(props: MediaCardProps) {
     return (
       <div className={"flex flex-col" + (size === "large" ? " w-96" : " w-52")}>
         <button
-          className="group relative aspect-square overflow-hidden shadow-[0_3px_10px_rgb(0,0,0,0.2)] rounded-2xl"
+          className="group relative rounded-lg overflow-hidden shadow-[0_3px_10px_rgb(0,0,0,0.2)]"
           onClick={() => {
             props.onPlayMedia(props.id, props.mediaType);
           }}
         >
-          <img
-            src={/* album.coverUrl ? album.coverUrl :  */ placeholder}
-            className="w-full h-full group-hover:blur transition-[filter]"
+          <Artwork
+            id={props.id /* Needs to be replaced with artwork id */}
+            className="group-hover:blur"
           />
           <Play
             size={48}
@@ -34,8 +34,7 @@ export function MediaCard(props: MediaCardProps) {
           />
         </button>
         <a
-          className="mt-1 overflow-ellipsis overflow-clip break-words hover:underline"
-          role="link"
+          className="mt-1 overflow-ellipsis break-words line-clamp-2 text-sm cursor-pointer hover:underline"
           onClick={() => {
             if (props.mediaType === "album") {
               props.onNavigate("new", {
@@ -47,6 +46,7 @@ export function MediaCard(props: MediaCardProps) {
         >
           {props.title}
         </a>
+        <a></a>
       </div>
     );
   } else {

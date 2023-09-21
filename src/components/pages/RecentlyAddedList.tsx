@@ -119,7 +119,7 @@ export default function RecentlyAddedList(props: RecentlyAddedListProps) {
       {Object.entries(recent).map(([timeClass, mediaData]) => {
         return (
           <div className="flex flex-col mb-12" key={slugify(timeClass)}>
-            <h1 className="text-xl pb-2">{timeClass}</h1>
+            <span className="text-xl pb-2">{timeClass}</span>
             <MediaCarousel>
               {mediaData.map((media) => (
                 <MediaCard

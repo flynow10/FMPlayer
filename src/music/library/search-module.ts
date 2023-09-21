@@ -106,7 +106,6 @@ export function createSearchMethods(crud: CRUDObjects): SearchMethods {
     rebuildIndex();
     triggerLoaded();
     isLoading = false;
-    console.log(rawDocumentList);
   };
   const rebuildIndex = function () {
     SearchEngine.removeAll();
@@ -155,7 +154,6 @@ export function createSearchMethods(crud: CRUDObjects): SearchMethods {
   };
 
   const loadDocumentType = async function (type: DocumentType) {
-    console.log(`Indexing ${type} documents for search`);
     switch (type) {
       case "album": {
         rawDocumentList.albums = await crud.album.list();
