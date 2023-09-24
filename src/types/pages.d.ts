@@ -44,8 +44,6 @@ export namespace Pages {
 
   export type NavigationType = "new" | "back";
 
-  export type MediaCardSize = "small" | "medium" | "large";
-
   export type PlayByID = (id: string, type: Music.MediaType) => void;
 
   export type NavigationMethod = (
@@ -55,6 +53,13 @@ export namespace Pages {
 
   export type PageStore = {
     type: PageType;
+    data?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+  };
+
+  export type PageContext = {
+    navigate: NavigationMethod;
+    location: Location;
+    currentLocation: Location;
     data?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
   };
 }

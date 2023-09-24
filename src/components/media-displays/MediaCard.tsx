@@ -1,5 +1,8 @@
 import Artwork from "@/src/components/media-displays/Artwork";
+import { usePageContext } from "@/src/contexts/PageContext";
+import { useAudioPlayer } from "@/src/hooks/use-audio-player";
 import { Music } from "@/src/types/music";
+import { Pages } from "@/src/types/pages";
 import classNames from "classnames";
 import { Play } from "lucide-react";
 import { MouseEvent } from "react";
@@ -53,6 +56,8 @@ export type MediaCardProps<T extends DisplayableMediaType> = {
 export default function MediaCard<T extends DisplayableMediaType>(
   props: MediaCardProps<T>
 ) {
+  const pages = usePageContext();
+  const audioPlayer = useAudioPlayer();
   let artworkId: string | null = null;
   let titleText = "";
   let subText = "";
@@ -94,15 +99,44 @@ export default function MediaCard<T extends DisplayableMediaType>(
   }
 
   const playMedia = () => {
-    // TODO: implement play media
-    return;
+    switch (props.type) {
+      case "album": {
+        audioPlayer.play.album(props.data.id);
+        break;
+      }
+      case "track": {
+        audioPlayer.play.track(props.data.id);
+        break;
+      }
+      default: {
+        alert("Unable to play this type of media!");
+        break;
+      }
+    }
   };
 
+  const visitable = ["album", "artist"].includes(props.type);
   const gotoMediaPage = () => {
-    // TODO: implement page navigation
+    let pageType: Pages.PageType | null = null;
+    switch (props.type) {
+      case "album": {
+        pageType = "album display";
+        break;
+      }
+      case "artist": {
+        pageType = "artist list";
+        break;
+      }
+    }
+    if (pageType === null) {
+      throw new Error("Cannot navigate to unvisitable page");
+    }
+    pages.navigate("new", {
+      type: pageType,
+      data: props.data.id,
+    });
     return;
   };
-  const visitable = ["album", "artist"].includes(props.type);
   const playable = ["album", "track"].includes(props.type);
   const clickablePhoto = props.onClickPhoto !== null;
 
@@ -158,7 +192,9 @@ export default function MediaCard<T extends DisplayableMediaType>(
     >
       <a
         onClick={
-          isTitleClickable ? props.onClickTitle ?? gotoMediaPage : undefined
+          isTitleClickable
+            ? props.onClickTitle ?? (visitable ? gotoMediaPage : undefined)
+            : undefined
         }
         className={classNames("line-clamp-2 text-sm w-fit whitespace-normal", {
           "hover:underline cursor-pointer": isTitleClickable,

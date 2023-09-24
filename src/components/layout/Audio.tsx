@@ -11,38 +11,34 @@ import {
 import { MusicLibrary } from "@/src/music/library/music-library";
 import { Music } from "@/src/types/music";
 import { DataState, useDatabase } from "@/src/hooks/use-database";
+import { useAudioPlayer } from "@/src/hooks/use-audio-player";
 
-type AudioProps = {
-  id: string | null;
-  loaded: boolean;
-  playing: boolean;
-  percentLoaded: number;
-  currentTime: number;
-  duration: number;
-  repeatMode: Music.RepeatMode;
-  onTogglePlay?: Music.AudioEvent;
-  onNext?: Music.AudioEvent;
-  onPrevious?: Music.AudioEvent;
-  onRepeatModeChange?: Music.AudioEvent;
-  onStartSeek?: Music.AudioEvent;
-  onSeekChange?: (time: number) => void;
-  onStopSeek?: (time: number) => void;
-};
-
-export function Audio(props: AudioProps) {
+export function Audio() {
+  const audioPlayer = useAudioPlayer();
+  const trackId = audioPlayer.useCurrentTrackId();
+  const duration = audioPlayer.useDuration();
+  const currentTime = audioPlayer.useCurrentTime();
+  const repeatMode = audioPlayer.useRepeatMode();
+  const audioLoaded = audioPlayer.useAudioLoaded();
+  const isPlaying = audioPlayer.useIsPlaying();
+  const percentLoaded = audioPlayer.usePercentLoaded();
+  const loadingNewTrack = audioPlayer.useLoadingNewTrack();
   const [track, loadedMetaData] = useDatabase(
     async () => {
-      if (!props.id) return null;
-      return await MusicLibrary.db.track.get({ id: props.id });
+      if (trackId === null) return null;
+      return await MusicLibrary.db.track.get({ id: trackId });
     },
     null,
     ["Track"],
-    [props.id]
+    [trackId]
   );
 
   const percentPlayed =
-    !isNaN(props.duration) && props.duration !== 0
-      ? (props.currentTime / props.duration) * 100
+    duration !== null &&
+    currentTime !== null &&
+    !isNaN(duration) &&
+    duration !== 0
+      ? (currentTime / duration) * 100
       : 0;
 
   const seekBar = useRef<HTMLDivElement>(null);
@@ -50,14 +46,14 @@ export function Audio(props: AudioProps) {
 
   useEffect(() => {
     const calculateTime = (e: MouseEvent) => {
-      if (seekBar.current) {
+      if (seekBar.current && duration) {
         const max = seekBar.current.clientWidth;
         const seekLocation = Math.min(
           Math.max(e.clientX - seekBar.current.offsetLeft, 0),
           max
         );
         const percentage = seekLocation / max;
-        return percentage * props.duration;
+        return percentage * duration;
       }
 
       return NaN;
@@ -65,13 +61,13 @@ export function Audio(props: AudioProps) {
 
     const onSeekMove = (e: MouseEvent) => {
       if (seeking) {
-        props.onSeekChange?.(calculateTime(e));
+        audioPlayer.seekToTime(calculateTime(e));
       }
     };
 
     const onSeekUp = (e: MouseEvent) => {
       if (seeking) {
-        props.onStopSeek?.(calculateTime(e));
+        audioPlayer.seekToTime(calculateTime(e), true);
         setSeeking(false);
       }
     };
@@ -83,10 +79,9 @@ export function Audio(props: AudioProps) {
       window.removeEventListener("mousemove", onSeekMove);
       window.removeEventListener("mouseup", onSeekUp);
     };
-  }, [seeking, setSeeking, props]);
+  }, [seeking, setSeeking, duration, audioPlayer]);
 
   const startSeek = () => {
-    props.onStartSeek?.();
     setSeeking(true);
   };
 
@@ -97,12 +92,16 @@ export function Audio(props: AudioProps) {
           <button
             className={
               "audio-button" +
-              (props.repeatMode !== "none" ? " text-blue-600" : "")
+              (repeatMode !== "none" ? " text-accent dark:invert" : "")
             }
-            onClick={props.onRepeatModeChange}
-            disabled={!props.loaded}
+            onClick={() => {
+              const loop: Music.RepeatMode[] = ["none", "all", "one"];
+              audioPlayer.setRepeatMode(
+                loop[(loop.indexOf(audioPlayer.repeatMode) + 1) % loop.length]
+              );
+            }}
           >
-            {props.repeatMode !== "one" ? (
+            {repeatMode !== "one" ? (
               <Repeat size={40} />
             ) : (
               <Repeat1 size={40} />
@@ -110,19 +109,22 @@ export function Audio(props: AudioProps) {
           </button>
           <button
             className="audio-button"
-            onClick={props.onPrevious}
-            disabled={!props.loaded}
+            onClick={() => {
+              audioPlayer.previousTrack(true);
+            }}
           >
             <ChevronLeft size={40} />
           </button>
           <button
             className="audio-button col-start-3"
-            onClick={props.onTogglePlay}
-            disabled={!props.loaded}
+            onClick={() => {
+              audioPlayer.toggleAudio();
+            }}
+            disabled={!audioLoaded || isPlaying === null}
           >
-            {!props.loaded ? (
+            {!audioLoaded ? (
               <Loader2 size={40} className="animate-spin" />
-            ) : !props.playing ? (
+            ) : !isPlaying || isPlaying === null ? (
               <PlayCircle size={40} />
             ) : (
               <PauseCircle size={40} />
@@ -130,15 +132,16 @@ export function Audio(props: AudioProps) {
           </button>
           <button
             className="audio-button"
-            onClick={props.onNext}
-            disabled={!props.loaded}
+            onClick={() => {
+              audioPlayer.nextTrack();
+            }}
           >
             <ChevronRight size={40} />
           </button>
         </div>
       </div>
       <div className="flex flex-col grow text-center">
-        {loadedMetaData !== DataState.Loading ? (
+        {!loadingNewTrack && loadedMetaData === DataState.Loaded ? (
           <>
             <h3 id="song-title">{track?.title}</h3>
             <h3 id="song-id">{track?.id}</h3>
@@ -160,7 +163,7 @@ export function Audio(props: AudioProps) {
           ></div>
           <div
             className="z-10 h-full bg-slate-300 absolute top-0 left-0 pointer-events-none"
-            style={{ width: props.percentLoaded + "%" }}
+            style={{ width: percentLoaded * 100 + "%" }}
           ></div>
         </div>
       </div>

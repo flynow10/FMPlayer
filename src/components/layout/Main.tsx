@@ -8,7 +8,6 @@ import DebugToolbar from "@/src/components/utils/DebugToolbar";
 import { getApplicationDebugConfig } from "@/config/app";
 
 type MainProps = {
-  onPlayMedia?: Pages.PlayByID;
   location: Pages.Location;
   searchString: string;
 };
@@ -107,9 +106,6 @@ export default function Main(props: MainProps) {
             currentLocation={props.location}
             key={location + index + page.type + JSON.stringify(page.data)}
             onNavigate={onNavigate.bind(null, location)}
-            onPlayMedia={(id, type) => {
-              props.onPlayMedia?.(id, type);
-            }}
           />
         );
       });

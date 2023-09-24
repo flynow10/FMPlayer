@@ -2,7 +2,19 @@ import { Audio } from "@/src/components/layout/Audio";
 import { Music } from "@/src/types/music";
 import { waitFor } from "@testing-library/react";
 import { render } from "@testing-library/react";
-import { v4 } from "uuid";
+
+jest.mock("@/src/hooks/use-audio-player", () => {
+  return {
+    useAudioPlayer: () => {
+      return {
+        ...jest.requireActual("@/src/hooks/use-audio-player").useAudioPlayer(),
+        useCurrentTrackId: () => {
+          return "";
+        },
+      };
+    },
+  };
+});
 
 jest.mock("@/src/music/library/music-library", () => ({
   MusicLibrary: {
@@ -40,17 +52,7 @@ jest.mock("@/src/music/library/music-library", () => ({
 
 describe("<Audio/>", () => {
   test("renders", async () => {
-    render(
-      <Audio
-        id={v4()}
-        currentTime={0}
-        duration={0}
-        loaded={true}
-        percentLoaded={0}
-        playing={false}
-        repeatMode="none"
-      />
-    );
+    render(<Audio />);
     await waitFor(() => {
       expect(document.getElementById("song-title")?.textContent).toBe(
         "Test track"
