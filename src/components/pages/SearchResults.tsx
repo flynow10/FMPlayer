@@ -3,22 +3,18 @@ import MediaCard, {
 } from "@/src/components/media-displays/MediaCard";
 import { MediaCarousel } from "@/src/components/media-displays/MediaCarousel";
 import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
+import { usePageContext } from "@/src/contexts/PageContext";
 import { useAsyncLoad } from "@/src/hooks/use-async-load";
 import { MusicLibrary } from "@/src/music/library/music-library";
-import { Pages } from "@/src/types/pages";
 
-type SearchResultsProps = {
-  onNavigate: Pages.NavigationMethod;
-  searchString: string;
-};
-
-export default function SearchResults(props: SearchResultsProps) {
+export default function SearchResults() {
+  const pages = usePageContext();
   const [searchResults, isLoaded] = useAsyncLoad(
     () => {
-      return MusicLibrary.search(props.searchString);
+      return MusicLibrary.search(pages.data);
     },
     null,
-    [props.searchString]
+    [pages.data]
   );
   if (!isLoaded || searchResults === null) {
     return <FullCover />;
@@ -84,7 +80,7 @@ export default function SearchResults(props: SearchResultsProps) {
     <div className="flex flex-col">
       <span className="px-4 pt-4 pb-2 text-gray-400">
         Showing results for: &quot;
-        <span className="text-black">{props.searchString}</span>&quot;
+        <span className="text-black">{pages.data}</span>&quot;
       </span>
       {searchResults.results.length > 0 ? (
         topResultsList
@@ -99,9 +95,9 @@ export default function SearchResults(props: SearchResultsProps) {
         Can&apos;t find what you&apos;re looking for?{" "}
         <a
           onClick={() => {
-            props.onNavigate("new", {
+            pages.navigate("new", {
               type: "file search",
-              data: props.searchString,
+              data: pages.data,
             });
           }}
           className="text-accent dark:invert cursor-pointer"

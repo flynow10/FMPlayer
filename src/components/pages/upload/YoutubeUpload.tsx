@@ -13,20 +13,16 @@ import { splitOutUrls } from "@/src/utils/url-utils";
 import ChannelDisplay from "@/src/components/utils/youtube/ChannelDisplay";
 import { MusicLibrary } from "@/src/music/library/music-library";
 import { toast } from "react-toastify";
+import { usePageContext } from "@/src/contexts/PageContext";
 
-type YoutubeUploadProps = {
-  data: {
-    video: API.Youtube.Video;
-  };
-  onNavigate: Pages.NavigationMethod;
-};
-
-export default function YoutubeUpload(props: YoutubeUploadProps) {
+export default function YoutubeUpload() {
+  const pages = usePageContext();
+  const video = pages.data.video as API.Youtube.Video;
   const [metadata, setMetadata] = useState<Music.Files.NewTrackMetadata>(() => {
     return {
       id: uuid(),
-      title: props.data.video.snippet.title,
-      artists: [{ name: props.data.video.snippet.channelTitle, type: "MAIN" }],
+      title: video.snippet.title,
+      artists: [{ name: video.snippet.channelTitle, type: "MAIN" }],
       genre: "",
       albumId: null,
       tags: [],
@@ -38,26 +34,26 @@ export default function YoutubeUpload(props: YoutubeUploadProps) {
   const [showVideo, setShowVideo] = useState(false);
   const youtubeRef = useRef<Youtube>(null);
 
-  const parsedDescription = splitOutUrls(
-    props.data.video.snippet.description
-  ).map((split, index) => {
-    if (split.type === "string") {
-      return <span key={index}>{split.data}</span>;
-    } else {
-      return (
-        <span key={index}>
-          <a
-            target="_blank"
-            rel="noreferrer"
-            href={split.data}
-            className="underline"
-          >
-            {split.data}
-          </a>
-        </span>
-      );
+  const parsedDescription = splitOutUrls(video.snippet.description).map(
+    (split, index) => {
+      if (split.type === "string") {
+        return <span key={index}>{split.data}</span>;
+      } else {
+        return (
+          <span key={index}>
+            <a
+              target="_blank"
+              rel="noreferrer"
+              href={split.data}
+              className="underline"
+            >
+              {split.data}
+            </a>
+          </span>
+        );
+      }
     }
-  });
+  );
 
   const setFileMetadataProperty =
     useCallback<Pages.Upload.SetFileMetadataFunction>(
@@ -83,10 +79,7 @@ export default function YoutubeUpload(props: YoutubeUploadProps) {
       if (!track) {
         throw new Error("Failed to create new track in database!");
       }
-      await MusicLibrary.audio.downloadYoutubeVideo(
-        props.data.video.id,
-        track.id
-      );
+      await MusicLibrary.audio.downloadYoutubeVideo(video.id, track.id);
     } catch (e) {
       console.error(e);
       toast(`Failed to upload ${metadata.title}!`, {
@@ -98,7 +91,7 @@ export default function YoutubeUpload(props: YoutubeUploadProps) {
     toast(`Completed preupload for ${metadata.title}`, {
       type: "success",
     });
-    props.onNavigate("back");
+    pages.navigate("back");
   };
 
   return (
@@ -109,7 +102,7 @@ export default function YoutubeUpload(props: YoutubeUploadProps) {
             <div className="flex p-4 gap-5 flex-col overflow-y-auto">
               <div className="flex flex-col gap-1">
                 <Youtube
-                  videoId={props.data.video.id}
+                  videoId={video.id}
                   className={showVideo ? "" : " hidden"}
                   iframeClassName="overflow-hidden rounded-lg aspect-video w-full"
                   opts={{
@@ -136,9 +129,8 @@ export default function YoutubeUpload(props: YoutubeUploadProps) {
                   <div className="relative group cursor-pointer rounded-lg overflow-hidden">
                     <img
                       src={
-                        YoutubeAPI.getBestThumbnail(
-                          props.data.video.snippet.thumbnails
-                        )?.url
+                        YoutubeAPI.getBestThumbnail(video.snippet.thumbnails)
+                          ?.url
                       }
                       className="object-cover w-auto"
                     />
@@ -150,15 +142,13 @@ export default function YoutubeUpload(props: YoutubeUploadProps) {
                     </div>
                   </div>
                 </div>
-                <span>{props.data.video.snippet.title}</span>
+                <span>{video.snippet.title}</span>
               </div>
               <div className="relative channel border-2 rounded-md p-3 h-20 flex gap-2">
                 <span className="absolute -top-4 left-2 text-gray-400 bg-white px-1">
                   Channel
                 </span>
-                <ChannelDisplay
-                  channelId={props.data.video.snippet.channelId}
-                />
+                <ChannelDisplay channelId={video.snippet.channelId} />
               </div>
               <div className="p-2 min-h-[100px] max-h-fit rounded-md border-2 relative">
                 <span className="absolute -top-4 left-2 text-gray-400 bg-white px-1">

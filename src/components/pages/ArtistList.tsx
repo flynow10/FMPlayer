@@ -8,15 +8,14 @@ import { LucideIcon, Mic2, Play, User2 /*Users*/ } from "lucide-react";
 import { useState } from "react";
 import OrderedTrackList from "@/src/components/media-displays/OrderedTrackList";
 import MediaCard from "@/src/components/media-displays/MediaCard";
+import { usePageContext } from "@/src/contexts/PageContext";
+import { useAudioPlayer } from "@/src/hooks/use-audio-player";
+import { AudioPlayer } from "@/src/music/player/audio-player";
 
-type ArtistListProps = {
-  onNavigate: Pages.NavigationMethod;
-  onPlayMedia: Pages.PlayByID;
-  artistId?: string;
-};
-
-export default function ArtistList(props: ArtistListProps) {
-  const [artistId, setArtistId] = useState(props.artistId ?? "all");
+export default function ArtistList() {
+  const pages = usePageContext();
+  const audioPlayer = useAudioPlayer();
+  const [artistId, setArtistId] = useState(pages.data ?? "all");
   const [artists, state] = useDatabase(
     async () => {
       const artists = await MusicLibrary.db.artist.list(
@@ -117,7 +116,7 @@ export default function ArtistList(props: ArtistListProps) {
       </div>
       <div className="grow flex flex-col overflow-auto">
         {filteredArtists.map((artist) =>
-          createArtistMusicList(props.onNavigate, props.onPlayMedia, artist)
+          createArtistMusicList(pages.navigate, audioPlayer, artist)
         )}
       </div>
     </div>
@@ -126,7 +125,7 @@ export default function ArtistList(props: ArtistListProps) {
 
 function createArtistMusicList(
   onNavigate: Pages.NavigationMethod,
-  onPlayMedia: Pages.PlayByID,
+  audioPlayer: AudioPlayer,
   artist: Music.DB.TableType<
     "Artist",
     {
@@ -225,10 +224,7 @@ function createArtistMusicList(
                     {album.genre.name} &bull; {album.createdOn.getFullYear()}
                   </span>
                 </div>
-                <OrderedTrackList
-                  onPlayMedia={onPlayMedia}
-                  trackConnections={album.trackList.trackConnections}
-                />
+                <OrderedTrackList list={album.trackList} />
               </div>
             </div>
           ))}
@@ -244,7 +240,7 @@ function createArtistMusicList(
                   <button
                     className="w-6 h-6"
                     onClick={() => {
-                      onPlayMedia(track.id, "track");
+                      audioPlayer.play.track(track.id);
                     }}
                   >
                     <Play className="block m-0 p-0" />

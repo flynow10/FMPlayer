@@ -3,11 +3,13 @@ import { Playlist } from "@/src/music/playlists/playlist";
 import { Music } from "@/src/types/music";
 
 export const PlaylistHelper = {
-  getPlaylistFromAlbum(album: Music.DB.TableType<"Album">): Playlist {
+  getPlaylistFromTrackList(trackList: Music.HelperDB.ThinTrackList): Playlist {
     const playlist = new Playlist();
-    album.trackList.trackConnections.forEach((track) => {
-      playlist.addAction(new PlaySongAction(track.trackId));
-    });
+    trackList.trackConnections
+      .sort((a, b) => a.trackNumber - b.trackNumber)
+      .forEach((track) => {
+        playlist.addAction(new PlaySongAction(track.trackId));
+      });
     return playlist;
   },
 };
