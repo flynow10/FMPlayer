@@ -52,7 +52,13 @@ jest.mock("@/src/music/library/music-library", () => ({
 
 describe("<Audio/>", () => {
   test("renders", async () => {
-    render(<Audio />);
+    render(
+      <Audio
+        onClickArtist={() => {
+          return;
+        }}
+      />
+    );
     await waitFor(() => {
       expect(document.getElementById("song-title")?.textContent).toBe(
         "Test track"
