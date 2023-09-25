@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Pages } from "@/src/types/pages";
 import MetadataEditor from "@/src/components/utils/MetadataEditor";
 import { FileContext } from "@/src/contexts/FileContext";
@@ -14,9 +14,11 @@ import ChannelDisplay from "@/src/components/utils/youtube/ChannelDisplay";
 import { MusicLibrary } from "@/src/music/library/music-library";
 import { toast } from "react-toastify";
 import { usePageContext } from "@/src/contexts/PageContext";
+import { useAudioPlayer } from "@/src/hooks/use-audio-player";
 
 export default function YoutubeUpload() {
   const pages = usePageContext();
+  const audioPlayer = useAudioPlayer();
   const video = pages.data.video as API.Youtube.Video;
   const [metadata, setMetadata] = useState<Music.Files.NewTrackMetadata>(() => {
     return {
@@ -33,6 +35,17 @@ export default function YoutubeUpload() {
   const [isUploading, setIsUploading] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const youtubeRef = useRef<Youtube>(null);
+
+  useEffect(() => {
+    const onPlayAppAudio = () => {
+      youtubeRef.current?.internalPlayer?.pauseVideo();
+    };
+    audioPlayer.addEventListener("play", onPlayAppAudio);
+
+    return () => {
+      audioPlayer.removeEventListener("play", onPlayAppAudio);
+    };
+  }, [audioPlayer]);
 
   const parsedDescription = splitOutUrls(video.snippet.description).map(
     (split, index) => {
@@ -113,6 +126,7 @@ export default function YoutubeUpload() {
                   }}
                   onPlay={() => {
                     setShowVideo(true);
+                    audioPlayer.pauseAudio();
                   }}
                   ref={youtubeRef}
                   title={metadata.title}
