@@ -259,6 +259,49 @@ export class AudioPlayer implements HookKeys {
   }
 
   private setupInternalListeners() {
+    const mediaSession = window.navigator.mediaSession;
+    mediaSession.setActionHandler("play", () => {
+      this.unpauseAudio();
+    });
+    mediaSession.setActionHandler("pause", () => {
+      this.pauseAudio();
+    });
+    mediaSession.setActionHandler("nexttrack", () => {
+      this.nextTrack();
+    });
+    mediaSession.setActionHandler("previoustrack", () => {
+      this.previousTrack();
+    });
+    const seekCallback = (e: MediaSessionActionDetails) => {
+      if (this.currentAudioTag !== null) {
+        const skipTime = e.seekOffset || 10;
+        this.seekToTime(
+          this.currentAudioTag.currentTime +
+            (e.action === "seekforward" ? 1 : -1) * skipTime,
+          true
+        );
+      }
+    };
+    mediaSession.setActionHandler("seekforward", seekCallback);
+    mediaSession.setActionHandler("seekbackward", seekCallback);
+    mediaSession.setActionHandler("seekto", (e) => {
+      if (e.seekTime) {
+        this.seekToTime(e.seekTime, true);
+      }
+    });
+    this.addEventListener("play", () => {
+      mediaSession.playbackState = "playing";
+    });
+    this.addEventListener("pause", () => {
+      mediaSession.playbackState = "paused";
+    });
+    this.addEventListener("timeupdate", () => {
+      mediaSession.setPositionState({
+        duration: this.currentAudioTag?.duration,
+        playbackRate: this.currentAudioTag?.playbackRate,
+        position: this.currentAudioTag?.currentTime,
+      });
+    });
     this.addEventListener("ended", this.onAudioEnded.bind(this));
     this.addEventListener("canplaythrough", this.onAudioLoaded.bind(this));
     this.addEventListener("progress", this.onAudioLoadProgress.bind(this));
