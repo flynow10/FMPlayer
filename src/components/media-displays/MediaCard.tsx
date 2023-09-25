@@ -202,6 +202,8 @@ export default function MediaCard<T extends DisplayableMediaType>(
   const shouldDisplayType =
     props.shouldDisplayType && props.style === "tab-card";
 
+  const SubTextElement = props.onClickSubText === undefined ? "span" : "a";
+
   const textLinks = (
     <div
       className={classNames("flex flex-col overflow-hidden", {
@@ -221,7 +223,7 @@ export default function MediaCard<T extends DisplayableMediaType>(
       >
         {titleText}
       </a>
-      <a
+      <SubTextElement
         onClick={props.onClickSubText}
         className={classNames(
           "text-gray-500 text-sm line-clamp-2 w-fit whitespace-normal break-words",
@@ -236,13 +238,13 @@ export default function MediaCard<T extends DisplayableMediaType>(
             props.type.substring(1) +
             (subText !== "" ? " • " : "")}
         {subText}
-      </a>
+      </SubTextElement>
     </div>
   );
 
   return (
     <div
-      className={classNames("flex gap-3", {
+      className={classNames("flex gap-3 shrink-0", {
         "flex-col w-52": props.style === "cover-card",
         "bg-gray-300 rounded-lg p-6 h-36": props.style === "tab-card",
       })}
