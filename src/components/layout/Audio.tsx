@@ -30,16 +30,18 @@ export function Audio() {
       if (track === null) {
         return null;
       }
-      window.navigator.mediaSession.metadata = new MediaMetadata({
-        title: track.title,
-        artist: track.artists
-          .filter((a) => a.artistType === "MAIN")
-          .map((a) => a.artist.name)
-          .join(", "),
-        album: track.listConnections.find(
-          (connection) => connection.trackList.album !== null
-        )?.trackList.album?.title,
-      });
+      if (window?.navigator?.mediaSession) {
+        window.navigator.mediaSession.metadata = new MediaMetadata({
+          title: track.title,
+          artist: track.artists
+            .filter((a) => a.artistType === "MAIN")
+            .map((a) => a.artist.name)
+            .join(", "),
+          album: track.listConnections.find(
+            (connection) => connection.trackList.album !== null
+          )?.trackList.album?.title,
+        });
+      }
       return track;
     },
     null,
