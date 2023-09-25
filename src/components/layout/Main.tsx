@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useState } from "react";
+import { MutableRefObject, ReactNode, useEffect, useState } from "react";
 import Page from "@/src/components/layout/Page";
 import { ChevronLeft } from "lucide-react";
 import classNames from "classnames";
@@ -10,6 +10,7 @@ import { getApplicationDebugConfig } from "@/config/app";
 type MainProps = {
   location: Pages.Location;
   searchString: string;
+  navigationRef: MutableRefObject<Pages.NavigationMethod | undefined>;
 };
 const DEFAULT_PAGES: Record<Pages.Location, Pages.PageStore> = {
   Search: { type: "search results" },
@@ -90,6 +91,7 @@ export default function Main(props: MainProps) {
       }
     }
   };
+  props.navigationRef.current = onNavigate.bind(null, props.location);
 
   (Object.entries(tabs) as [Pages.Location, Pages.PageStore[]][]).forEach(
     ([location, pageList]) => {
