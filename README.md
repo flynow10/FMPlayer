@@ -1,32 +1,36 @@
-# FMPlayer
+<p align="center" >
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://music.wagologies.com/favicon-dark-mode.svg">
+    <source media="(prefers-color-scheme: light)" srcset="https://music.wagologies.com/favicon-light-mode.svg">
+    <img alt="Functional Music Player logo" src="https://music.wagologies.com/icon.svg" width="96" color="white">
+  </picture>
+  <h3 align="center">The Functional Music Player</h3>
+</p>
 
-## \(F\)unctional \(M\)usic Player
+## FMPlayer
 
-This is a music player that is based on the concept of functional programming. It allows the creation of playlist that follow complex rules when played
+This is a music player that is based on the concept of functional programming. It allows the creation of playlist that follow complex rules when played.
 
 ## Getting started
 
-1.  Install [Node.js](https://nodejs.org/en/).
-2.  Install [Yarn](https://yarnpkg.com/en/).
-3.  Run `yarn install` to install dependencies.
-4.  Follow one of the directions below.
+This project uses a myriad of services to accomplish various tasks. The biggest are listed here:
 
-## How to Develop
+- Hosting: **[Vercel](https://vercel.com/)**
+- Front End: **[Vite](https://vitejs.dev/) / [React](https://react.dev/)**
+- Metadata storage: **[MySQL Database](https://www.mysql.com/)**
+  - Database Connection: **[Vercel Serverless](https://vercel.com/docs/functions/serverless-functions)**
+  - ORM: **[Prisma](https://www.prisma.io/client)**
+- Audio Storage: **[AWS S3 Buckets](https://aws.amazon.com/s3/)**
+- Audio Conversion: **[AWS Lambda](https://aws.amazon.com/lambda/)**
+- Realtime Updates: **[Ably](https://ably.com/)**
 
-1.  Run `yarn dev` to start the vite server with the main app.
-2.  Open a new terminal window.
-3.  From the project root run `cd server`.
-4.  Run `yarn dev` to start the library and proxy server.
-
-## How to Test
-
-Run `yarn test` to launch the test runner in interactive watch mode.
+Please see the [getting started](getting-started.md) page for how to setup this project
 
 ## How to Contribute
 
-1.  Fork this repository.
-2.  Create a new branch for each feature or improvement.
-3.  Send a pull request from each feature branch to the **develop** branch.
+1. Create a new branch
+2. Build your feature
+3. Create a pull request on the **preview** branch
 
 ## License
 

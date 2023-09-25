@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Pages } from "@/src/types/pages";
 import MetadataEditor from "@/src/components/utils/MetadataEditor";
 import { FileContext } from "@/src/contexts/FileContext";
@@ -8,46 +8,65 @@ import { v4 as uuid } from "uuid";
 import Youtube from "react-youtube";
 import { YoutubeAPI } from "@/src/api/youtube-API";
 import { Loader2, Play } from "lucide-react";
-import { useAsyncLoad } from "@/src/hooks/use-async-load";
-import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
-import { shortenNumberString } from "@/src/utils/string-utils";
 import VerticalSplit from "@/src/components/utils/VerticalSplit";
-import { MyMusicLibrary } from "@/src/music/library/music-library";
+import { splitOutUrls } from "@/src/utils/url-utils";
+import ChannelDisplay from "@/src/components/utils/youtube/ChannelDisplay";
+import { MusicLibrary } from "@/src/music/library/music-library";
 import { toast } from "react-toastify";
+import { usePageContext } from "@/src/contexts/PageContext";
+import { useAudioPlayer } from "@/src/hooks/use-audio-player";
 
-type YoutubeUploadProps = {
-  data: {
-    video: API.Youtube.Video;
-  };
-  onNavigate: Pages.NavigationMethod;
-};
-
-export default function YoutubeUpload(props: YoutubeUploadProps) {
-  const [metadata, setMetadata] = useState<Music.Files.EditableMetadata>(() => {
+export default function YoutubeUpload() {
+  const pages = usePageContext();
+  const audioPlayer = useAudioPlayer();
+  const video = pages.data.video as API.Youtube.Video;
+  const [metadata, setMetadata] = useState<Music.Files.NewTrackMetadata>(() => {
     return {
       id: uuid(),
-      title: props.data.video.snippet.title,
-      artists: [props.data.video.snippet.channelTitle],
-      featuring: [],
-      genre: "Unknown",
+      title: video.snippet.title,
+      artists: [{ name: video.snippet.channelTitle, type: "MAIN" }],
+      genre: "",
       albumId: null,
-      trackNumber: 1,
-      audioUploaded: null,
+      tags: [],
+      artworkUrl: null,
     };
   });
-  const [channel, loadedChannel] = useAsyncLoad(
-    async () => {
-      return (
-        (await YoutubeAPI.channel(props.data.video.snippet.channelId))
-          ?.items[0] ?? null
-      );
-    },
-    null,
-    [props.data]
-  );
+
   const [isUploading, setIsUploading] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const youtubeRef = useRef<Youtube>(null);
+
+  useEffect(() => {
+    const onPlayAppAudio = () => {
+      youtubeRef.current?.internalPlayer?.pauseVideo();
+    };
+    audioPlayer.addEventListener("play", onPlayAppAudio);
+
+    return () => {
+      audioPlayer.removeEventListener("play", onPlayAppAudio);
+    };
+  }, [audioPlayer]);
+
+  const parsedDescription = splitOutUrls(video.snippet.description).map(
+    (split, index) => {
+      if (split.type === "string") {
+        return <span key={index}>{split.data}</span>;
+      } else {
+        return (
+          <span key={index}>
+            <a
+              target="_blank"
+              rel="noreferrer"
+              href={split.data}
+              className="underline"
+            >
+              {split.data}
+            </a>
+          </span>
+        );
+      }
+    }
+  );
 
   const setFileMetadataProperty =
     useCallback<Pages.Upload.SetFileMetadataFunction>(
@@ -68,40 +87,35 @@ export default function YoutubeUpload(props: YoutubeUploadProps) {
   const uploadVideo = async () => {
     youtubeRef.current?.internalPlayer?.stopVideo();
     setIsUploading(true);
-
     try {
-      const song = await MyMusicLibrary.downloadYoutubeVideo(
-        props.data.video.id,
-        metadata
-      );
-      console.log(song);
+      const track = await MusicLibrary.uploadNewTrack(metadata);
+      if (!track) {
+        throw new Error("Failed to create new track in database!");
+      }
+      await MusicLibrary.audio.downloadYoutubeVideo(video.id, track.id);
     } catch (e) {
+      console.error(e);
       toast(`Failed to upload ${metadata.title}!`, {
         type: "error",
       });
+      return;
     }
 
     toast(`Completed preupload for ${metadata.title}`, {
       type: "success",
     });
-    props.onNavigate("back");
+    pages.navigate("back");
   };
 
-  if (!loadedChannel) {
-    return <FullCover />;
-  }
-
-  const channelUrl = `https://www.youtube.com/channel/${props.data.video.snippet.channelId}`;
-
   return (
-    <FileContext.Provider value={{ metadata }}>
+    <FileContext.Provider value={metadata}>
       <VerticalSplit
         left={
           <div className="flex flex-col h-full relative">
             <div className="flex p-4 gap-5 flex-col overflow-y-auto">
               <div className="flex flex-col gap-1">
                 <Youtube
-                  videoId={props.data.video.id}
+                  videoId={video.id}
                   className={showVideo ? "" : " hidden"}
                   iframeClassName="overflow-hidden rounded-lg aspect-video w-full"
                   opts={{
@@ -112,6 +126,7 @@ export default function YoutubeUpload(props: YoutubeUploadProps) {
                   }}
                   onPlay={() => {
                     setShowVideo(true);
+                    audioPlayer.pauseAudio();
                   }}
                   ref={youtubeRef}
                   title={metadata.title}
@@ -128,9 +143,8 @@ export default function YoutubeUpload(props: YoutubeUploadProps) {
                   <div className="relative group cursor-pointer rounded-lg overflow-hidden">
                     <img
                       src={
-                        YoutubeAPI.getBestThumbnail(
-                          props.data.video.snippet.thumbnails
-                        )?.url
+                        YoutubeAPI.getBestThumbnail(video.snippet.thumbnails)
+                          ?.url
                       }
                       className="object-cover w-auto"
                     />
@@ -142,48 +156,20 @@ export default function YoutubeUpload(props: YoutubeUploadProps) {
                     </div>
                   </div>
                 </div>
-                <span>{props.data.video.snippet.title}</span>
+                <span>{video.snippet.title}</span>
               </div>
-              <div className="relative channel border-2 rounded-md p-3 flex gap-2">
+              <div className="relative channel border-2 rounded-md p-3 h-20 flex gap-2">
                 <span className="absolute -top-4 left-2 text-gray-400 bg-white px-1">
                   Channel
                 </span>
-                {channel && (
-                  <a href={channelUrl} target="_blank" rel="noreferrer">
-                    <img
-                      src={
-                        YoutubeAPI.getBestThumbnail(channel.snippet.thumbnails)
-                          ?.url
-                      }
-                      width={48}
-                      height={48}
-                      className="rounded-full"
-                    />
-                  </a>
-                )}
-                <div className="flex flex-col justify-around">
-                  <a href={channelUrl} target="_blank" rel="noreferrer">
-                    {channel
-                      ? channel.snippet.localized.title
-                      : props.data.video.snippet.channelTitle}
-                  </a>
-                  {channel && (
-                    <span className="text-sm text-gray-500">
-                      {shortenNumberString(
-                        channel.statistics.subscriberCount,
-                        2
-                      )}{" "}
-                      subscribers
-                    </span>
-                  )}
-                </div>
+                <ChannelDisplay channelId={video.snippet.channelId} />
               </div>
               <div className="p-2 min-h-[100px] max-h-fit rounded-md border-2 relative">
                 <span className="absolute -top-4 left-2 text-gray-400 bg-white px-1">
                   Description
                 </span>
                 <p className="whitespace-pre-wrap overflow-y-auto h-full">
-                  {props.data.video.snippet.description}
+                  {parsedDescription}
                 </p>
               </div>
             </div>

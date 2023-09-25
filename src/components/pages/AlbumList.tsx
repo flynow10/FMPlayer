@@ -1,38 +1,29 @@
-import { MyMusicLibrary } from "@/src/music/library/music-library";
-import { useAsyncLoad } from "@/src/hooks/use-async-load";
+import { MusicLibrary } from "@/src/music/library/music-library";
 import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
-import { MediaCard } from "@/src/components/media-displays/MediaCard";
-import { Pages } from "@/src/types/pages";
+import MediaCard from "@/src/components/media-displays/MediaCard";
+import { DataState, useDatabase } from "@/src/hooks/use-database";
 
-type AlbumListProps = {
-  onPlayMedia: Pages.PlayByID;
-  onNavigate: Pages.NavigationMethod;
-};
-
-export default function AlbumList(props: AlbumListProps) {
-  const [albumList, loaded] = useAsyncLoad(
+export default function AlbumList() {
+  const [albumList, loadedState] = useDatabase(
     () => {
-      return MyMusicLibrary.getAlbumList();
+      return MusicLibrary.db.album.list();
     },
     [],
-    []
+    ["Album"]
   );
 
-  if (!loaded) {
+  if (loadedState === DataState.Loading) {
     return <FullCover />;
   }
 
   return (
-    <div className="grid grid-cols-5 gap-x-8 overflow-auto p-10">
+    <div className="flex flex-row flex-wrap gap-y-8 gap-x-8 overflow-auto p-8">
       {albumList.map((album) => (
         <MediaCard
           key={album.id}
-          id={album.id}
-          title={album.title}
-          size={"medium"}
-          mediaType={"album"}
-          onNavigate={props.onNavigate}
-          onPlayMedia={props.onPlayMedia}
+          data={album}
+          style="cover-card"
+          type="album"
         />
       ))}
     </div>

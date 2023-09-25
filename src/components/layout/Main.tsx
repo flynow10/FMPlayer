@@ -1,28 +1,29 @@
-import { UUID } from "@/src/components/utils/UUID";
-import { ReactNode, useEffect, useState } from "react";
+import { MutableRefObject, ReactNode, useEffect, useState } from "react";
 import Page from "@/src/components/layout/Page";
 import { ChevronLeft } from "lucide-react";
 import classNames from "classnames";
 import { Pages } from "@/src/types/pages";
-import ToastTest from "@/src/components/utils/ToastTest";
+import AblyStatusSymbol from "@/src/components/utils/AblyStatusSymbol";
+import DebugToolbar from "@/src/components/utils/DebugToolbar";
+import { getApplicationDebugConfig } from "@/config/app";
 
 type MainProps = {
-  onPlayMedia?: Pages.PlayByID;
   location: Pages.Location;
   searchString: string;
-  isSearching: boolean;
+  navigationRef: MutableRefObject<Pages.NavigationMethod | undefined>;
 };
 const DEFAULT_PAGES: Record<Pages.Location, Pages.PageStore> = {
   Search: { type: "search results" },
   Albums: { type: "album list" },
-  Songs: { type: "song list" },
+  Tracks: { type: "track list" },
   Playlists: { type: "playlist list" },
   Genres: { type: "genre list" },
   "Import Media": { type: "file search" },
-  Artists: { type: "album display" }, // no page created yet
+  Artists: { type: "artist list" }, // no page created yet
   "Edit Playlists": { type: "album display" }, // no page created yet
   "Recently Added": { type: "recent list" },
 };
+const debug = getApplicationDebugConfig();
 
 export default function Main(props: MainProps) {
   const [tabs, updateTabs] = useState<
@@ -36,7 +37,7 @@ export default function Main(props: MainProps) {
     Playlists: [],
     "Recently Added": [],
     Search: [],
-    Songs: [],
+    Tracks: [],
   });
 
   useEffect(() => {
@@ -48,9 +49,18 @@ export default function Main(props: MainProps) {
     }
   }, [props.location, tabs]);
 
-  const pageTitle = props.isSearching
-    ? "Search: " + props.searchString
-    : props.location;
+  // Reset Search Location on search
+
+  useEffect(() => {
+    if (props.searchString !== "") {
+      updateTabs((prev) => ({
+        ...prev,
+        Search: [DEFAULT_PAGES.Search],
+      }));
+    }
+  }, [props.searchString]);
+
+  const pageTitle = props.location;
 
   const pageElements: ReactNode[] = [];
 
@@ -81,6 +91,7 @@ export default function Main(props: MainProps) {
       }
     }
   };
+  props.navigationRef.current = onNavigate.bind(null, props.location);
 
   (Object.entries(tabs) as [Pages.Location, Pages.PageStore[]][]).forEach(
     ([location, pageList]) => {
@@ -90,14 +101,13 @@ export default function Main(props: MainProps) {
             index={index}
             location={location}
             type={page.type}
-            data={page.data}
+            data={
+              page.type === "search results" ? props.searchString : page.data
+            }
             locationPageCount={pageList.length}
-            currentLocation={props.isSearching ? "Search" : props.location}
+            currentLocation={props.location}
             key={location + index + page.type + JSON.stringify(page.data)}
             onNavigate={onNavigate.bind(null, location)}
-            onPlayMedia={(id, type) => {
-              props.onPlayMedia?.(id, type);
-            }}
           />
         );
       });
@@ -106,32 +116,34 @@ export default function Main(props: MainProps) {
   return (
     <div className="main overflow-clip flex flex-col">
       <div className="py-3 border-b-2 px-4">
-        <div className="flex items-center">
-          <button
-            className={classNames(
-              "p-1",
-              "mr-1",
-              "align-middle",
-              "hover:bg-gray-100",
-              "rounded-lg",
-              {
-                "text-gray-500 hover:bg-inherit":
-                  tabs[props.location].length === 1,
-              }
-            )}
-            disabled={tabs[props.location].length === 1}
-            onClick={() => {
-              onNavigate(props.location, "back");
-            }}
-          >
-            <ChevronLeft />
-          </button>
-          <h3 className="text-2xl inline-block">{pageTitle}</h3>
+        <div className="flex items-center w-full">
+          <div className="flex items-center grow">
+            <button
+              className={classNames(
+                "p-1",
+                "mr-1",
+                "align-middle",
+                "hover:bg-gray-100",
+                "rounded-lg",
+                {
+                  "text-gray-500 hover:bg-inherit":
+                    tabs[props.location].length === 1,
+                }
+              )}
+              disabled={tabs[props.location].length === 1}
+              onClick={() => {
+                onNavigate(props.location, "back");
+              }}
+            >
+              <ChevronLeft />
+            </button>
+            <h3 className="text-2xl inline-block">{pageTitle}</h3>
+          </div>
+          <AblyStatusSymbol />
         </div>
-        <div className="flex flex-row gap-2">
-          <UUID />
-          <ToastTest />
-        </div>
+        {debug && debug.showDebugToolBar && (
+          <DebugToolbar onNavigate={onNavigate} location={props.location} />
+        )}
       </div>
       {pageElements}
     </div>

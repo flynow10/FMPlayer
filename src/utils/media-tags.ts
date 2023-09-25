@@ -17,8 +17,8 @@ export const getTags = (data: Blob | Uint8Array) =>
 
 export const pullMetadataFromTags = (
   tags: TagType
-): Partial<Music.Files.EditableMetadata> => {
-  const metadata: Partial<Music.Files.EditableMetadata> = {};
+): Partial<Music.Files.NewTrackMetadata> => {
+  const metadata: Partial<Music.Files.NewTrackMetadata> = {};
 
   if (tags.tags.title) {
     metadata.title = tags.tags.title;
@@ -28,13 +28,18 @@ export const pullMetadataFromTags = (
     metadata.genre = tags.tags.genre;
   }
 
-  if (tags.tags.track) {
-    const trackNumber: number = parseInt(tags.tags.track);
-    metadata.trackNumber = trackNumber;
-  }
+  // if (tags.tags.track) {
+  //   const trackNumber: number = parseInt(tags.tags.track);
+  //   metadata.trackNumber = trackNumber;
+  // }
 
   if (tags.tags.artist) {
-    metadata.artists = [tags.tags.artist];
+    metadata.artists = [
+      {
+        name: tags.tags.artist,
+        type: "MAIN",
+      },
+    ];
   }
 
   return metadata;
