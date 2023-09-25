@@ -19,6 +19,11 @@ jest.mock("@/src/hooks/use-audio-player", () => {
 jest.mock("@/src/music/library/music-library", () => ({
   MusicLibrary: {
     db: {
+      album: {
+        get: jest.fn(async (): Promise<null> => {
+          return null;
+        }),
+      },
       track: {
         get: jest.fn(
           ({ id }: { id: string }): Promise<Music.DB.TableType<"Track">> => {
