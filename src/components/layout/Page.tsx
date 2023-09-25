@@ -11,16 +11,16 @@ import { ErrorBoundary } from "react-error-boundary";
 import AlbumDisplay from "@/src/components/pages/AlbumDisplay";
 import ArtistList from "@/src/components/pages/ArtistList";
 import SearchResults from "@/src/components/pages/SearchResults";
+import { PageContext } from "@/src/contexts/PageContext";
 
 type PageProps = {
-  location: string;
-  currentLocation: string;
+  location: Pages.Location;
+  currentLocation: Pages.Location;
   index: number;
   locationPageCount: number;
   type: Pages.PageType;
   data: any; // eslint-disable-line @typescript-eslint/no-explicit-any
   onNavigate: Pages.NavigationMethod;
-  onPlayMedia: Pages.PlayByID;
 };
 
 export default function Page(props: PageProps) {
@@ -30,100 +30,77 @@ export default function Page(props: PageProps) {
     isHiddenClass = isHidden ? "hidden " : "";
   const pageClass = isHiddenClass + "relative max-h-full min-h-0 grow";
   return (
-    <div className={pageClass}>
-      <div className="h-full overflow-auto relative">
-        <ErrorBoundary
-          fallback={
-            <span>This page failed to load! Check the console for details</span>
-          }
-        >
-          {(() => {
-            switch (props.type) {
-              case "recent list": {
-                return <RecentlyAddedList />;
-              }
-
-              case "file search": {
-                return (
-                  <UploadSearch
-                    onNavigate={props.onNavigate}
-                    initialSearch={props.data}
-                  />
-                );
-              }
-
-              case "file upload": {
-                return (
-                  <FileUpload data={props.data} onNavigate={props.onNavigate} />
-                );
-              }
-
-              case "youtube upload": {
-                return (
-                  <YoutubeUpload
-                    data={props.data}
-                    onNavigate={props.onNavigate}
-                  />
-                );
-              }
-
-              case "album list": {
-                return <AlbumList />;
-              }
-
-              case "track list": {
-                return (
-                  <TrackList
-                    onPlayMedia={props.onPlayMedia}
-                    onNavigate={props.onNavigate}
-                  />
-                );
-              }
-
-              case "genre list": {
-                return <GenreList />;
-              }
-
-              case "artist list": {
-                return (
-                  <ArtistList
-                    onPlayMedia={props.onPlayMedia}
-                    onNavigate={props.onNavigate}
-                    artistId={props.data}
-                  />
-                );
-              }
-
-              case "album display": {
-                return (
-                  <AlbumDisplay
-                    onPlayMedia={props.onPlayMedia}
-                    onNavigate={props.onNavigate}
-                    albumId={props.data as string}
-                  />
-                );
-              }
-
-              case "search results": {
-                return (
-                  <SearchResults
-                    onNavigate={props.onNavigate}
-                    searchString={props.data}
-                  />
-                );
-              }
-
-              case "testing page": {
-                return <TestingPage />;
-              }
-
-              default: {
-                return <span>Page Missing! Type: {props.type}</span>;
-              }
+    <PageContext.Provider
+      value={{
+        navigate: props.onNavigate,
+        location: props.location,
+        currentLocation: props.currentLocation,
+        data: props.data,
+      }}
+    >
+      <div className={pageClass}>
+        <div className="h-full overflow-auto relative">
+          <ErrorBoundary
+            fallback={
+              <span>
+                This page failed to load! Check the console for details
+              </span>
             }
-          })()}
-        </ErrorBoundary>
+          >
+            {(() => {
+              switch (props.type) {
+                case "recent list": {
+                  return <RecentlyAddedList />;
+                }
+
+                case "file search": {
+                  return <UploadSearch />;
+                }
+
+                case "file upload": {
+                  return <FileUpload />;
+                }
+
+                case "youtube upload": {
+                  return <YoutubeUpload />;
+                }
+
+                case "album list": {
+                  return <AlbumList />;
+                }
+
+                case "track list": {
+                  return <TrackList />;
+                }
+
+                case "genre list": {
+                  return <GenreList />;
+                }
+
+                case "artist list": {
+                  return <ArtistList />;
+                }
+
+                case "album display": {
+                  return <AlbumDisplay />;
+                }
+
+                case "search results": {
+                  return <SearchResults />;
+                }
+
+                case "testing page": {
+                  return <TestingPage />;
+                }
+
+                default: {
+                  return <span>Page Missing! Type: {props.type}</span>;
+                }
+              }
+            })()}
+          </ErrorBoundary>
+        </div>
       </div>
-    </div>
+    </PageContext.Provider>
   );
 }

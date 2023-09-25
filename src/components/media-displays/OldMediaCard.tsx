@@ -3,11 +3,13 @@ import { Music } from "@/src/types/music";
 import { Pages } from "@/src/types/pages";
 import Artwork from "@/src/components/media-displays/Artwork";
 
+type MediaCardSize = "small" | "medium" | "large";
+
 export type MediaCardProps = {
   id: string;
   title: string;
   mediaType: Music.MediaType;
-  size?: Pages.MediaCardSize;
+  size?: MediaCardSize;
   onPlayMedia: Pages.PlayByID;
   onNavigate: Pages.NavigationMethod;
 };

@@ -173,6 +173,31 @@ export namespace Music {
       [Key in TableName]: TableType<Key>;
     };
   }
+  export namespace HelperDB {
+    export type ThinTrackList = DB.TableType<
+      "TrackList",
+      {
+        trackConnections: {
+          include: {
+            track: true;
+          };
+        };
+      }
+    >;
+    export type ArtistConnection =
+      | Music.DB.TableType<
+          "AlbumArtist",
+          {
+            artist: true;
+          }
+        >
+      | Music.DB.TableType<
+          "TrackArtist",
+          {
+            artist: true;
+          }
+        >;
+  }
   export namespace Files {
     export type EditableFile = {
       metadata: NewTrackMetadata;

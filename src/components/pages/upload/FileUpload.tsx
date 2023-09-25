@@ -12,31 +12,29 @@ import { Loader2 } from "lucide-react";
 import { toast } from "react-toastify";
 import VerticalSplit from "@/src/components/utils/VerticalSplit";
 import { MusicLibrary } from "@/src/music/library/music-library";
+import { usePageContext } from "@/src/contexts/PageContext";
 
-type FileUploadProps = {
-  data: {
+export default function FileUpload() {
+  const pages = usePageContext();
+  const fileData = pages.data as {
     uploadType: Pages.Upload.FileUploadType;
     url?: string;
     files?: File[];
   };
-  onNavigate: Pages.NavigationMethod;
-};
-
-export default function FileUpload(props: FileUploadProps) {
   const [files, filesLoaded, setFiles] = useAsyncLoad<
     Music.Files.EditableFile[]
   >(
     async () => {
       let files: Music.Files.EditableFile[] = [];
 
-      switch (props.data.uploadType) {
+      switch (fileData.uploadType) {
         case "file": {
-          if (props.data.files === undefined) {
+          if (fileData.files === undefined) {
             throw new Error("Files missing from file upload");
           }
 
           files = await Promise.all(
-            props.data.files.map(async (file) => {
+            fileData.files.map(async (file) => {
               const fileName = file.name.replace(/\.[^/.]+$/, "");
               return await getPreUploadFileFromData(
                 await fetchFile(file),
@@ -48,14 +46,14 @@ export default function FileUpload(props: FileUploadProps) {
         }
 
         case "url": {
-          if (props.data.url === undefined) {
+          if (fileData.url === undefined) {
             throw new Error("Url missing from url upload");
           }
 
-          const fileName = getFileNameFromUrl(props.data.url);
+          const fileName = getFileNameFromUrl(fileData.url);
           files = [
             await getPreUploadFileFromData(
-              await fetchFile(props.data.url),
+              await fetchFile(fileData.url),
               fileName
             ),
           ];
@@ -82,7 +80,7 @@ export default function FileUpload(props: FileUploadProps) {
       return files;
     },
     [],
-    [props.data]
+    [pages]
   );
 
   const [openFileId, setOpenFileId] = useState("");
@@ -202,7 +200,7 @@ export default function FileUpload(props: FileUploadProps) {
     toast(`Completed preupload for ${selectedFiles.length} files`, {
       type: "success",
     });
-    props.onNavigate("back");
+    pages.navigate("back");
   };
 
   const ableToUpload =
