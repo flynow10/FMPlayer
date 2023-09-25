@@ -1,11 +1,13 @@
+import { getApplicationDebugConfig } from "@/config/app";
 import Artwork from "@/src/components/media-displays/Artwork";
+import LinkedArtistList from "@/src/components/media-displays/LinkedArtistList";
 import { usePageContext } from "@/src/contexts/PageContext";
 import { useAudioPlayer } from "@/src/hooks/use-audio-player";
 import { Music } from "@/src/types/music";
 import { Pages } from "@/src/types/pages";
 import classNames from "classnames";
 import { Play } from "lucide-react";
-import { MouseEvent } from "react";
+import { MouseEvent, ReactNode } from "react";
 
 export type DisplayableMediaType = "album" | "track" | "playlist" | "artist";
 type CardStyle = "cover-card" | "tab-card";
@@ -56,20 +58,27 @@ export type MediaCardProps<T extends DisplayableMediaType> = {
 export default function MediaCard<T extends DisplayableMediaType>(
   props: MediaCardProps<T>
 ) {
+  const debugConfig = getApplicationDebugConfig();
   const pages = usePageContext();
   const audioPlayer = useAudioPlayer();
   let artworkId: string | null = null;
   let titleText = "";
-  let subText = "";
+  let subText: string | ReactNode = "";
   switch (props.type) {
     case "album": {
       const album = props.data as Music.DB.TableType<"Album">;
       artworkId = album.artwork?.id ?? null;
       titleText = album.title;
-      subText = album.artists
-        .map((artist) => artist.artist.name)
-        .join(", ")
-        .trim();
+      if (album.artists.length > 0) {
+        subText = (
+          <LinkedArtistList
+            artistList={album.artists}
+            onClickArtist={(artistId) => {
+              pages.navigate("new", { type: "artist list", data: artistId });
+            }}
+          />
+        );
+      }
       break;
     }
     case "artist": {
@@ -90,12 +99,22 @@ export default function MediaCard<T extends DisplayableMediaType>(
       const track = props.data as Music.DB.TableType<"Track">;
       artworkId = track.artwork?.id ?? null;
       titleText = track.title;
-      subText = track.artists
-        .map((artist) => artist.artist.name)
-        .join(", ")
-        .trim();
+      if (track.artists.length > 0) {
+        subText = (
+          <LinkedArtistList
+            artistList={track.artists}
+            onClickArtist={(artistId) => {
+              pages.navigate("new", { type: "artist list", data: artistId });
+            }}
+          />
+        );
+      }
       break;
     }
+  }
+
+  if (debugConfig?.showIds) {
+    subText = props.data.id;
   }
 
   const playMedia = () => {
@@ -205,7 +224,7 @@ export default function MediaCard<T extends DisplayableMediaType>(
       <a
         onClick={props.onClickSubText}
         className={classNames(
-          "text-gray-500 text-sm line-clamp-2 break-words",
+          "text-gray-500 text-sm line-clamp-2 w-fit whitespace-normal break-words",
           {
             "hover:underline cursor-pointer":
               props.onClickSubText !== undefined,
