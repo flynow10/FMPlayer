@@ -13,7 +13,24 @@ import { Music } from "@/src/types/music";
 import { DataState, useDatabase } from "@/src/hooks/use-database";
 import { useAudioPlayer } from "@/src/hooks/use-audio-player";
 
-export function Audio() {
+type ArtistConnection =
+  | Music.DB.TableType<
+      "AlbumArtist",
+      {
+        artist: true;
+      }
+    >
+  | Music.DB.TableType<
+      "TrackArtist",
+      {
+        artist: true;
+      }
+    >;
+
+type AudioProps = {
+  onClickArtist: (artistId: string) => void;
+};
+export function Audio(props: AudioProps) {
   const audioPlayer = useAudioPlayer();
   const trackId = audioPlayer.useCurrentTrackId();
   const duration = audioPlayer.useDuration();
@@ -23,17 +40,32 @@ export function Audio() {
   const isPlaying = audioPlayer.useIsPlaying();
   const percentLoaded = audioPlayer.usePercentLoaded();
   const loadingNewTrack = audioPlayer.useLoadingNewTrack();
-  const [track, loadedMetaData] = useDatabase(
+  const [[track, artists], loadedMetaData] = useDatabase<
+    [Music.DB.TableType<"Track"> | null, ArtistConnection[]]
+  >(
     async () => {
-      if (trackId === null) return null;
+      if (trackId === null) return [null, []];
       const track = await MusicLibrary.db.track.get({ id: trackId });
       if (track === null) {
-        return null;
+        return [null, []];
+      }
+      let artists: ArtistConnection[] = [];
+      if (track.artists.length !== 0) {
+        artists = track.artists;
+      } else {
+        const album = await MusicLibrary.db.album.get({
+          id: track.listConnections.find(
+            (connection) => connection.trackList.album !== null
+          )?.trackList.album?.id,
+        });
+        if (album) {
+          artists = album.artists;
+        }
       }
       if (window?.navigator?.mediaSession) {
         window.navigator.mediaSession.metadata = new MediaMetadata({
           title: track.title,
-          artist: track.artists
+          artist: artists
             .filter((a) => a.artistType === "MAIN")
             .map((a) => a.artist.name)
             .join(", "),
@@ -42,10 +74,10 @@ export function Audio() {
           )?.trackList.album?.title,
         });
       }
-      return track;
+      return [track, artists];
     },
-    null,
-    ["Track"],
+    [null, []],
+    ["Track", "Album"],
     [trackId]
   );
 
@@ -159,8 +191,26 @@ export function Audio() {
       <div className="flex flex-col grow text-center">
         {!loadingNewTrack && loadedMetaData === DataState.Loaded ? (
           <>
-            <h3 id="song-title">{track?.title}</h3>
-            <h3 id="song-id">{track?.id}</h3>
+            <span id="song-title">{track?.title}</span>
+            <span
+              id="song-id"
+              className="empty:before:content-[''] empty:before:inline-block text-gray-400"
+            >
+              {artists.map((artistConnection, index, arr) => (
+                <>
+                  <a
+                    key={artistConnection.artist.id}
+                    className="cursor-pointer text-accent-muted dark:invert"
+                    onClick={() => {
+                      props.onClickArtist(artistConnection.artistId);
+                    }}
+                  >
+                    {artistConnection.artist.name}
+                  </a>
+                  <span>{index < arr.length - 1 ? ", " : ""}</span>
+                </>
+              ))}
+            </span>
           </>
         ) : (
           <Loader2 size={32} className="animate-spin mx-auto my-2" />

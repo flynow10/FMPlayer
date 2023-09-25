@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Audio } from "@/src/components/layout/Audio";
 import { MusicLibrary } from "@/src/music/library/music-library";
 import AudioControlPlaceholder from "@/src/components/layout/AudioControlPlaceholder";
@@ -10,8 +10,11 @@ import { Pages } from "@/src/types/pages";
 export default function App() {
   const [location, setLocation] = useState<Pages.Location>("Recently Added");
   const [searchString, setSearchString] = useState("");
+
+  const navigationMethod = useRef<Pages.NavigationMethod>();
   const audioPlayer = useAudioPlayer();
   const hasPlayedOnce = audioPlayer.useHasPlayedOnce();
+
   const beginPlayback = async () => {
     const albums = await MusicLibrary.db.album.list();
     if (albums.length === 0) {
@@ -34,7 +37,18 @@ export default function App() {
       {!hasPlayedOnce ? (
         <AudioControlPlaceholder onPlay={beginPlayback} />
       ) : (
-        <Audio />
+        <Audio
+          onClickArtist={(artistId: string) => {
+            if (navigationMethod.current) {
+              navigationMethod.current("new", {
+                type: "artist list",
+                data: artistId,
+              });
+            } else {
+              alert("An error occurred! Unable to navigate artist page!");
+            }
+          }}
+        />
       )}
     </div>
   );
@@ -61,7 +75,11 @@ export default function App() {
           }
         }}
       />
-      <Main location={location} searchString={searchString} />
+      <Main
+        location={location}
+        searchString={searchString}
+        navigationRef={navigationMethod}
+      />
       {audioComponent}
     </div>
   );
