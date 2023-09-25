@@ -1,24 +1,21 @@
 import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
 import { useDatabase, DataState } from "@/src/hooks/use-database";
 import { MusicLibrary } from "@/src/music/library/music-library";
-import { Pages } from "@/src/types/pages";
 import { CircleEllipsis, Play } from "lucide-react";
 import { Blur } from "@/src/components/utils/loading-pages/Blur";
 import OrderedTrackList from "@/src/components/media-displays/OrderedTrackList";
 import Artwork from "@/src/components/media-displays/Artwork";
+import { usePageContext } from "@/src/contexts/PageContext";
+import { useAudioPlayer } from "@/src/hooks/use-audio-player";
 
-type AlbumDisplayProps = {
-  onPlayMedia: Pages.PlayByID;
-  onNavigate: Pages.NavigationMethod;
-  albumId: string;
-};
-
-export default function AlbumDisplay(props: AlbumDisplayProps) {
+export default function AlbumDisplay() {
+  const pages = usePageContext();
+  const audioPlayer = useAudioPlayer();
   const [album, state] = useDatabase(
-    () => MusicLibrary.db.album.get({ id: props.albumId }),
+    () => MusicLibrary.db.album.get({ id: pages.data }),
     null,
     "Album",
-    []
+    [pages]
   );
 
   // Unfinished! Setup after refactoring audio playing component
@@ -51,7 +48,7 @@ export default function AlbumDisplay(props: AlbumDisplayProps) {
                   <a
                     key={artist.id}
                     onClick={() => {
-                      props.onNavigate("new", {
+                      pages.navigate("new", {
                         type: "artist list",
                         data: artist.id,
                       });
@@ -72,7 +69,7 @@ export default function AlbumDisplay(props: AlbumDisplayProps) {
                   icon: <Play />,
                   name: "Play",
                   clickHandler: () => {
-                    props.onPlayMedia(props.albumId, "album");
+                    audioPlayer.play.album(pages.data);
                     return;
                   },
                 },
@@ -104,10 +101,7 @@ export default function AlbumDisplay(props: AlbumDisplayProps) {
             </div>
           </div>
         </div>
-        <OrderedTrackList
-          onPlayMedia={props.onPlayMedia}
-          trackConnections={album.trackList.trackConnections}
-        />
+        <OrderedTrackList list={album.trackList} />
         <div className="font-light text-sm text-gray-500">
           <span>
             Created on {album.createdOn.toLocaleDateString()} at{" "}

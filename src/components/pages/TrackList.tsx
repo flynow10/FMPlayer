@@ -3,14 +3,9 @@ import { ChevronDown, ChevronUp, Play } from "lucide-react";
 import { Blur } from "@/src/components/utils/loading-pages/Blur";
 import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
 import { useState } from "react";
-import { Pages } from "@/src/types/pages";
 import { Music } from "@/src/types/music";
 import { DataState, useDatabase } from "@/src/hooks/use-database";
-
-type TrackListProps = {
-  onPlayMedia: Pages.PlayByID;
-  onNavigate: Pages.NavigationMethod;
-};
+import { useAudioPlayer } from "@/src/hooks/use-audio-player";
 
 type Column = {
   name: string;
@@ -46,7 +41,8 @@ const columns: Column[] = [
   },
 ];
 
-export default function TrackList(props: TrackListProps) {
+export default function TrackList() {
+  const audioPlayer = useAudioPlayer();
   const [sortBy, setSortBy] = useState<Column["prop"]>("title");
   const [sort, setSort] = useState<"asc" | "desc">("asc");
   const [trackList, loadedState] = useDatabase(
@@ -122,7 +118,7 @@ export default function TrackList(props: TrackListProps) {
                   role="button"
                   className="p-2"
                   onClick={() => {
-                    props.onPlayMedia(track.id, "track");
+                    audioPlayer.play.track(track.id);
                   }}
                 >
                   <Play />

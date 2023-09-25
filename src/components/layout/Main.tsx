@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useState } from "react";
+import { MutableRefObject, ReactNode, useEffect, useState } from "react";
 import Page from "@/src/components/layout/Page";
 import { ChevronLeft } from "lucide-react";
 import classNames from "classnames";
@@ -8,9 +8,9 @@ import DebugToolbar from "@/src/components/utils/DebugToolbar";
 import { getApplicationDebugConfig } from "@/config/app";
 
 type MainProps = {
-  onPlayMedia?: Pages.PlayByID;
   location: Pages.Location;
   searchString: string;
+  navigationRef: MutableRefObject<Pages.NavigationMethod | undefined>;
 };
 const DEFAULT_PAGES: Record<Pages.Location, Pages.PageStore> = {
   Search: { type: "search results" },
@@ -91,6 +91,7 @@ export default function Main(props: MainProps) {
       }
     }
   };
+  props.navigationRef.current = onNavigate.bind(null, props.location);
 
   (Object.entries(tabs) as [Pages.Location, Pages.PageStore[]][]).forEach(
     ([location, pageList]) => {
@@ -107,9 +108,6 @@ export default function Main(props: MainProps) {
             currentLocation={props.location}
             key={location + index + page.type + JSON.stringify(page.data)}
             onNavigate={onNavigate.bind(null, location)}
-            onPlayMedia={(id, type) => {
-              props.onPlayMedia?.(id, type);
-            }}
           />
         );
       });
