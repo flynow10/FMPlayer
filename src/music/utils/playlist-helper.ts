@@ -1,13 +1,15 @@
 import { PlaySongAction } from "@/src/music/actions/play-song-action";
 import { Playlist } from "@/src/music/playlists/playlist";
-import { PostgresRequest } from "@/src/types/postgres-request";
+import { Music } from "@/src/types/music";
 
 export const PlaylistHelper = {
-  getPlaylistFromAlbum(album: PostgresRequest.AlbumWithRelations): Playlist {
+  getPlaylistFromTrackList(trackList: Music.HelperDB.ThinTrackList): Playlist {
     const playlist = new Playlist();
-    album.songs.forEach((song) => {
-      playlist.addAction(new PlaySongAction(song.id));
-    });
+    trackList.trackConnections
+      .sort((a, b) => a.trackNumber - b.trackNumber)
+      .forEach((track) => {
+        playlist.addAction(new PlaySongAction(track.trackId));
+      });
     return playlist;
   },
 };

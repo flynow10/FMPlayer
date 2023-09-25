@@ -4,11 +4,11 @@ export namespace Pages {
   export namespace Upload {
     export type FileUploadType = "file" | "url";
     export type SetFileMetadataFunction = <
-      T extends keyof Music.Files.EditableMetadata
+      T extends keyof Music.Files.NewTrackMetadata
     >(
       fileId: string,
       property: T,
-      value: Music.Files.EditableFile[T]
+      value: Music.Files.NewTrackMetadata[T]
     ) => void;
 
     export type FileStatus = {
@@ -22,7 +22,7 @@ export namespace Pages {
     | "Recently Added"
     | "Albums"
     | "Artists"
-    | "Songs"
+    | "Tracks"
     | "Playlists"
     | "Genres"
     | "Import Media"
@@ -31,18 +31,18 @@ export namespace Pages {
   export type PageType =
     | "search results"
     | "album list"
-    | "song list"
+    | "track list"
     | "playlist list"
-    | "album display"
-    | "file search"
     | "genre list"
     | "recent list"
+    | "artist list"
+    | "file search"
     | "file upload"
-    | "youtube upload";
+    | "youtube upload"
+    | "album display"
+    | "testing page";
 
   export type NavigationType = "new" | "back";
-
-  export type MediaCardSize = "small" | "medium" | "large";
 
   export type PlayByID = (id: string, type: Music.MediaType) => void;
 
@@ -53,6 +53,13 @@ export namespace Pages {
 
   export type PageStore = {
     type: PageType;
+    data?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+  };
+
+  export type PageContext = {
+    navigate: NavigationMethod;
+    location: Location;
+    currentLocation: Location;
     data?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
   };
 }

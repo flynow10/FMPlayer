@@ -1,45 +1,28 @@
-import { useAsyncLoad } from "@/src/hooks/use-async-load";
-import { MyMusicLibrary } from "@/src/music/library/music-library";
+import { MusicLibrary } from "@/src/music/library/music-library";
 import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
-import { MediaCard } from "@/src/components/media-displays/MediaCard";
+import MediaCard from "@/src/components/media-displays/MediaCard";
 import { MediaCarousel } from "@/src/components/media-displays/MediaCarousel";
-import { PostgresRequest } from "@/src/types/postgres-request";
-import { Pages } from "@/src/types/pages";
+import { DataState, useDatabase } from "@/src/hooks/use-database";
 
-type GenreListProps = {
-  onPlayMedia: Pages.PlayByID;
-  onNavigate: Pages.NavigationMethod;
-};
-
-export default function GenreList(props: GenreListProps) {
-  const [genreMedia, loaded] = useAsyncLoad<
-    PostgresRequest.GenreMediaResponse[]
-  >(
+export default function GenreList() {
+  const [genreMedia, loadedState] = useDatabase(
     async () => {
-      const genreList = await MyMusicLibrary.getGenreList();
-      return Promise.all(
-        genreList.map((genre) => {
-          return MyMusicLibrary.getGenreMedia(genre.genre);
-        })
-      );
+      return await MusicLibrary.db.genre.list();
     },
     [],
-    []
+    ["Genre", "Album", "Track"]
   );
 
-  if (!loaded) {
+  if (loadedState === DataState.Loading) {
     return <FullCover />;
   }
 
   return (
     <div>
       {genreMedia.map((genreInfo) => {
-        const filteredSongs = genreInfo.songs.filter(
-          (song) => song.albumId === null
-        );
         return (
-          <div key={genreInfo.genre} className="flex flex-col p-10">
-            <h3 className="text-2xl font-bold">{genreInfo.genre}</h3>
+          <div key={genreInfo.name} className="flex flex-col p-10">
+            <h3 className="text-2xl font-bold">{genreInfo.name}</h3>
             {genreInfo.albums.length > 0 && (
               <>
                 <h2 className="text-lg ml-5">Albums</h2>
@@ -48,32 +31,26 @@ export default function GenreList(props: GenreListProps) {
                     return (
                       <MediaCard
                         key={album.id}
-                        id={album.id}
-                        mediaType={"album"}
-                        title={album.title}
-                        size={"medium"}
-                        onPlayMedia={props.onPlayMedia}
-                        onNavigate={props.onNavigate}
+                        type="album"
+                        data={album}
+                        style="cover-card"
                       />
                     );
                   })}
                 </MediaCarousel>
               </>
             )}
-            {filteredSongs.length > 0 && (
+            {genreInfo.tracks.length > 0 && (
               <>
-                <h2 className="text-lg ml-5">Songs</h2>
+                <h2 className="text-lg ml-5">Tracks</h2>
                 <MediaCarousel>
-                  {filteredSongs.map((song) => {
+                  {genreInfo.tracks.map((track) => {
                     return (
                       <MediaCard
-                        key={song.id}
-                        id={song.id}
-                        mediaType={"song"}
-                        size={"medium"}
-                        title={song.title}
-                        onPlayMedia={props.onPlayMedia}
-                        onNavigate={props.onNavigate}
+                        key={track.id}
+                        data={track}
+                        style="cover-card"
+                        type="track"
                       />
                     );
                   })}

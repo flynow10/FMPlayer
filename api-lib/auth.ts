@@ -1,70 +1,94 @@
 import { nanoid } from "nanoid";
-import { SignJWT, jwtVerify } from "jose";
-import { USER_TOKEN, getJwtSecretKey } from "./constants.js";
-import cookie from "cookie";
+import { SignJWT } from "jose";
+import {
+  getJwtSecretKey,
+  getEnvVar,
+  REFRESH_TOKEN_EXPIRATION,
+} from "./constants.js";
 import { VercelResponse } from "@vercel/node";
+import crypto from "crypto";
+import { prismaClient } from "./data-clients.js";
+import { dateAdd } from "./api-utils.js";
 
-interface UserJwtPayload {
-  jti: string;
-  iat: number;
+export class AuthError extends Error {}
+
+function hashString(value: string) {
+  return crypto.createHash("sha256").update(value).digest("hex");
 }
 
-class AuthError extends Error {}
-
-export async function verifyAuth(req: Request) {
-  // Get token from cookie
-  const cookies = req.headers.get("cookie");
-  const parsedCookies = cookie.parse(cookies || "");
-  const token = parsedCookies[USER_TOKEN];
-
-  if (!token) throw new AuthError("Missing user token");
-
-  try {
-    const verified = await jwtVerify(
-      token,
-      new TextEncoder().encode(getJwtSecretKey())
-    );
-    return verified.payload as UserJwtPayload;
-  } catch (err) {
-    throw new AuthError("Your token has expired.");
+export function authenticateUser(passwordHash: string) {
+  const correctHash = getEnvVar("PASSWORD_HASH");
+  if (passwordHash !== correctHash) {
+    throw new AuthError("Incorrect Password");
   }
+  return createTokenPair();
+}
+
+export async function refreshSession(refreshToken: string) {
+  const refreshHash = hashString(refreshToken);
+  try {
+    await prismaClient.session.findUniqueOrThrow({
+      where: {
+        refreshToken: refreshHash,
+        expiresOn: {
+          gte: new Date(),
+        },
+      },
+    });
+  } catch (e) {
+    throw new AuthError("Invalid refresh token");
+  }
+  return createTokenPair();
+}
+
+async function createTokenPair() {
+  const jwtSecret = getJwtSecretKey();
+  const textEncoder = new TextEncoder();
+
+  const refreshToken = crypto.randomBytes(64).toString("hex");
+  const refreshHash = hashString(refreshToken);
+  const refreshExpiration = dateAdd(
+    new Date(),
+    "minute",
+    REFRESH_TOKEN_EXPIRATION
+  );
+  if (refreshExpiration === undefined) {
+    throw new Error("Failed to create refresh expiration date!");
+  }
+  try {
+    const dbReturnedToken = await prismaClient.session.create({
+      data: {
+        refreshToken: refreshHash,
+        expiresOn: refreshExpiration,
+      },
+    });
+    if (dbReturnedToken.refreshToken !== refreshHash) {
+      throw new Error("Database token does not match generated hash!");
+    }
+  } catch (e) {
+    throw new Error("Failed to save session to database", { cause: e });
+  }
+
+  const accessToken = await new SignJWT({})
+    .setExpirationTime("15m")
+    .setProtectedHeader({
+      alg: "HS256",
+    })
+    .setIssuedAt()
+    .setJti(nanoid())
+    .sign(textEncoder.encode(jwtSecret));
+
+  return {
+    accessToken,
+    refreshToken,
+  };
 }
 
 /**
  * Adds the user token cookie to a response.
  */
 
-export async function setUserCookie(res: VercelResponse) {
-  const token = await new SignJWT({})
-    .setProtectedHeader({ alg: "HS256" })
-    .setJti(nanoid())
-    .setIssuedAt()
-    .setExpirationTime("2h")
-    .sign(new TextEncoder().encode(getJwtSecretKey()));
-
-  res.setHeader(
-    "Set-Cookie",
-    cookie.serialize(USER_TOKEN, token, {
-      secure: true,
-      path: "/",
-    })
-  );
-
-  return res;
-}
-
-/**
- * Expires the user token cookie
- */
-
-export function expireUserCookie(res: VercelResponse) {
-  res.setHeader(
-    "Set-Cookie",
-    cookie.serialize(USER_TOKEN, "", {
-      secure: true,
-      path: "/",
-      maxAge: 0,
-    })
-  );
+export function setCookie(res: VercelResponse, cookieString: string) {
+  res.setHeader("Set-Cookie", cookieString);
   return res;
 }

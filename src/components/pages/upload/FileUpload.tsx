@@ -5,37 +5,36 @@ import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
 import { Pages } from "@/src/types/pages";
 import { getFileNameFromUrl } from "@/src/utils/url-utils";
 import MetadataEditor from "@/src/components/utils/MetadataEditor";
-import { MyMusicLibrary } from "@/src/music/library/music-library";
 import FileList from "@/src/components/pages/upload/FileList";
 import { FileContext } from "@/src/contexts/FileContext";
 import { Music } from "@/src/types/music";
 import { Loader2 } from "lucide-react";
 import { toast } from "react-toastify";
+import VerticalSplit from "@/src/components/utils/VerticalSplit";
+import { MusicLibrary } from "@/src/music/library/music-library";
+import { usePageContext } from "@/src/contexts/PageContext";
 
-type FileUploadProps = {
-  data: {
+export default function FileUpload() {
+  const pages = usePageContext();
+  const fileData = pages.data as {
     uploadType: Pages.Upload.FileUploadType;
     url?: string;
     files?: File[];
   };
-  onNavigate: Pages.NavigationMethod;
-};
-
-export default function FileUpload(props: FileUploadProps) {
   const [files, filesLoaded, setFiles] = useAsyncLoad<
-    Music.Files.PreUploadFile[]
+    Music.Files.EditableFile[]
   >(
     async () => {
-      let files: Music.Files.PreUploadFile[] = [];
+      let files: Music.Files.EditableFile[] = [];
 
-      switch (props.data.uploadType) {
+      switch (fileData.uploadType) {
         case "file": {
-          if (props.data.files === undefined) {
+          if (fileData.files === undefined) {
             throw new Error("Files missing from file upload");
           }
 
           files = await Promise.all(
-            props.data.files.map(async (file) => {
+            fileData.files.map(async (file) => {
               const fileName = file.name.replace(/\.[^/.]+$/, "");
               return await getPreUploadFileFromData(
                 await fetchFile(file),
@@ -47,14 +46,14 @@ export default function FileUpload(props: FileUploadProps) {
         }
 
         case "url": {
-          if (props.data.url === undefined) {
+          if (fileData.url === undefined) {
             throw new Error("Url missing from url upload");
           }
 
-          const fileName = getFileNameFromUrl(props.data.url);
+          const fileName = getFileNameFromUrl(fileData.url);
           files = [
             await getPreUploadFileFromData(
-              await fetchFile(props.data.url),
+              await fetchFile(fileData.url),
               fileName
             ),
           ];
@@ -81,7 +80,7 @@ export default function FileUpload(props: FileUploadProps) {
       return files;
     },
     [],
-    [props.data]
+    [pages]
   );
 
   const [openFileId, setOpenFileId] = useState("");
@@ -150,7 +149,6 @@ export default function FileUpload(props: FileUploadProps) {
     setFileStatuses(
       selectedFiles.map((f) => ({ id: f.metadata.id, status: "waiting" }))
     );
-
     for (let i = 0; i < selectedFiles.length; i++) {
       const file = selectedFiles[i];
       setFileStatuses((prev) => {
@@ -165,7 +163,26 @@ export default function FileUpload(props: FileUploadProps) {
           }
         });
       });
-      await MyMusicLibrary.uploadFile(file);
+      try {
+        const track = await MusicLibrary.uploadNewTrack(file.metadata);
+        if (!track) {
+          throw new Error(
+            `Failed to create new track '${file.metadata.title}':'${file.metadata.id}' in database`
+          );
+        }
+        if (
+          !(await MusicLibrary.audio.uploadAudioData(file.audioData, track.id))
+        ) {
+          throw new Error(
+            `Failed to upload audio data for '${track.title}':'${track.id}' for conversion`
+          );
+        }
+      } catch (e) {
+        console.error(e);
+        toast(`Failed to complete preupload for ${file.metadata.title}!`, {
+          type: "error",
+        });
+      }
       setFileStatuses((prev) => {
         return prev.map((s) => {
           if (s.id === file.metadata.id) {
@@ -183,7 +200,7 @@ export default function FileUpload(props: FileUploadProps) {
     toast(`Completed preupload for ${selectedFiles.length} files`, {
       type: "success",
     });
-    props.onNavigate("back");
+    pages.navigate("back");
   };
 
   const ableToUpload =
@@ -194,52 +211,54 @@ export default function FileUpload(props: FileUploadProps) {
   }
 
   return (
-    <FileContext.Provider value={openFile}>
-      <div className="grid grid-rows-1 grid-cols-10 h-full">
-        <div className="flex flex-col col-span-3 h-full">
-          <FileList
-            files={files}
-            onOpenFile={setOpenFileId}
-            selectedFiles={selectedFileIds}
-            setSelectedFile={selectFile}
-            ableToSelect={!isUploading}
-            fileStatuses={fileStatuses}
-          />
-          <button
-            onClick={() => {
-              if (
-                confirm("Are you sure you want to upload the selected files?")
-              ) {
-                uploadSelectedFiles();
-              }
-            }}
-            disabled={!ableToUpload || isUploading}
-            className="text-white m-4 rounded-lg btn success border-2"
-          >
-            {ableToUpload && !isUploading ? (
-              selectedFileIds.length !== files.length ? (
-                "Upload selected files"
+    <FileContext.Provider value={openFile?.metadata ?? null}>
+      <VerticalSplit
+        left={
+          <div className="flex flex-col h-full">
+            <FileList
+              files={files.map((f) => f.metadata)}
+              onOpenFile={setOpenFileId}
+              selectedFiles={selectedFileIds}
+              setSelectedFile={selectFile}
+              ableToSelect={!isUploading}
+              fileStatuses={fileStatuses}
+            />
+            <button
+              onClick={() => {
+                if (
+                  confirm("Are you sure you want to upload the selected files?")
+                ) {
+                  uploadSelectedFiles();
+                }
+              }}
+              disabled={!ableToUpload || isUploading}
+              className="text-white m-4 rounded-lg btn success border-2"
+            >
+              {ableToUpload && !isUploading ? (
+                selectedFileIds.length !== files.length ? (
+                  "Upload selected files"
+                ) : (
+                  "Upload all files"
+                )
+              ) : !isUploading ? (
+                "No files selected"
               ) : (
-                "Upload all files"
-              )
-            ) : !isUploading ? (
-              "No files selected"
-            ) : (
-              <span className="flex flex-row justify-center gap-2">
-                {"Performing inital upload"}
-                <Loader2 className="animate-spin" />
-              </span>
-            )}
-          </button>
-        </div>
-        <div className="p-7 h-full border-x-2 col-span-7 row-span-6 overflow-auto relative">
-          <MetadataEditor
-            otherFiles={files}
-            audioData={openFile?.audioData.buffer}
-            setFileMetadata={setFileMetadataProperty}
-          />
-        </div>
-      </div>
+                <span className="flex flex-row justify-center gap-2">
+                  {"Performing inital upload"}
+                  <Loader2 className="animate-spin" />
+                </span>
+              )}
+            </button>
+          </div>
+        }
+        right={
+          <div className="p-7 h-full overflow-auto relative">
+            <MetadataEditor setFileMetadata={setFileMetadataProperty} />
+          </div>
+        }
+        defaultPosition="left"
+        minWidth={450}
+      />
     </FileContext.Provider>
   );
 }

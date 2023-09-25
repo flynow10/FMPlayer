@@ -1,0 +1,17 @@
+.app-container {
+  grid-template-areas:
+    "sidebar main main main main main"
+    "controls controls controls controls controls controls";
+}
+
+.audio-controls {
+  grid-area: controls;
+}
+
+.sidebar {
+  grid-area: sidebar;
+}
+
+.main {
+  grid-area: main;
+}

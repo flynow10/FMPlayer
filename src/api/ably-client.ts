@@ -1,15 +1,5 @@
-import { API } from "@/src/types/api";
 import { Realtime, Types } from "ably";
-import {
-  Id,
-  ToastContent,
-  ToastOptions,
-  UpdateOptions,
-  toast,
-} from "react-toastify";
-import { AblyMessage } from "@fm-player/shared";
-import { MyMusicLibrary } from "@/src/music/library/music-library";
-import { createElement, useState } from "react";
+import { AblyMessage } from "fm-player-shared";
 
 type MessageCallback<T> = (msg: T) => void;
 class AblyChannelWrapper<T> {
@@ -44,12 +34,94 @@ class AblyChannelWrapper<T> {
   }
 }
 
+type StateChangeListener = (stateChange: Types.ConnectionStateChange) => void;
+class ConnectionStateManager {
+  public state: Types.ConnectionState = "initialized";
+  public _stateChangeListeners: {
+    state: Types.ConnectionState | "all";
+    listener: StateChangeListener;
+  }[] = [];
+
+  public _onNewState(stateChange: Types.ConnectionStateChange) {
+    this.state = stateChange.current;
+    this._stateChangeListeners.forEach((value) => {
+      if (value.state === stateChange.current || value.state === "all") {
+        value.listener(stateChange);
+      }
+    });
+  }
+
+  public subscribe(callback: StateChangeListener): void;
+  public subscribe(
+    event: Types.ConnectionState,
+    callback: StateChangeListener
+  ): void;
+  public subscribe(
+    event: Types.ConnectionState | StateChangeListener,
+    callback?: StateChangeListener
+  ) {
+    let innerEvent: Types.ConnectionState | "all";
+    if (typeof event === "function") {
+      callback = event;
+      innerEvent = "all";
+    } else {
+      innerEvent = event;
+    }
+    if (callback === undefined) {
+      throw new Error("Missing event callback!");
+    }
+
+    this._stateChangeListeners.push({
+      state: innerEvent,
+      listener: callback,
+    });
+  }
+
+  public unsubscribe(): void;
+  public unsubscribe(event: Types.ConnectionState): void;
+  public unsubscribe(callback: StateChangeListener): void;
+  public unsubscribe(
+    event: Types.ConnectionState,
+    callback: StateChangeListener
+  ): void;
+  public unsubscribe(
+    event?: Types.ConnectionState | StateChangeListener,
+    callback?: StateChangeListener
+  ) {
+    let innerEvent: Types.ConnectionState | "all" = "all";
+    let innerCallback: StateChangeListener | undefined = undefined;
+    if (callback !== undefined) {
+      innerCallback = callback;
+    } else if (event !== undefined) {
+      if (typeof event === "function") {
+        innerCallback = event;
+      } else {
+        innerEvent = event;
+      }
+    }
+
+    this._stateChangeListeners = this._stateChangeListeners.filter((value) => {
+      if (innerCallback !== undefined) {
+        if (value.listener !== innerCallback) {
+          return true;
+        }
+      }
+      if (innerEvent !== "all") {
+        if (value.state !== innerEvent) {
+          return true;
+        }
+      }
+      return false;
+    });
+  }
+}
+
 export class AblyClient {
-  private readonly client: Types.RealtimePromise;
-  private readonly uploadStatusChannel: AblyChannelWrapper<AblyMessage.UploadStatus>;
   private static readonly CONNETION_TIMEOUT = 10000;
-  private toastIds: Record<string, Id> = {};
-  private songTitles: Record<string, string> = {};
+  private readonly client: Types.RealtimePromise;
+  public stateManager: ConnectionStateManager = new ConnectionStateManager();
+  public readonly uploadStatusChannel: AblyChannelWrapper<AblyMessage.FileUpload.UploadStatus>;
+  public readonly databaseUpdatesChannel: AblyChannelWrapper<AblyMessage.DatabaseChanges.UpdateMessage>;
 
   constructor() {
     this.client = new Realtime.Promise({
@@ -61,168 +133,64 @@ export class AblyClient {
       this.client.channels.get(AblyMessage.Channel.FileUpload)
     );
 
-    this.initializeUploadStatus();
+    this.databaseUpdatesChannel = new AblyChannelWrapper(
+      this.client.channels.get(AblyMessage.Channel.DatabaseChanges)
+    );
+    this.initializeConnectionListener();
   }
 
-  private async initializeUploadStatus() {
-    this.uploadStatusChannel.subscribe((msg) => {
-      console.log(msg);
-      // eslint-disable-next-line @typescript-eslint/no-this-alias
-      const client = this;
-      function ToastBody(props: {
-        text: (title: string) => string;
-        fileId: string;
-      }) {
-        const [title, setTitle] = useState(props.fileId);
-        client.getSongTitle(props.fileId).then(setTitle);
-
-        return createElement("span", {}, props.text(title));
-      }
-
-      switch (msg.status) {
-        case AblyMessage.FileStatus.DownloadStarted: {
-          this.createToast(
-            msg.fileId,
-            createElement(ToastBody, {
-              text: (title) => `Downloading youtube audio for: ${title}`,
-              fileId: msg.fileId,
-            }),
-            {
-              isLoading: true,
-              autoClose: false,
-              type: "info",
-            }
-          );
-          break;
-        }
-
-        case AblyMessage.FileStatus.DownloadComplete: {
-          this.updateToast(msg.fileId, {
-            isLoading: false,
-            autoClose: 5000,
-            type: "success",
-            render: createElement(ToastBody, {
-              text: (title) => `Download completed successfully for: ${title}`,
-              fileId: msg.fileId,
-            }),
-          });
-          break;
-        }
-
-        case AblyMessage.FileStatus.DownloadFailed: {
-          this.updateToast(msg.fileId, {
-            isLoading: false,
-            autoClose: 5000,
-            type: "error",
-            render: createElement(ToastBody, {
-              text: (title) => `Failed to download youtube audio for: ${title}`,
-              fileId: msg.fileId,
-            }),
-          });
-          break;
-        }
-
-        case AblyMessage.FileStatus.ConversionStarted: {
-          this.createToast(
-            msg.fileId,
-            createElement(ToastBody, {
-              text: (title) => `Converting audio file for: ${title}`,
-              fileId: msg.fileId,
-            }),
-            {
-              isLoading: true,
-              autoClose: false,
-              type: "info",
-            }
-          );
-          break;
-        }
-
-        case AblyMessage.FileStatus.ConversionComplete: {
-          this.updateToast(msg.fileId, {
-            isLoading: false,
-            autoClose: 5000,
-            type: "success",
-            render: createElement(ToastBody, {
-              text: (title) =>
-                `Conversion completed successfully for: ${title}`,
-              fileId: msg.fileId,
-            }),
-          });
-          break;
-        }
-
-        case AblyMessage.FileStatus.ConversionFailed: {
-          this.updateToast(msg.fileId, {
-            isLoading: false,
-            autoClose: 5000,
-            type: "error",
-            render: createElement(ToastBody, {
-              text: (title) => `Failed to convert audio for file:\n${title}`,
-              fileId: msg.fileId,
-            }),
-          });
-          break;
+  private async initializeConnectionListener() {
+    this.client.connection.on((stateChange) => {
+      if (
+        stateChange.current === "disconnected" &&
+        stateChange.reason &&
+        stateChange.reason.cause
+      ) {
+        const cause = stateChange.reason.cause;
+        if (typeof cause === "object" && "statusCode" in cause) {
+          if (cause.statusCode === 501) {
+            this.disconnect();
+          }
         }
       }
+      this.stateManager._onNewState(stateChange);
     });
   }
 
-  private async getSongTitle(id: string) {
-    if (this.songTitles[id]) {
-      return this.songTitles[id];
-    } else {
-      return MyMusicLibrary.getSong(id).then((song) => {
-        if (song !== undefined) {
-          this.songTitles[id] = song.title;
-        }
-        return this.songTitles[id];
-      });
+  public async disconnect() {
+    try {
+      this.client.close();
+    } catch (_) {
+      return;
     }
   }
 
-  private createToast(
-    fileId: string,
-    content: ToastContent,
-    options?: ToastOptions
-  ) {
-    const toastId = toast(content, options);
-    this.toastIds[fileId] = toastId;
-  }
-
-  private updateToast(
-    fileId: string,
-    options: UpdateOptions,
-    shouldCreateNew = true
-  ) {
-    const toastId = this.toastIds[fileId];
-    if (toastId && toast.isActive(toastId)) {
-      toast.update(toastId, options);
-    } else if (shouldCreateNew) {
-      this.createToast(fileId, options.render, options as ToastOptions);
-    }
-  }
-
-  public async connect(): Promise<API.Ably.ConnectionStatus> {
+  public async connect(): Promise<Types.ConnectionState> {
     this.client.connect();
     return new Promise((resolve) => {
-      let status: API.Ably.ConnectionStatus = "pending";
-      this.client.connection.once("connected", () => {
-        if (status === "pending") {
-          status = "connected";
-          console.log("Ably connected");
-          resolve(status);
+      const stateListener = (stateChange: Types.ConnectionStateChange) => {
+        if (
+          (
+            [
+              "connected",
+              "disconnected",
+              "failed",
+              "closed",
+              "suspended",
+            ] as Types.ConnectionState[]
+          ).includes(stateChange.current)
+        ) {
+          this.client.connection.off(stateListener);
+          resolve(stateChange.current);
         }
-      });
+      };
       setTimeout(() => {
-        if (status === "pending") {
-          status = "timeout";
-          this.client.close();
-          resolve(status);
-        }
+        this.client.connection.off(stateListener);
+        resolve("suspended");
       }, AblyClient.CONNETION_TIMEOUT);
+      this.client.connection.on(stateListener);
     });
   }
 }
 
-export const LambdaStatus = new AblyClient();
+export const RealtimeStatus = new AblyClient();

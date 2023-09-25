@@ -1,4 +1,4 @@
-import { Lock, Music4 } from "lucide-react";
+import { Loader2, Lock, Music4 } from "lucide-react";
 import { FormEvent, useState } from "react";
 import { toast } from "react-toastify";
 import { VercelAPI } from "@/src/api/vercel-API";
@@ -6,16 +6,23 @@ import { useNavigate } from "react-router-dom";
 
 export function Login() {
   const [password, setPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
   const onLogin = (e: FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     VercelAPI.loginWithPassword(password).then((loginResponse) => {
+      console.log(loginResponse);
       if (loginResponse.success) {
-        console.log("Login success");
         navigate("/");
       } else {
-        addError(loginResponse.error);
+        setIsSubmitting(false);
+        if (loginResponse.error instanceof Error) {
+          addError(loginResponse.error.message);
+        } else {
+          addError(loginResponse.error);
+        }
       }
     });
   };
@@ -48,8 +55,14 @@ export function Login() {
                 setPassword(e.currentTarget.value);
               }}
             />
-            <button className="dark:invert bg-green-400 mx-4 mb-4 p-2 rounded-md text-lg hover:bg-green-500 transition-colors">
-              <Lock className="inline " /> Login
+
+            <button
+              disabled={isSubmitting}
+              className="dark:invert bg-green-400 mx-4 mb-4 p-2 rounded-md text-lg hover:bg-green-500 transition-colors"
+            >
+              {isSubmitting && <Loader2 className="inline animate-spin mr-2" />}
+              {!isSubmitting && <Lock className="inline mr-2" />}
+              Login
             </button>
           </div>
         </form>

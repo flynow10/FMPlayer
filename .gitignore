@@ -31,4 +31,11 @@ coverage
 
 # Personal Music
 static/*
+
+# Seeded songs
+!static/songs
 .env*.local
+
+# Prisma Docs
+prisma/docs
+prisma/dbml

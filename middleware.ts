@@ -1,27 +1,43 @@
-import { verifyAuth } from "./api-lib/auth";
+import { getApiDebugConfig } from "./config/api";
+import { getJwtSecretKey, USER_TOKEN } from "./api-lib/constants";
+import cookie from "cookie";
+import { jwtVerify } from "jose";
 
 // Run middleware on all paths following /api/* except for the /api/tryAuth
 export const config = {
-  matcher: ["/api/((?!login).*)"],
+  matcher: ["/api/((?!token).*)"],
 };
 
-export default async function middleware(req: Request) {
-  // validate the user is authenticated
-  const verifiedToken = await verifyAuth(req).catch((err) => {
-    console.error(err.message);
-  });
+async function checkAccessToken(accessToken: string) {
+  try {
+    const verified = await jwtVerify(
+      accessToken,
+      new TextEncoder().encode(getJwtSecretKey())
+    );
+    return verified;
+  } catch (err) {
+    return false;
+  }
+}
 
-  if (!verifiedToken) {
-    // if this an API request, respond with JSON
-    if (new URL(req.url).pathname.startsWith("/api/")) {
-      return new Response(
-        JSON.stringify({ error: { message: "Authentication Required" } }),
-        { status: 401 }
-      );
-    }
-    // otherwise, redirect to the set token page
-    else {
-      return Response.redirect(new URL("/", req.url));
-    }
+export default async function middleware(req: Request) {
+  const debug = getApiDebugConfig();
+  if (debug && !debug.useLogin) {
+    return;
+  }
+
+  const cookies = req.headers.get("cookie");
+  const parsedCookies = cookie.parse(cookies || "");
+  const token = parsedCookies[USER_TOKEN];
+
+  const parsedToken = await checkAccessToken(token);
+
+  if (parsedToken === false) {
+    return new Response(
+      JSON.stringify({
+        error: "Invalid access token",
+      }),
+      { status: 401 }
+    );
   }
 }
