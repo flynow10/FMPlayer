@@ -12,25 +12,14 @@ import { MusicLibrary } from "@/src/music/library/music-library";
 import { Music } from "@/src/types/music";
 import { DataState, useDatabase } from "@/src/hooks/use-database";
 import { useAudioPlayer } from "@/src/hooks/use-audio-player";
-
-type ArtistConnection =
-  | Music.DB.TableType<
-      "AlbumArtist",
-      {
-        artist: true;
-      }
-    >
-  | Music.DB.TableType<
-      "TrackArtist",
-      {
-        artist: true;
-      }
-    >;
+import { getApplicationDebugConfig } from "@/config/app";
+import LinkedArtistList from "@/src/components/media-displays/LinkedArtistList";
 
 type AudioProps = {
   onClickArtist: (artistId: string) => void;
 };
 export function Audio(props: AudioProps) {
+  const debugConfig = getApplicationDebugConfig();
   const audioPlayer = useAudioPlayer();
   const trackId = audioPlayer.useCurrentTrackId();
   const duration = audioPlayer.useDuration();
@@ -41,7 +30,7 @@ export function Audio(props: AudioProps) {
   const percentLoaded = audioPlayer.usePercentLoaded();
   const loadingNewTrack = audioPlayer.useLoadingNewTrack();
   const [[track, artists], loadedMetaData] = useDatabase<
-    [Music.DB.TableType<"Track"> | null, ArtistConnection[]]
+    [Music.DB.TableType<"Track"> | null, Music.HelperDB.ArtistConnection[]]
   >(
     async () => {
       if (trackId === null) return [null, []];
@@ -49,7 +38,7 @@ export function Audio(props: AudioProps) {
       if (track === null) {
         return [null, []];
       }
-      let artists: ArtistConnection[] = [];
+      let artists: Music.HelperDB.ArtistConnection[] = [];
       if (track.artists.length !== 0) {
         artists = track.artists;
       } else {
@@ -196,20 +185,14 @@ export function Audio(props: AudioProps) {
               id="song-id"
               className="empty:before:content-[''] empty:before:inline-block text-gray-400"
             >
-              {artists.map((artistConnection, index, arr) => (
-                <>
-                  <a
-                    key={artistConnection.artist.id}
-                    className="cursor-pointer text-accent-muted dark:invert"
-                    onClick={() => {
-                      props.onClickArtist(artistConnection.artistId);
-                    }}
-                  >
-                    {artistConnection.artist.name}
-                  </a>
-                  <span>{index < arr.length - 1 ? ", " : ""}</span>
-                </>
-              ))}
+              {debugConfig?.showIds ? (
+                track?.id
+              ) : (
+                <LinkedArtistList
+                  artistList={artists}
+                  onClickArtist={props.onClickArtist}
+                />
+              )}
             </span>
           </>
         ) : (

@@ -184,6 +184,19 @@ export namespace Music {
         };
       }
     >;
+    export type ArtistConnection =
+      | Music.DB.TableType<
+          "AlbumArtist",
+          {
+            artist: true;
+          }
+        >
+      | Music.DB.TableType<
+          "TrackArtist",
+          {
+            artist: true;
+          }
+        >;
   }
   export namespace Files {
     export type EditableFile = {
