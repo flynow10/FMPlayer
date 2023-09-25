@@ -3,6 +3,8 @@ const config: Config = {
   preset: "ts-jest",
   testEnvironment: "jsdom",
   setupFilesAfterEnv: ["<rootDir>/src/tests/setup-jest.ts"],
+  passWithNoTests: true,
+  testPathIgnorePatterns: ["/src/tests/.*"],
   modulePaths: ["src"],
   moduleDirectories: ["node_modules"],
   moduleNameMapper: {
