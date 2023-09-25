@@ -17,7 +17,7 @@ export default function AlbumList() {
   }
 
   return (
-    <div className="grid grid-cols-5 gap-x-8 overflow-auto p-10">
+    <div className="grid grid-cols-5 gap-x-8 overflow-auto p-8">
       {albumList.map((album) => (
         <MediaCard
           key={album.id}
