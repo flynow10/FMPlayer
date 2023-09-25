@@ -1,3 +1,4 @@
+import { getApplicationDebugConfig } from "@/config/app";
 import BaseSuggestionInput from "@/src/components/utils/input-extensions/BaseSuggestionInput";
 import MultiSuggestionInput from "@/src/components/utils/input-extensions/MultiSuggestionInput";
 import { FileContext } from "@/src/contexts/FileContext";
@@ -14,6 +15,7 @@ type MetadataEditorProps = {
 
 export default function MetadataEditor(props: MetadataEditorProps) {
   const file = useContext(FileContext);
+  const debugConfig = getApplicationDebugConfig();
   const [allArtists, allArtistsLoaded] = useDatabase(
     () => {
       return MusicLibrary.db.artist.list();
@@ -195,6 +197,32 @@ export default function MetadataEditor(props: MetadataEditorProps) {
           }}
         />
       </div>
+      {debugConfig?.showRawUploadData && (
+        <div>
+          <button
+            onClick={() => {
+              setShowDebugJson(!showDebugJson);
+            }}
+            className="btn text-black bg-gray-300 active:bg-gray-500"
+          >
+            Show Debug
+          </button>
+
+          <p
+            className={
+              "whitespace-pre-wrap " + (showDebugJson ? "block" : "hidden")
+            }
+          >
+            {JSON.stringify(
+              {
+                metadata: file,
+              },
+              null,
+              2
+            )}
+          </p>
+        </div>
+      )}
       <div>
         <button
           onClick={() => {
