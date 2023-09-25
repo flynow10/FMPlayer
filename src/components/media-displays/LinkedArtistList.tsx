@@ -1,4 +1,5 @@
 import { Music } from "@/src/types/music";
+import React from "react";
 
 type LinkedArtistListProps = {
   onClickArtist: (artistId: string) => void;
@@ -7,9 +8,8 @@ type LinkedArtistListProps = {
 
 export default function LinkedArtistList(props: LinkedArtistListProps) {
   return props.artistList.map((artistConnection, index, arr) => (
-    <>
+    <React.Fragment key={artistConnection.artistId}>
       <a
-        key={artistConnection.artist.id}
         className="cursor-pointer text-accent-muted dark:invert"
         onClick={() => {
           props.onClickArtist(artistConnection.artistId);
@@ -18,6 +18,6 @@ export default function LinkedArtistList(props: LinkedArtistListProps) {
         {artistConnection.artist.name}
       </a>
       <span>{index < arr.length - 1 ? ", " : ""}</span>
-    </>
+    </React.Fragment>
   ));
 }
