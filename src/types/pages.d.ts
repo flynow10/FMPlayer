@@ -40,6 +40,7 @@ export namespace Pages {
     | "file upload"
     | "youtube upload"
     | "album display"
+    | "playlist display"
     | "testing page";
 
   export type NavigationType = "new" | "back";
@@ -61,5 +62,6 @@ export namespace Pages {
     location: Location;
     currentLocation: Location;
     data?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    pageSlug: string;
   };
 }

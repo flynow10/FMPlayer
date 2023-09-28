@@ -53,34 +53,36 @@ export default function App() {
     </div>
   );
   return (
-    <div className="app-container grid grid-cols-6 grid-rows-[minmax(0,6fr)_minmax(0,1fr)] h-full max-h-full">
-      <Sidebar
-        location={location}
-        isSearching={location === "Search"}
-        onSelectTab={(toLocation) => {
-          setLocation(toLocation);
-        }}
-        onFocusSearch={() => {
-          if (MusicLibrary.search.hasNotLoaded()) {
-            MusicLibrary.search.loadDocuments();
-          }
-          if (searchString !== "") {
-            setLocation("Search");
-          }
-        }}
-        onSearch={(newSearch) => {
-          if (newSearch !== "") {
-            setLocation("Search");
-            setSearchString(newSearch);
-          }
-        }}
-      />
-      <Main
-        location={location}
-        searchString={searchString}
-        navigationRef={navigationMethod}
-      />
-      {audioComponent}
-    </div>
+    <>
+      <div className="app-container grid grid-cols-6 grid-rows-[minmax(0,6fr)_minmax(0,1fr)] h-full max-h-full">
+        <Sidebar
+          location={location}
+          isSearching={location === "Search"}
+          onSelectTab={(toLocation) => {
+            setLocation(toLocation);
+          }}
+          onFocusSearch={() => {
+            if (MusicLibrary.search.hasNotLoaded()) {
+              MusicLibrary.search.loadDocuments();
+            }
+            if (searchString !== "") {
+              setLocation("Search");
+            }
+          }}
+          onSearch={(newSearch) => {
+            if (newSearch !== "") {
+              setLocation("Search");
+              setSearchString(newSearch);
+            }
+          }}
+        />
+        <Main
+          location={location}
+          searchString={searchString}
+          navigationRef={navigationMethod}
+        />
+        {audioComponent}
+      </div>
+    </>
   );
 }

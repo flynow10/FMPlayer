@@ -3,6 +3,7 @@ import Artwork from "@/src/components/media-displays/Artwork";
 import LinkedArtistList from "@/src/components/media-displays/LinkedArtistList";
 import { usePageContext } from "@/src/contexts/PageContext";
 import { useAudioPlayer } from "@/src/hooks/use-audio-player";
+import { useMediaContext } from "@/src/hooks/use-media-context";
 import { Music } from "@/src/types/music";
 import { Pages } from "@/src/types/pages";
 import classNames from "classnames";
@@ -61,6 +62,7 @@ export default function MediaCard<T extends DisplayableMediaType>(
   const debugConfig = getApplicationDebugConfig();
   const pages = usePageContext();
   const audioPlayer = useAudioPlayer();
+  const { show: showPlaylistMenu } = useMediaContext("playlist");
   let artworkId: string | null = null;
   let titleText = "";
   let subText: string | ReactNode = "";
@@ -127,6 +129,11 @@ export default function MediaCard<T extends DisplayableMediaType>(
         audioPlayer.play.track(props.data.id);
         break;
       }
+      case "playlist": {
+        const playlist = props.data as Music.DB.TableType<"Playlist">;
+        audioPlayer.play.trackList(playlist.trackListId);
+        break;
+      }
       default: {
         alert("Unable to play this type of media!");
         break;
@@ -134,7 +141,7 @@ export default function MediaCard<T extends DisplayableMediaType>(
     }
   };
 
-  const visitable = ["album", "artist"].includes(props.type);
+  const visitable = ["album", "artist", "playlist"].includes(props.type);
   const gotoMediaPage = () => {
     let pageType: Pages.PageType | null = null;
     switch (props.type) {
@@ -144,6 +151,10 @@ export default function MediaCard<T extends DisplayableMediaType>(
       }
       case "artist": {
         pageType = "artist list";
+        break;
+      }
+      case "playlist": {
+        pageType = "playlist display";
         break;
       }
     }
@@ -156,7 +167,7 @@ export default function MediaCard<T extends DisplayableMediaType>(
     });
     return;
   };
-  const playable = ["album", "track"].includes(props.type);
+  const playable = ["album", "track", "playlist"].includes(props.type);
   const clickablePhoto = props.onClickPhoto !== null;
 
   const ArtworkWrapper = clickablePhoto ? "button" : "div";
@@ -244,6 +255,16 @@ export default function MediaCard<T extends DisplayableMediaType>(
 
   return (
     <div
+      onContextMenu={(event) => {
+        if (props.type === "playlist") {
+          showPlaylistMenu({
+            event,
+            props: {
+              playlistId: props.data.id,
+            },
+          });
+        }
+      }}
       className={classNames("flex gap-3 shrink-0", {
         "flex-col w-52": props.style === "cover-card",
         "bg-gray-300 rounded-lg p-6 h-36": props.style === "tab-card",
