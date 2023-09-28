@@ -12,6 +12,10 @@ import AlbumDisplay from "@/src/components/pages/AlbumDisplay";
 import ArtistList from "@/src/components/pages/ArtistList";
 import SearchResults from "@/src/components/pages/SearchResults";
 import { PageContext } from "@/src/contexts/PageContext";
+import PlaylistList from "@/src/components/pages/PlaylistList";
+import PlaylistDisplay from "@/src/components/pages/PlaylistDisplay";
+import PlaylistCtxMenu from "@/src/components/utils/PlaylistCtxMenu";
+import { slugify } from "@/src/utils/string-utils";
 
 type PageProps = {
   location: Pages.Location;
@@ -29,9 +33,11 @@ export default function Page(props: PageProps) {
       props.locationPageCount !== props.index + 1,
     isHiddenClass = isHidden ? "hidden " : "";
   const pageClass = isHiddenClass + "relative max-h-full min-h-0 grow";
+  const pageSlug = slugify(props.location, props.type, props.index);
   return (
     <PageContext.Provider
       value={{
+        pageSlug,
         navigate: props.onNavigate,
         location: props.location,
         currentLocation: props.currentLocation,
@@ -93,6 +99,14 @@ export default function Page(props: PageProps) {
                   return <TestingPage />;
                 }
 
+                case "playlist list": {
+                  return <PlaylistList />;
+                }
+
+                case "playlist display": {
+                  return <PlaylistDisplay />;
+                }
+
                 default: {
                   return <span>Page Missing! Type: {props.type}</span>;
                 }
@@ -101,6 +115,7 @@ export default function Page(props: PageProps) {
           </ErrorBoundary>
         </div>
       </div>
+      <PlaylistCtxMenu pageSlug={pageSlug} />
     </PageContext.Provider>
   );
 }
