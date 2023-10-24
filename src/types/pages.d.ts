@@ -41,6 +41,7 @@ export namespace Pages {
     | "youtube upload"
     | "album display"
     | "playlist display"
+    | "playlist editor"
     | "testing page";
 
   export type NavigationType = "new" | "back";

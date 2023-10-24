@@ -30,6 +30,7 @@
     "@aws-sdk/client-s3": "^3.327.0",
     "@aws-sdk/s3-presigned-post": "^3.327.0",
     "@aws-sdk/s3-request-presigner": "^3.328.0",
+    "@hello-pangea/dnd": "^16.3.0",
     "@prisma/client": "^5.2.0",
     "@vercel/edge": "^1.0.2",
     "@vercel/node": "^3.0.5",

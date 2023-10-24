@@ -1,3 +1,4 @@
+import { usePageContext } from "@/src/contexts/PageContext";
 import { ContextMenuPropType } from "@/src/hooks/use-media-context";
 import { MusicLibrary } from "@/src/music/library/music-library";
 import { Item, ItemParams, Menu, Separator } from "react-contexify";
@@ -8,6 +9,7 @@ type PlaylistCtxMenuProps = {
 };
 
 export default function PlaylistCtxMenu(props: PlaylistCtxMenuProps) {
+  const pages = usePageContext();
   const deletePlaylist = (
     event: ItemParams<ContextMenuPropType<"playlist">>
   ) => {
@@ -46,6 +48,17 @@ export default function PlaylistCtxMenu(props: PlaylistCtxMenuProps) {
         }
       });
   };
+  const editPlaylist = (event: ItemParams<ContextMenuPropType<"playlist">>) => {
+    const playlistId = event.props?.playlistId;
+    if (typeof playlistId !== "string") {
+      alert("This context menu was not set up correctly!");
+      throw new Error("Unable to open playlist editor; missing playlist id!");
+    }
+    pages.navigate("new", {
+      type: "playlist editor",
+      data: playlistId,
+    });
+  };
   return (
     <Menu
       id={"playlist-" + props.pageSlug}
@@ -60,7 +73,7 @@ export default function PlaylistCtxMenu(props: PlaylistCtxMenuProps) {
         Add to queue
       </Item>
       <Separator />
-      <Item>Edit Playlist</Item>
+      <Item onClick={editPlaylist}>Edit Playlist</Item>
       <Item
         onClick={(event) => {
           if (!confirm("Are you sure you want to delete this playlist?")) {
