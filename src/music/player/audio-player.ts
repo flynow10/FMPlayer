@@ -14,7 +14,9 @@ type AudioPlayerEventType =
   | "setupNewTrack"
   | "createAudioContext"
   | "changeRepeatMode"
-  | "loadNewTrack";
+  | "loadNewTrack"
+  | "playNewQueue"
+  | "updateQueue";
 type AudioTagEvents =
   | "play"
   | "pause"
@@ -93,11 +95,13 @@ type KeyMap = {
   duration: number | null;
   isPlaying: boolean | null;
   currentTrackId: string | null;
+  currentTrackIndex: number;
   hasPlayedOnce: boolean;
   repeatMode: Music.RepeatMode;
   percentLoaded: number;
   audioLoaded: boolean;
   loadingNewTrack: boolean;
+  trackQueue: Playlist;
 };
 
 type HookKeys = {
@@ -150,10 +154,12 @@ export class AudioPlayer implements HookKeys {
     createAudioContext: [],
     changeRepeatMode: [],
     loadNewTrack: [],
+    playNewQueue: [],
+    updateQueue: [],
   };
 
-  private currentTrackIndex = 0;
-  private trackQueue: Playlist = new Playlist();
+  private _currentTrackIndex = 0;
+  private _trackQueue: Playlist = new Playlist();
   private _repeatMode: Music.RepeatMode = "none";
   private wasPlayingBeforeSeek: boolean | null = null;
   private seeking = false;
@@ -201,9 +207,17 @@ export class AudioPlayer implements HookKeys {
     return this.currentAudioTag.duration;
   }
 
+  public get currentTrackIndex() {
+    return this._currentTrackIndex;
+  }
+
   public get currentTrackId() {
     if (this.currentAudioTag === null) return null;
     return this.currentAudioTag.trackId;
+  }
+
+  public get trackQueue() {
+    return this._trackQueue;
   }
 
   public constructor() {
@@ -231,6 +245,11 @@ export class AudioPlayer implements HookKeys {
     "currentTrackId",
     "setupNewTrack"
   );
+  public useCurrentTrackIndex = createHook(
+    this,
+    "currentTrackIndex",
+    "setupNewTrack"
+  );
   public useHasPlayedOnce = createHook(
     this,
     "hasPlayedOnce",
@@ -251,6 +270,11 @@ export class AudioPlayer implements HookKeys {
     "setupNewTrack",
     "nexttrack",
     "previoustrack",
+  ]);
+
+  public useTrackQueue = createHook(this, "trackQueue", [
+    "playNewQueue",
+    "updateQueue",
   ]);
 
   public setRepeatMode(mode: Music.RepeatMode) {
@@ -419,24 +443,24 @@ export class AudioPlayer implements HookKeys {
   }
 
   private getTrackId(): string | null {
-    if (this.trackQueue.isBlank()) {
+    if (this._trackQueue.isBlank()) {
       return null;
     } else {
-      return this.trackQueue.songList[this.currentTrackIndex].songId;
+      return this._trackQueue.trackList[this._currentTrackIndex].songId;
     }
   }
 
   private getNextId(): string | null {
-    if (this.trackQueue.isBlank()) {
+    if (this._trackQueue.isBlank()) {
       return null;
     } else {
-      if (this.currentTrackIndex + 1 === this.trackQueue.songList.length) {
+      if (this._currentTrackIndex + 1 === this._trackQueue.trackList.length) {
         if (this.repeatMode === "none") {
           return null;
         }
       }
-      return this.trackQueue.songList[
-        (this.currentTrackIndex + 1) % this.trackQueue.songList.length
+      return this._trackQueue.trackList[
+        (this._currentTrackIndex + 1) % this._trackQueue.trackList.length
       ].songId;
     }
   }
@@ -496,10 +520,10 @@ export class AudioPlayer implements HookKeys {
     }
     this.isLoadingNewTrack = true;
 
-    if (this.currentTrackIndex > 0) {
-      this.currentTrackIndex--;
+    if (this._currentTrackIndex > 0) {
+      this._currentTrackIndex--;
     } else if (this.repeatMode === "all") {
-      this.currentTrackIndex = this.trackQueue.songList.length - 1;
+      this._currentTrackIndex = this._trackQueue.trackList.length - 1;
     }
     this.callEvent("previoustrack");
     await this.setupTrack();
@@ -507,12 +531,12 @@ export class AudioPlayer implements HookKeys {
 
   public async nextTrack() {
     this.isLoadingNewTrack = true;
-    if (this.currentTrackIndex < this.trackQueue.songList.length - 1) {
-      this.currentTrackIndex++;
+    if (this._currentTrackIndex < this._trackQueue.trackList.length - 1) {
+      this._currentTrackIndex++;
       this.callEvent("nexttrack");
       await this.setupTrack();
     } else {
-      this.currentTrackIndex = 0;
+      this._currentTrackIndex = 0;
       this.callEvent("nexttrack");
       await this.setupTrack(this.repeatMode !== "none");
     }
@@ -608,11 +632,12 @@ export class AudioPlayer implements HookKeys {
     playlist: Playlist,
     startIndex = 0
   ): Promise<boolean> {
-    if (playlist.songList.length <= startIndex) {
+    if (playlist.trackList.length <= startIndex) {
       return false;
     }
-    this.trackQueue = playlist;
-    this.currentTrackIndex = startIndex;
+    this._trackQueue = playlist;
+    this._currentTrackIndex = startIndex;
+    this.callEvent("playNewQueue");
     await this.setupTrack();
     return true;
   }
