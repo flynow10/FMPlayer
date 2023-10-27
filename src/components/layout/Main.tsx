@@ -6,11 +6,14 @@ import { Pages } from "@/src/types/pages";
 import AblyStatusSymbol from "@/src/components/utils/AblyStatusSymbol";
 import DebugToolbar from "@/src/components/utils/DebugToolbar";
 import { getApplicationDebugConfig } from "@/config/app";
+import QueuePanel from "@/src/components/layout/QueuePanel";
 
 type MainProps = {
   location: Pages.Location;
   searchString: string;
   navigationRef: MutableRefObject<Pages.NavigationMethod | undefined>;
+  queueOpen: boolean;
+  onToggleQueue: () => void;
 };
 const DEFAULT_PAGES: Record<Pages.Location, Pages.PageStore> = {
   Search: { type: "search results" },
@@ -114,7 +117,7 @@ export default function Main(props: MainProps) {
     }
   );
   return (
-    <div className="main overflow-clip flex flex-col">
+    <div className="main relative overflow-clip flex flex-col">
       <div className="py-3 border-b-2 px-4">
         <div className="flex items-center w-full">
           <div className="flex items-center grow">
@@ -142,10 +145,17 @@ export default function Main(props: MainProps) {
           <AblyStatusSymbol />
         </div>
         {debug && debug.showDebugToolBar && (
-          <DebugToolbar onNavigate={onNavigate} location={props.location} />
+          <DebugToolbar
+            onToggleQueue={() => {
+              props.onToggleQueue();
+            }}
+            onNavigate={onNavigate}
+            location={props.location}
+          />
         )}
       </div>
       {pageElements}
+      <QueuePanel open={props.queueOpen} />
     </div>
   );
 }

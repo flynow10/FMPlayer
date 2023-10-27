@@ -3,12 +3,12 @@ import { Action } from "@/src/music/actions/action";
 import { PlaylistParser } from "./playlist-parser";
 import { Music } from "@/src/types/music";
 
-export type ActionSongPair = { songId: string; actionId: string };
+export type ActionTrackPair = { songId: string; actionId: string };
 
 export class Playlist {
   public id: string;
   private _actionList: Action[];
-  public songList: ActionSongPair[];
+  public trackList: ActionTrackPair[];
 
   public get actionList() {
     return [...this._actionList];
@@ -17,12 +17,12 @@ export class Playlist {
   constructor() {
     this.id = uuid();
     this._actionList = [];
-    this.songList = [];
+    this.trackList = [];
   }
 
   public regenerateSongList() {
     const parser = new PlaylistParser();
-    this.songList = parser.parse(this._actionList);
+    this.trackList = parser.parse(this._actionList);
   }
 
   public addAction(...action: Action[]) {
