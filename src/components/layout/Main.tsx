@@ -6,7 +6,7 @@ import { Pages } from "@/src/types/pages";
 import AblyStatusSymbol from "@/src/components/utils/AblyStatusSymbol";
 import DebugToolbar from "@/src/components/utils/DebugToolbar";
 import { getApplicationDebugConfig } from "@/config/app";
-import QueuePanel from "@/src/components/layout/QueuePanel";
+import QueuePanel from "@/src/components/layout/queue/QueuePanel";
 
 type MainProps = {
   location: Pages.Location;
