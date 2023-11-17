@@ -2,7 +2,7 @@ import MediaCard, {
   DisplayableMediaType,
 } from "@/src/components/media-displays/MediaCard";
 import { MediaCarousel } from "@/src/components/media-displays/MediaCarousel";
-import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
+import { FullCover } from "@/src/components/utils/loading/FullCover";
 import { usePageContext } from "@/src/contexts/PageContext";
 import { useAsyncLoad } from "@/src/hooks/use-async-load";
 import { MusicLibrary } from "@/src/music/library/music-library";

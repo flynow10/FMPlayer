@@ -9,6 +9,7 @@ type DebugToolbarProps = {
     pageData?: Pages.PageStore
   ) => void;
   location: Pages.Location;
+  onToggleQueue: () => void;
 };
 
 export default function DebugToolbar(props: DebugToolbarProps) {
@@ -24,6 +25,16 @@ export default function DebugToolbar(props: DebugToolbarProps) {
           }
         >
           Go To Testing Page
+        </button>
+      </div>
+      <div>
+        <button
+          className="px-2 border-2 rounded-md"
+          onClick={() => {
+            props.onToggleQueue();
+          }}
+        >
+          Toggle Queue
         </button>
       </div>
     </div>

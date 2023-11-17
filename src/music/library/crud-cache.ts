@@ -55,7 +55,9 @@ export function cacheResponse<
   table: T,
   requestType: RequestType,
   requestKey: string,
-  response: Awaited<ReturnType<CacheableRequestTypes<T>[RequestType]>>
+  response: NonNullable<
+    Awaited<ReturnType<CacheableRequestTypes<T>[RequestType]>>
+  >
 ) {
   cache[table][requestType][requestKey] = response;
   subscribeToTableUpdates(table);
@@ -94,7 +96,10 @@ export function findCachedResponse<
   requestKey: string
 ): ResponseType<T, RequestType> | null {
   if (requestKey in cache[table][requestType]) {
-    return cache[table][requestType][requestKey];
+    return cache[table][requestType][requestKey] as ResponseType<
+      T,
+      RequestType
+    >;
   }
   return null;
 }

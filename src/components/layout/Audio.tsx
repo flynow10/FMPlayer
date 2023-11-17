@@ -7,6 +7,7 @@ import {
   Repeat1,
   ChevronLeft,
   ChevronRight,
+  Menu,
 } from "lucide-react";
 import { MusicLibrary } from "@/src/music/library/music-library";
 import { Music } from "@/src/types/music";
@@ -17,6 +18,7 @@ import LinkedArtistList from "@/src/components/media-displays/LinkedArtistList";
 
 type AudioProps = {
   onClickArtist: (artistId: string) => void;
+  onClickQueue?: () => void;
 };
 export function Audio(props: AudioProps) {
   const debugConfig = getApplicationDebugConfig();
@@ -123,9 +125,9 @@ export function Audio(props: AudioProps) {
   };
 
   return (
-    <div className="flex flex-row">
+    <div className="flex flex-row justify-around gap-8 px-10">
       <div className="controls flex justify-center">
-        <div className="grid grid-cols-5">
+        <div className="grid grid-cols-4">
           <button
             className={
               "audio-button" +
@@ -216,6 +218,14 @@ export function Audio(props: AudioProps) {
           ></div>
         </div>
       </div>
+      <button
+        className="my-auto mx-4 rounded-lg p-2 border-2"
+        onClick={() => {
+          props.onClickQueue?.();
+        }}
+      >
+        <Menu />
+      </button>
     </div>
   );
 }

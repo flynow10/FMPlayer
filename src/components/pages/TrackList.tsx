@@ -1,7 +1,7 @@
 import { MusicLibrary } from "@/src/music/library/music-library";
 import { ChevronDown, ChevronUp, Play } from "lucide-react";
-import { Blur } from "@/src/components/utils/loading-pages/Blur";
-import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
+import { Blur } from "@/src/components/utils/loading/Blur";
+import { FullCover } from "@/src/components/utils/loading/FullCover";
 import { useState } from "react";
 import { Music } from "@/src/types/music";
 import { DataState, useDatabase } from "@/src/hooks/use-database";
