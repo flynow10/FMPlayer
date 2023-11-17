@@ -41,10 +41,10 @@ export default function QueueTrack(props: QueueTrackProps) {
       onClick={() => onClick(false)}
       onDoubleClick={() => onClick(true)}
     >
-      <div className="w-10 my-auto relative overflow-hidden rounded-md">
+      <div className="w-10 shrink-0 my-auto relative overflow-hidden rounded-md">
         <Artwork
           id={track.artwork?.id ?? null}
-          className={"invert" + (props.activeTrack ? " blur-sm" : "")}
+          className={classNames("invert", { "blur-sm": props.activeTrack })}
           imgClassName={classNames({
             "brightness-75": props.activeTrack,
           })}
