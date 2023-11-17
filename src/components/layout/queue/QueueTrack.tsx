@@ -44,7 +44,9 @@ export default function QueueTrack(props: QueueTrackProps) {
       <div className="w-10 shrink-0 my-auto relative overflow-hidden rounded-md">
         <Artwork
           id={track.artwork?.id ?? null}
-          className={classNames("invert", { "blur-sm": props.activeTrack })}
+          className={classNames("dark:invert", {
+            "blur-sm": props.activeTrack,
+          })}
           imgClassName={classNames({
             "brightness-75": props.activeTrack,
           })}
