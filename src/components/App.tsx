@@ -84,9 +84,6 @@ export default function App() {
         searchString={searchString}
         navigationRef={navigationMethod}
         queueOpen={queueOpen}
-        onToggleQueue={() => {
-          setQueueOpen(!queueOpen);
-        }}
       />
       {audioComponent}
     </div>

@@ -13,7 +13,6 @@ type MainProps = {
   searchString: string;
   navigationRef: MutableRefObject<Pages.NavigationMethod | undefined>;
   queueOpen: boolean;
-  onToggleQueue: () => void;
 };
 const DEFAULT_PAGES: Record<Pages.Location, Pages.PageStore> = {
   Search: { type: "search results" },
@@ -145,13 +144,7 @@ export default function Main(props: MainProps) {
           <AblyStatusSymbol />
         </div>
         {debug && debug.showDebugToolBar && (
-          <DebugToolbar
-            onToggleQueue={() => {
-              props.onToggleQueue();
-            }}
-            onNavigate={onNavigate}
-            location={props.location}
-          />
+          <DebugToolbar onNavigate={onNavigate} location={props.location} />
         )}
       </div>
       {pageElements}
