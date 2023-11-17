@@ -89,6 +89,9 @@ export default function QueuePanel(props: QueuePanelProps) {
               }
             )}
           >
+            {playlist.trackList.length === 0 && (
+              <span className="text-lg">Try picking something to play!</span>
+            )}
             {playlist.trackList.map((value, index) => {
               return (
                 <QueueTrack
