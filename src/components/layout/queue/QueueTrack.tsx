@@ -1,49 +1,9 @@
 import Artwork from "@/src/components/media-displays/Artwork";
 import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
-import { useAudioPlayer } from "@/src/hooks/use-audio-player";
 import { DataState, useDatabase } from "@/src/hooks/use-database";
 import { MusicLibrary } from "@/src/music/library/music-library";
 import classNames from "classnames";
 import bouncingLines from "/bouncing-lines.svg";
-
-type QueuePanelProps = {
-  open: boolean;
-};
-
-export default function QueuePanel(props: QueuePanelProps) {
-  const audioPlayer = useAudioPlayer();
-  const playlist = audioPlayer.useTrackQueue();
-  const isPlaying = audioPlayer.useIsPlaying();
-  const currentTrackIndex = audioPlayer.useCurrentTrackIndex();
-  return (
-    <div
-      className={
-        "absolute top-0 h-full z-50 py-6 transition-[right] " +
-        (props.open ? "right-6" : "-right-full")
-      }
-    >
-      <div className="flex flex-col bg-white h-full max-w-xs p-4 rounded-lg border-2 border-accent dark:invert dark:bg-black dark:text-white">
-        <span className="font-bold text-lg">Up Next</span>
-        <hr className="my-2" />
-        <div className="flex flex-col overflow-y-auto">
-          {playlist.trackList.map((value, index) => {
-            return (
-              <QueueTrack
-                key={index}
-                playing={isPlaying}
-                activeTrack={index === currentTrackIndex}
-                trackId={value.songId}
-                onPlayTrack={() => {
-                  audioPlayer.moveToTrack(index);
-                }}
-              />
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
-}
 
 type QueueTrackProps = {
   trackId: string;
@@ -52,8 +12,7 @@ type QueueTrackProps = {
   onPlayTrack: () => void;
 };
 
-// eslint-disable-next-line react/no-multi-comp
-function QueueTrack(props: QueueTrackProps) {
+export default function QueueTrack(props: QueueTrackProps) {
   const [track, state] = useDatabase(
     () => {
       return MusicLibrary.db.track.get({
@@ -65,6 +24,12 @@ function QueueTrack(props: QueueTrackProps) {
     [props.trackId]
   );
 
+  const onClick = (isDblClick: boolean) => {
+    if (isDblClick || !props.activeTrack) {
+      props.onPlayTrack();
+    }
+  };
+
   if (state === DataState.Loading || track === null) {
     return <FullCover />;
   }
@@ -73,7 +38,8 @@ function QueueTrack(props: QueueTrackProps) {
       className={classNames(
         "flex gap-2 p-2 hover:bg-slate-400 rounded-md cursor-pointer"
       )}
-      onClick={props.onPlayTrack}
+      onClick={() => onClick(false)}
+      onDoubleClick={() => onClick(true)}
     >
       <div className="w-10 my-auto relative overflow-hidden rounded-md">
         <Artwork
