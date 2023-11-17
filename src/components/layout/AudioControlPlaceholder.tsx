@@ -34,7 +34,10 @@ export default function AudioControlPlaceholder({
         <Music4 className="mx-auto my-2" size={32} />
         <div className="w-full h-3 bg-slate-200 rounded-md overflow-hidden"></div>
       </div>
-      <button className="my-auto mx-4 rounded-lg p-2 border-2" disabled>
+      <button
+        className="my-auto mx-4 rounded-lg p-2 border-2 text-gray-500"
+        disabled
+      >
         <Menu />
       </button>
     </div>

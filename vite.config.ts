@@ -5,6 +5,7 @@ import path from "path";
 
 import type { PluginOption } from "vite";
 import { apiServer } from "vite-api-server";
+import bodyParser from "body-parser";
 
 export default ({ mode }) => {
   if (process.env.VERCEL_ENV === undefined) {
@@ -14,7 +15,12 @@ export default ({ mode }) => {
   const environment = process.env.VITE_VERCEL_ENV ?? process.env.VERCEL_ENV;
   const plugins: PluginOption[] = [react()];
   if (environment === "development" && mode === "development") {
-    plugins.push(apiServer({ handler: "api-local/server.ts" }));
+    plugins.push(
+      apiServer({
+        handler: "api-local/server.ts",
+        middleware: [bodyParser.json()],
+      })
+    );
   }
   return defineConfig({
     plugins,
