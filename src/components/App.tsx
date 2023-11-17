@@ -10,6 +10,7 @@ import { Pages } from "@/src/types/pages";
 export default function App() {
   const [location, setLocation] = useState<Pages.Location>("Recently Added");
   const [searchString, setSearchString] = useState("");
+  const [queueOpen, setQueueOpen] = useState(false);
 
   const navigationMethod = useRef<Pages.NavigationMethod>();
   const audioPlayer = useAudioPlayer();
@@ -33,7 +34,7 @@ export default function App() {
   };
 
   const audioComponent = (
-    <div className="audio-controls px-20 py-4 border-t-2">
+    <div className="audio-controls py-4 border-t-2">
       {!hasPlayedOnce ? (
         <AudioControlPlaceholder onPlay={beginPlayback} />
       ) : (
@@ -48,41 +49,46 @@ export default function App() {
               alert("An error occurred! Unable to navigate artist page!");
             }
           }}
+          onClickQueue={() => {
+            setQueueOpen(!queueOpen);
+          }}
         />
       )}
     </div>
   );
   return (
-    <>
-      <div className="app-container grid grid-cols-6 grid-rows-[minmax(0,6fr)_minmax(0,1fr)] h-full max-h-full">
-        <Sidebar
-          location={location}
-          isSearching={location === "Search"}
-          onSelectTab={(toLocation) => {
-            setLocation(toLocation);
-          }}
-          onFocusSearch={() => {
-            if (MusicLibrary.search.hasNotLoaded()) {
-              MusicLibrary.search.loadDocuments();
-            }
-            if (searchString !== "") {
-              setLocation("Search");
-            }
-          }}
-          onSearch={(newSearch) => {
-            if (newSearch !== "") {
-              setLocation("Search");
-              setSearchString(newSearch);
-            }
-          }}
-        />
-        <Main
-          location={location}
-          searchString={searchString}
-          navigationRef={navigationMethod}
-        />
-        {audioComponent}
-      </div>
-    </>
+    <div className="app-container grid grid-cols-6 grid-rows-[minmax(0,6fr)_minmax(0,1fr)] h-full max-h-full">
+      <Sidebar
+        location={location}
+        isSearching={location === "Search"}
+        onSelectTab={(toLocation) => {
+          setLocation(toLocation);
+        }}
+        onFocusSearch={() => {
+          if (MusicLibrary.search.hasNotLoaded()) {
+            MusicLibrary.search.loadDocuments();
+          }
+          if (searchString !== "") {
+            setLocation("Search");
+          }
+        }}
+        onSearch={(newSearch) => {
+          if (newSearch !== "") {
+            setLocation("Search");
+            setSearchString(newSearch);
+          }
+        }}
+      />
+      <Main
+        location={location}
+        searchString={searchString}
+        navigationRef={navigationMethod}
+        queueOpen={queueOpen}
+        onToggleQueue={() => {
+          setQueueOpen(!queueOpen);
+        }}
+      />
+      {audioComponent}
+    </div>
   );
 }

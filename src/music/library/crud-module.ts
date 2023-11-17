@@ -134,7 +134,12 @@ function getMethodFactory<T extends keyof Music.DB.TableTypes>(
     }
     const fixedRequest = fixJsonDateStrings(response);
 
-    cacheResponse(table, "get", requestHash, fixedRequest);
+    cacheResponse(
+      table,
+      "get",
+      requestHash,
+      fixedRequest as Awaited<Music.DB.TableTypes[T]>
+    );
     return fixedRequest;
   };
 }
