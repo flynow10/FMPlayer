@@ -1,7 +1,7 @@
 import { fetchFile, getPreUploadFileFromData } from "@/src/utils/file-utils";
 import { useAsyncLoad } from "@/src/hooks/use-async-load";
 import { useCallback, useState } from "react";
-import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
+import { FullCover } from "@/src/components/utils/loading/FullCover";
 import { Pages } from "@/src/types/pages";
 import { getFileNameFromUrl } from "@/src/utils/url-utils";
 import MetadataEditor from "@/src/components/utils/MetadataEditor";

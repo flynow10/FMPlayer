@@ -1,5 +1,5 @@
 import { YoutubeAPI } from "@/src/api/youtube-API";
-import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
+import { FullCover } from "@/src/components/utils/loading/FullCover";
 import { useAsyncLoad } from "@/src/hooks/use-async-load";
 import { shortenNumberString } from "@/src/utils/string-utils";
 
