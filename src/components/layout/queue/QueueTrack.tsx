@@ -1,9 +1,9 @@
 import Artwork from "@/src/components/media-displays/Artwork";
-import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
 import { DataState, useDatabase } from "@/src/hooks/use-database";
 import { MusicLibrary } from "@/src/music/library/music-library";
 import classNames from "classnames";
 import bouncingLines from "/bouncing-lines.svg";
+import LoadingSpinner from "@/src/components/utils/loading/LoadingSpinner";
 
 type QueueTrackProps = {
   trackId: string;
@@ -31,7 +31,7 @@ export default function QueueTrack(props: QueueTrackProps) {
   };
 
   if (state === DataState.Loading || track === null) {
-    return <FullCover />;
+    return <LoadingSpinner />;
   }
   return (
     <div
