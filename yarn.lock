@@ -2524,6 +2524,14 @@
   dependencies:
     "@babel/types" "^7.20.7"
 
+"@types/body-parser@^1.19.4":
+  version "1.19.4"
+  resolved "https://registry.yarnpkg.com/@types/body-parser/-/body-parser-1.19.4.tgz#78ad68f1f79eb851aa3634db0c7f57f6f601b462"
+  integrity sha512-N7UDG0/xiPQa2D/XrVJXjkWbpqHCd2sBaB32ggRF2l83RhPfamgKGF8gwwqyksS95qUS5ZYF9aF+lLPRlwI2UA==
+  dependencies:
+    "@types/connect" "*"
+    "@types/node" "*"
+
 "@types/cacheable-request@^6.0.1":
   version "6.0.3"
   resolved "https://registry.yarnpkg.com/@types/cacheable-request/-/cacheable-request-6.0.3.tgz#a430b3260466ca7b5ca5bfd735693b36e7a9d183"
@@ -2533,6 +2541,13 @@
     "@types/keyv" "^3.1.4"
     "@types/node" "*"
     "@types/responselike" "^1.0.0"
+
+"@types/connect@*":
+  version "3.4.37"
+  resolved "https://registry.yarnpkg.com/@types/connect/-/connect-3.4.37.tgz#c66a96689fd3127c8772eb3e9e5c6028ec1a9af5"
+  integrity sha512-zBUSRqkfZ59OcwXon4HVxhx5oWCJmc0OtBTK05M+p0dYjgN6iTwIL2T/WbsQZrEsdnwaF9cWQ+azOnpPvIqY3Q==
+  dependencies:
+    "@types/node" "*"
 
 "@types/cookie@^0.5.1":
   version "0.5.2"
@@ -2980,9 +2995,9 @@ acorn-walk@^8.0.2, acorn-walk@^8.1.1:
   integrity sha512-k+iyHEuPgSw6SbuDpGQM+06HQUa04DZ3o+F6CSzXMvvI5KMvnaEqXe+YVe555R9nn6GPt404fos4wcgpw12SDA==
 
 acorn@^8.1.0:
-  version "8.11.1"
-  resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.11.1.tgz#29c6f12c3002d884b6f8baa37089e1917425cd3d"
-  integrity sha512-IJTNCJMRHfRfb8un89z1QtS0x890C2QUrUxFMK8zy+RizcId6mfnqOf68Bu9YkDgpLYuvCm6aYbwDatXVZPjMQ==
+  version "8.11.2"
+  resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.11.2.tgz#ca0d78b51895be5390a5903c5b3bdcdaf78ae40b"
+  integrity sha512-nc0Axzp/0FILLEVsm4fNwLCwMttvhEI263QtVPQcbpfZZ3ts0hLsZGOpE6czNlid7CJ9MlyH8reXkpsf3YUY4w==
 
 acorn@^8.4.1, acorn@^8.8.1, acorn@^8.9.0:
   version "8.10.0"
@@ -9268,13 +9283,12 @@ vary@~1.1.2:
   resolved "https://registry.yarnpkg.com/vary/-/vary-1.1.2.tgz#2299f02c6ded30d4a5961b0b9f74524a18f634fc"
   integrity sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==
 
-vite-api-server@^0.4.2:
-  version "0.4.4"
-  resolved "https://registry.yarnpkg.com/vite-api-server/-/vite-api-server-0.4.4.tgz#e95f40c5a8b12afee5c4f7e81a840aab38871d70"
-  integrity sha512-ekRqPjG8sa+ds6aWS/MjayvHrzAPInOVklOUxkyvzGFLOEdQlJt7kMe4uEUBjscdCYfkVGcKCkOtubhvZ3teiw==
+vite-api-server@0.5.2:
+  version "0.5.2"
+  resolved "https://registry.yarnpkg.com/vite-api-server/-/vite-api-server-0.5.2.tgz#d4a779ef13456666013958e75ab49d358d11160a"
+  integrity sha512-AxMbxlk2mj0dRP9cSaiN2pPpK2p4mxRLZpFsB6mlHRksV1bpunnEj4sO6gPn+Tfu0mby7ePaFAG9YB5g6bEiMg==
   dependencies:
     "@vercel/nft" "^0.10.1"
-    body-parser "^1.20.2"
 
 vite@^4.1.0:
   version "4.5.0"

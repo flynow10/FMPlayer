@@ -1,6 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { PlaySongAction } from "@/src/music/actions/play-song-action";
 import { MusicLibrary } from "@/src/music/library/music-library";
+import { AudioTag } from "@/src/music/player/audio-tag";
 import { Playlist } from "@/src/music/playlists/playlist";
 import { PlaylistHelper } from "@/src/music/utils/playlist-helper";
 import { Music } from "@/src/types/music";
@@ -8,9 +8,10 @@ import { useEffect, useState } from "react";
 
 type AudioPlayerEventType =
   | AudioTagEvents
-  | "nexttrack"
-  | "previoustrack"
-  | "restartedtrack"
+  | "nextTrack"
+  | "previousTrack"
+  | "restartedTrack"
+  | "moveToTrack"
   | "setupNewTrack"
   | "createAudioContext"
   | "changeRepeatMode"
@@ -26,74 +27,10 @@ type AudioTagEvents =
   | "ended";
 type AudioPlayerEventListener = (audioPlayer: AudioPlayer) => void;
 
-type AudioTagListenerPair<K extends keyof HTMLMediaElementEventMap> = {
-  type: K;
-  listener: (this: HTMLAudioElement, ev: HTMLMediaElementEventMap[K]) => any;
-};
-
-class AudioTag extends Audio {
-  public trackId: string;
-  public listeners: AudioTagListenerPair<keyof HTMLMediaElementEventMap>[] = [];
-  public mediaSourceNode: MediaElementAudioSourceNode;
-
-  public constructor(trackId: string, audioContext: AudioContext) {
-    super();
-    this.mediaSourceNode = new MediaElementAudioSourceNode(audioContext, {
-      mediaElement: this,
-    });
-    this.trackId = trackId;
-    this.crossOrigin = "*";
-  }
-
-  public async play(): Promise<void> {
-    await this.setFileSrc();
-    await super.play();
-  }
-
-  public async startLoad(): Promise<void> {
-    await this.setFileSrc();
-    this.load();
-  }
-
-  private async setFileSrc() {
-    if (this.src === "") {
-      const trackUrl = await MusicLibrary.audio.getAudioFileUrl(this.trackId);
-      if (trackUrl === null) {
-        throw new Error("Failed to retrieve track url from aws!");
-      }
-      if (this.src !== trackUrl) {
-        this.src = trackUrl;
-      }
-    }
-  }
-
-  public addEventListener<K extends keyof HTMLMediaElementEventMap>(
-    type: K,
-    listener: (this: HTMLAudioElement, ev: HTMLMediaElementEventMap[K]) => any,
-    options?: boolean | AddEventListenerOptions | undefined
-  ): void {
-    super.addEventListener(type, listener, options);
-    this.listeners.push({
-      type,
-      listener: listener as (
-        this: HTMLAudioElement,
-        ev: HTMLMediaElementEventMap[keyof HTMLMediaElementEventMap]
-      ) => any,
-    });
-  }
-
-  public removeAllEventListeners() {
-    this.listeners.forEach((pair) => {
-      this.removeEventListener(pair.type, pair.listener);
-    });
-    this.listeners = [];
-  }
-}
-
 type KeyMap = {
   currentTime: number | null;
   duration: number | null;
-  isPlaying: boolean | null;
+  isPlaying: boolean;
   currentTrackId: string | null;
   currentTrackIndex: number;
   hasPlayedOnce: boolean;
@@ -142,12 +79,13 @@ export class AudioPlayer implements HookKeys {
     [Key in AudioPlayerEventType]: AudioPlayerEventListener[];
   } = {
     canplaythrough: [],
-    nexttrack: [],
+    nextTrack: [],
+    moveToTrack: [],
     pause: [],
     play: [],
-    previoustrack: [],
+    previousTrack: [],
     progress: [],
-    restartedtrack: [],
+    restartedTrack: [],
     timeupdate: [],
     ended: [],
     setupNewTrack: [],
@@ -268,8 +206,9 @@ export class AudioPlayer implements HookKeys {
   public useLoadingNewTrack = createHook(this, "loadingNewTrack", [
     "loadNewTrack",
     "setupNewTrack",
-    "nexttrack",
-    "previoustrack",
+    "nextTrack",
+    "previousTrack",
+    "moveToTrack",
   ]);
 
   public useTrackQueue = createHook(this, "trackQueue", [
@@ -504,7 +443,7 @@ export class AudioPlayer implements HookKeys {
       return false;
     }
     this.currentAudioTag.currentTime = 0;
-    this.callEvent("restartedtrack");
+    this.callEvent("restartedTrack");
     return true;
   }
 
@@ -525,7 +464,7 @@ export class AudioPlayer implements HookKeys {
     } else if (this.repeatMode === "all") {
       this._currentTrackIndex = this._trackQueue.trackList.length - 1;
     }
-    this.callEvent("previoustrack");
+    this.callEvent("previousTrack");
     await this.setupTrack();
   }
 
@@ -533,12 +472,23 @@ export class AudioPlayer implements HookKeys {
     this.isLoadingNewTrack = true;
     if (this._currentTrackIndex < this._trackQueue.trackList.length - 1) {
       this._currentTrackIndex++;
-      this.callEvent("nexttrack");
+      this.callEvent("nextTrack");
       await this.setupTrack();
     } else {
       this._currentTrackIndex = 0;
-      this.callEvent("nexttrack");
+      this.callEvent("nextTrack");
       await this.setupTrack(this.repeatMode !== "none");
+    }
+  }
+
+  public async moveToTrack(trackIndex: number) {
+    if (trackIndex >= 0 && trackIndex < this._trackQueue.trackList.length) {
+      this.isLoadingNewTrack = true;
+      this._currentTrackIndex = trackIndex;
+      this.callEvent("moveToTrack");
+      await this.setupTrack();
+    } else {
+      throw new Error("This track index could not be played!");
     }
   }
 
@@ -659,7 +609,6 @@ export class AudioPlayer implements HookKeys {
   }
 
   private callEvent(event: AudioPlayerEventType) {
-    console.log("Event: " + event);
     this.eventListeners[event].forEach((listener) => {
       listener(this);
     });
