@@ -1,4 +1,4 @@
-import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
+import { FullCover } from "@/src/components/utils/loading/FullCover";
 import { DataState, useDatabase } from "@/src/hooks/use-database";
 import { MusicLibrary } from "@/src/music/library/music-library";
 import { Music } from "@/src/types/music";

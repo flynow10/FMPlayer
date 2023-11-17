@@ -1,5 +1,5 @@
 import { MusicLibrary } from "@/src/music/library/music-library";
-import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
+import { FullCover } from "@/src/components/utils/loading/FullCover";
 import MediaCard from "@/src/components/media-displays/MediaCard";
 import { slugify } from "@/src/utils/string-utils";
 import { Music } from "@/src/types/music";
