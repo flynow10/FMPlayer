@@ -1,31 +1,59 @@
 import { getApplicationDebugConfig } from "@/config/app";
+import objectHash from "object-hash";
 
 const REFRESH_TOKEN_ID = "refresh-token";
 type RequestMethod<O extends object> = (
   endpoint: Endpoint,
   body: O,
   path: string
-) => Promise<Response>;
+) => Promise<object | string | LoggedOutUserError>;
 
 type HTTPMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+
+class LoggedOutUserError extends Error {
+  constructor() {
+    super();
+  }
+}
 
 function _urlPath(endpoint: Endpoint, path = "") {
   return `${endpoint}${path.length > 0 ? "/" : ""}${path}`;
 }
+
+const requestPromises: Record<
+  string,
+  Promise<object | string | LoggedOutUserError>
+> = {};
 
 async function _makeJSONRequest<O>(
   method: HTTPMethod,
   endpoint: Endpoint,
   body: O,
   path: string
-): Promise<Response> {
-  return fetch(`${_urlPath(endpoint, path)}?method=${method}`, {
-    method: "POST",
-    body: JSON.stringify(body),
-    headers: {
-      "Content-Type": "application/json",
-    },
+): Promise<object | string | LoggedOutUserError> {
+  const idempotencyToken = objectHash({ method, endpoint, path, body });
+  if (idempotencyToken in requestPromises) {
+    return requestPromises[idempotencyToken];
+  }
+  const responsePromise = fetch(
+    `${_urlPath(endpoint, path)}?method=${method}`,
+    {
+      method: "POST",
+      body: JSON.stringify(body),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  ).then((response) => {
+    if (response.status === 401) {
+      return new LoggedOutUserError();
+    }
+    return response.json();
   });
+  requestPromises[idempotencyToken] = responsePromise;
+  const response = await responsePromise;
+  delete requestPromises[idempotencyToken];
+  return response;
 }
 
 /* Unused code from before switch to query parameter method specification */
@@ -103,7 +131,7 @@ async function makeRequest<T, O extends object = object>(
 
   const baseUrlPath = _urlPath(endpoint, path);
 
-  if (response.status === 401) {
+  if (response instanceof LoggedOutUserError) {
     if (await refreshToken()) {
       if (defaultResponse === undefined) {
         return makeRequest(endpoint, body, path, method);
@@ -118,7 +146,7 @@ async function makeRequest<T, O extends object = object>(
     }
   }
 
-  const responseJson: object | string = await response.json();
+  const responseJson: object | string = response;
 
   if (typeof responseJson === "string") {
     console.warn(responseJson);

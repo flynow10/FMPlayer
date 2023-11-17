@@ -2,7 +2,7 @@ import { Action } from "@/src/music/actions/action";
 import { EndLoopAction, LoopAction } from "@/src/music/actions/loop-action";
 import { NumberAction } from "@/src/music/actions/number-action";
 import { PlaySongAction } from "@/src/music/actions/play-song-action";
-import { ActionSongPair } from "@/src/music/playlists/playlist";
+import { ActionTrackPair } from "@/src/music/playlists/playlist";
 import { PlaylistParser } from "@/src/music/playlists/playlist-parser";
 
 describe("PlaylistParser", () => {
@@ -21,7 +21,7 @@ describe("PlaylistParser", () => {
     }
 
     expect(parser.parse(actionList)).toIncludeAllMembers(
-      actionList.map<ActionSongPair>((action) => ({
+      actionList.map<ActionTrackPair>((action) => ({
         actionId: action.id,
         songId: action.songId,
       }))
@@ -41,7 +41,7 @@ describe("PlaylistParser", () => {
     actionList.push(new EndLoopAction());
 
     expect(parser.parse(actionList)).toIncludeAllMembers(
-      ["", "", ""].map<ActionSongPair>(() => ({
+      ["", "", ""].map<ActionTrackPair>(() => ({
         actionId: songAction.id,
         songId: songAction.songId,
       }))

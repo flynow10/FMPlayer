@@ -92,7 +92,10 @@ export default function Sidebar(props: SidebarProps) {
   return (
     <div className="sidebar flex flex-col border-r-2">
       <h3 className="text-4xl font-medium p-3 whitespace-nowrap overflow-clip">
-        <img src="./icon.svg" className="dark:invert-0 inline mr-1 h-full" />
+        <img
+          src="./colorIcon.svg"
+          className="dark:invert-0 inline mr-1 h-full"
+        />
         FM Player
       </h3>
       <SuggestionSearch
