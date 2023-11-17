@@ -1,6 +1,6 @@
 import LinkedArtistList from "@/src/components/media-displays/LinkedArtistList";
 import VerticalSplit from "@/src/components/utils/VerticalSplit";
-import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
+import { FullCover } from "@/src/components/utils/loading/FullCover";
 import { usePageContext } from "@/src/contexts/PageContext";
 import { useAudioPlayer } from "@/src/hooks/use-audio-player";
 import { DataState, useDatabase } from "@/src/hooks/use-database";
