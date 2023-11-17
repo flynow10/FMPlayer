@@ -29,7 +29,7 @@ export default function QueuePanel(props: QueuePanelProps) {
       )}
     >
       <div className="flex flex-col bg-white h-full max-w-xs p-4 rounded-lg border-2 border-accent dark:invert dark:bg-black dark:text-white">
-        <div className="flex">
+        <div className="flex gap-8">
           <span className="font-bold text-lg">Up Next</span>
           <div className="ml-auto flex">
             <button
