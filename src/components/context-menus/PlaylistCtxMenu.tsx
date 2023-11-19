@@ -1,4 +1,5 @@
 import { usePageContext } from "@/src/contexts/PageContext";
+import { useAudioPlayer } from "@/src/hooks/use-audio-player";
 import { ContextMenuPropType } from "@/src/hooks/use-media-context";
 import { MusicLibrary } from "@/src/music/library/music-library";
 import { Item, ItemParams, Menu, Separator } from "react-contexify";
@@ -10,6 +11,43 @@ type PlaylistCtxMenuProps = {
 
 export default function PlaylistCtxMenu(props: PlaylistCtxMenuProps) {
   const pages = usePageContext();
+  const audioPlayer = useAudioPlayer();
+
+  const addToQueue = async (
+    event: ItemParams<ContextMenuPropType<"playlist">>,
+    addNext: boolean
+  ) => {
+    const playlistId = event.props?.playlistId;
+    if (typeof playlistId !== "string") {
+      alert("This context menu was not set up correctly!");
+      throw new Error("Unable to add playlist to queue; missing playlist id!");
+    }
+    const playlist = await MusicLibrary.db.playlist.get({ id: playlistId });
+    if (playlist === null) {
+      alert("This context menu was not setup correctly");
+      throw new Error(
+        "Unable to add playlist to queue; playlist doesn't exist!"
+      );
+    }
+    if (
+      !(await audioPlayer.queue.addTrackList(playlist.trackListId, addNext))
+    ) {
+      alert("Failed to add track to queue!");
+    }
+  };
+
+  const editPlaylist = (event: ItemParams<ContextMenuPropType<"playlist">>) => {
+    const playlistId = event.props?.playlistId;
+    if (typeof playlistId !== "string") {
+      alert("This context menu was not set up correctly!");
+      throw new Error("Unable to open playlist editor; missing playlist id!");
+    }
+    pages.navigate("new", {
+      type: "playlist editor",
+      data: playlistId,
+    });
+  };
+
   const deletePlaylist = (
     event: ItemParams<ContextMenuPropType<"playlist">>
   ) => {
@@ -48,17 +86,7 @@ export default function PlaylistCtxMenu(props: PlaylistCtxMenuProps) {
         }
       });
   };
-  const editPlaylist = (event: ItemParams<ContextMenuPropType<"playlist">>) => {
-    const playlistId = event.props?.playlistId;
-    if (typeof playlistId !== "string") {
-      alert("This context menu was not set up correctly!");
-      throw new Error("Unable to open playlist editor; missing playlist id!");
-    }
-    pages.navigate("new", {
-      type: "playlist editor",
-      data: playlistId,
-    });
-  };
+
   return (
     <Menu
       id={"playlist-" + props.pageSlug}
@@ -66,11 +94,18 @@ export default function PlaylistCtxMenu(props: PlaylistCtxMenuProps) {
       className="dark:invert"
     >
       <Item
-        onClick={() => {
-          alert("This function has not been implemented yet!");
+        onClick={(event) => {
+          addToQueue(event, false);
         }}
       >
-        Add to queue
+        Play Last
+      </Item>
+      <Item
+        onClick={(event) => {
+          addToQueue(event, true);
+        }}
+      >
+        Play Next
       </Item>
       <Separator />
       <Item onClick={editPlaylist}>Edit Playlist</Item>
