@@ -14,7 +14,7 @@ import SearchResults from "@/src/components/pages/SearchResults";
 import { PageContext } from "@/src/contexts/PageContext";
 import PlaylistList from "@/src/components/pages/PlaylistList";
 import PlaylistDisplay from "@/src/components/pages/PlaylistDisplay";
-import PlaylistCtxMenu from "@/src/components/utils/context-menus/PlaylistCtxMenu";
+import PlaylistCtxMenu from "@/src/components/context-menus/PlaylistCtxMenu";
 import { slugify } from "@/src/utils/string-utils";
 import PlaylistEditor from "@/src/components/pages/PlaylistEditor";
 
