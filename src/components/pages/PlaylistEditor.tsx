@@ -8,12 +8,13 @@ import { MusicLibrary } from "@/src/music/library/music-library";
 import { Music } from "@/src/types/music";
 import { Menu, Play, Plus, PlusCircle, Trash } from "lucide-react";
 import { useEffect, useState } from "react";
-import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
 import { toast } from "react-toastify";
 import classNames from "classnames";
 import { v4 as uuid } from "uuid";
+import { ReactSortable } from "react-sortablejs";
+import Artwork from "@/src/components/media-displays/Artwork";
 
-type UniqueTrack = { trackId: string; key: string };
+type UniqueTrack = { trackId: string; id: string };
 
 export default function PlaylistEditor() {
   const pages = usePageContext();
@@ -50,7 +51,7 @@ export default function PlaylistEditor() {
         setPlaylistTracksIds(
           playlistData.trackList.trackConnections.map((trackConn) => ({
             trackId: trackConn.trackId,
-            key: uuid(),
+            id: uuid(),
           }))
         );
         setPlaylistLoaded(true);
@@ -72,18 +73,6 @@ export default function PlaylistEditor() {
         a.artist.name.toLowerCase().includes(trimmedFilter)
       )
     );
-  };
-
-  const reorder = (
-    list: UniqueTrack[],
-    startIndex: number,
-    endIndex: number
-  ) => {
-    const result = Array.from(list);
-    const [removed] = result.splice(startIndex, 1);
-    result.splice(endIndex, 0, removed);
-
-    return result;
   };
 
   const savePlaylist = async () => {
@@ -156,109 +145,55 @@ export default function PlaylistEditor() {
           <span className="text-xl p-4 border-b-2">
             {originalPlaylistData?.title}
           </span>
-          <DragDropContext
-            onDragEnd={(result) => {
-              if (!result.destination) {
-                return;
-              }
-              let items: UniqueTrack[];
-              if (result.destination.droppableId === "trash") {
-                items = Array.from(playlistTracksIds);
-                items.splice(result.source.index, 1);
-              } else {
-                items = reorder(
-                  playlistTracksIds,
-                  result.source.index,
-                  result.destination.index
-                );
-              }
-
-              setPlaylistTracksIds(items);
-            }}
+          <ReactSortable
+            className="flex flex-col grow overflow-y-auto"
+            list={playlistTracksIds}
+            setList={setPlaylistTracksIds}
+            direction={"vertical"}
+            animation={200}
           >
-            <div className="flex flex-col grow relative overflow-hidden">
-              <Droppable droppableId={pages.pageSlug + "-playlist-drop"}>
-                {(provided) => (
-                  <div
-                    className="flex flex-col overflow-y-scroll select-none"
-                    {...provided.droppableProps}
-                  >
-                    <div ref={provided.innerRef}>
-                      {playlistTracksIds.map((uniqueTrack, index) => {
-                        const track = tracks.find(
-                          (t) => t.id === uniqueTrack.trackId
-                        );
-                        if (!track) {
-                          throw new Error("Missing track in playlist!");
-                        }
-                        return (
-                          <Draggable
-                            key={uniqueTrack.key}
-                            draggableId={uniqueTrack.key}
-                            index={index}
-                          >
-                            {(provided, snapshot) => (
-                              <div
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                                style={{
-                                  ...provided.draggableProps.style,
-                                  ...(snapshot.isDropAnimating &&
-                                  snapshot.draggingOver === "trash"
-                                    ? {
-                                        transitionDuration: "0.001s",
-                                      }
-                                    : {}),
-                                }}
-                                className={classNames(
-                                  "flex gap-2 p-4 bg-white",
-                                  {
-                                    "border-2":
-                                      snapshot.isDragging &&
-                                      !snapshot.isDropAnimating,
-                                    "border-b-2":
-                                      !snapshot.isDragging ||
-                                      snapshot.isDropAnimating,
-                                  }
-                                )}
-                              >
-                                <span>{index + 1}.</span>
-                                <span>{track.title}</span>
-                                <Menu className="ml-auto" />
-                              </div>
-                            )}
-                          </Draggable>
-                        );
-                      })}
-                      {provided.placeholder}
-                    </div>
+            {playlistTracksIds.map((uniqueTrack) => {
+              const track = tracks.find((t) => t.id === uniqueTrack.trackId);
+              if (!track) {
+                throw new Error("Missing track in playlist!");
+              }
+              return (
+                <div
+                  key={uniqueTrack.id}
+                  className={classNames(
+                    "flex",
+                    "gap-2",
+                    "p-2",
+                    "bg-white",
+                    "border-b-2"
+                  )}
+                >
+                  <div className="h-10">
+                    <Artwork id={track.artworkId} />
                   </div>
-                )}
-              </Droppable>
-            </div>
-            <div className="border-t-2">
-              <Droppable droppableId="trash">
-                {(provided, snapshot) => (
-                  <div
-                    {...provided.droppableProps}
-                    ref={provided.innerRef}
-                    className={classNames(
-                      "p-4 flex flex-row gap-2 text-white dark:invert",
-                      {
-                        "bg-red-400": snapshot.isDraggingOver,
-                      }
-                    )}
-                  >
-                    <Trash />
-                    <span>Trash</span>
-                    <div className="hidden">{provided.placeholder}</div>
+                  <span className="my-auto">{track.title}</span>
+                  <div className="ml-auto my-auto">
+                    <button className="hover:bg-gray-200 rounded-md p-1">
+                      <Menu />
+                    </button>
+                    <button
+                      onClick={() => {
+                        setPlaylistTracksIds((prev) => {
+                          return prev.filter(
+                            (fTrack) => fTrack.id !== uniqueTrack.id
+                          );
+                        });
+                      }}
+                      className="group hover:bg-gray-200 rounded-md p-1 hover:text-red-400"
+                    >
+                      <Trash className="dark:group-hover:invert" />
+                    </button>
                   </div>
-                )}
-              </Droppable>
-            </div>
-          </DragDropContext>
-          <div className="flex flex-col border-t-2 p-2">
+                </div>
+              );
+            })}
+          </ReactSortable>
+          <div className="flex flex-col border-t-2 p-2 mt-auto">
             <button
               onClick={savePlaylist}
               disabled={
@@ -323,7 +258,7 @@ export default function PlaylistEditor() {
                     className="group ml-auto w-6 h-6"
                     onClick={() => {
                       setPlaylistTracksIds((prev) => {
-                        return [...prev, { trackId: track.id, key: uuid() }];
+                        return [...prev, { trackId: track.id, id: uuid() }];
                       });
                     }}
                   >
