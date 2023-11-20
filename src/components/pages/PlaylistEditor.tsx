@@ -19,6 +19,11 @@ type UniqueTrack = { trackId: string; id: string };
 
 export default function PlaylistEditor() {
   const pages = usePageContext();
+
+  const { isNew, id: oldPlaylistId } = pages.data as
+    | { isNew: false; id: string }
+    | { isNew: true; id: null };
+
   const audioPlayer = useAudioPlayer();
   const [tracks, trackLoadState] = useDatabase(
     () => {
@@ -40,29 +45,31 @@ export default function PlaylistEditor() {
   useEffect(() => {
     let active = true;
     const load = async () => {
-      const playlistData = await MusicLibrary.db.playlist.get({
-        id: pages.data,
-      });
-      if (!playlistData) {
-        alert("Playlist editor failed to load!");
-        throw new Error("Failed to load current playlist data!");
-      }
-      if (active) {
-        setOriginalPlaylistData(playlistData);
-        setPlaylistTitle(playlistData.title);
-        setPlaylistTracksIds(
-          playlistData.trackList.trackConnections.map((trackConn) => ({
-            trackId: trackConn.trackId,
-            id: uuid(),
-          }))
-        );
+      if (!isNew) {
+        const playlistData = await MusicLibrary.db.playlist.get({
+          id: oldPlaylistId,
+        });
+        if (!playlistData) {
+          alert("Playlist editor failed to load!");
+          throw new Error("Failed to load current playlist data!");
+        }
+        if (active) {
+          setOriginalPlaylistData(playlistData);
+          setPlaylistTitle(playlistData.title);
+          setPlaylistTracksIds(
+            playlistData.trackList.trackConnections.map((trackConn) => ({
+              trackId: trackConn.trackId,
+              id: uuid(),
+            }))
+          );
+        }
       }
     };
     load();
     return () => {
       active = false;
     };
-  }, [pages.data]);
+  }, [isNew, oldPlaylistId]);
 
   const [filter, setFilter] = useState<string>("");
   const trimmedFilter = filter.toLowerCase().trim();
@@ -77,12 +84,15 @@ export default function PlaylistEditor() {
   };
 
   const savePlaylist = async () => {
-    if (!originalPlaylistData) {
-      alert("Failed to save playlist!");
+    if (!isSaveable) {
+      alert("This playlist isn't saveable right now!");
       return;
     }
-    pages.navigate("back");
-    const toastId = toast(`Updating playlist...`, {
+    const trackData = playlistTracksIds.map((track, index) => ({
+      trackId: track.trackId,
+      trackNumber: index + 1,
+    }));
+    const toastId = toast(`${isNew ? "Creating" : "Updating"} playlist...`, {
       autoClose: false,
       isLoading: true,
       closeButton: false,
@@ -90,64 +100,125 @@ export default function PlaylistEditor() {
       draggable: false,
       type: "info",
     });
-    const updatedPlaylist = await MusicLibrary.db.playlist.update(
-      {
-        id: originalPlaylistData.id,
-      },
-      {
+    if (isNew) {
+      pages.navigate("back");
+      const newPlaylist = await MusicLibrary.db.playlist.create({
         title: playlistTitle,
         trackList: {
-          update: {
+          create: {
             trackConnections: {
-              deleteMany: {},
               createMany: {
-                data: playlistTracksIds.map((track, index) => ({
-                  trackId: track.trackId,
-                  trackNumber: index + 1,
-                })),
+                data: trackData,
               },
             },
           },
         },
-      }
-    );
-    const success = updatedPlaylist !== null;
+      });
+      const success = newPlaylist !== null;
 
-    const tracksAdded = playlistTracksIds.reduce(
-      (acc, track) => acc + (originalTrackIds.includes(track.trackId) ? 0 : 1),
-      0
-    );
-    const tracksRemoved = originalTrackIds.reduce(
-      (acc, track) =>
-        acc + (playlistTracksIds.map((t) => t.trackId).includes(track) ? 0 : 1),
-      0
-    );
-    toast.update(toastId, {
-      render: success
-        ? `Successfully added ${tracksAdded} track${
-            tracksAdded !== 1 ? "s" : ""
-          } and removed ${tracksRemoved} track${tracksRemoved !== 1 ? "s" : ""}`
-        : "Failed to update playlist!",
-      autoClose: 5000,
-      draggable: true,
-      closeOnClick: true,
-      closeButton: true,
-      isLoading: false,
-      type: success ? "success" : "error",
-    });
+      toast.update(toastId, {
+        render: success
+          ? `Successfully created playlist "${newPlaylist.title}"`
+          : "Failed to update playlist!",
+        autoClose: 5000,
+        draggable: true,
+        closeOnClick: true,
+        closeButton: true,
+        isLoading: false,
+        type: success ? "success" : "error",
+      });
+    } else {
+      if (!originalPlaylistData) {
+        alert("Failed to save playlist!");
+        return;
+      }
+      pages.navigate("back");
+
+      const updatedPlaylist = await MusicLibrary.db.playlist.update(
+        {
+          id: originalPlaylistData.id,
+        },
+        {
+          title: playlistTitle,
+          trackList: {
+            update: {
+              trackConnections: {
+                deleteMany: {},
+                createMany: {
+                  data: trackData,
+                },
+              },
+            },
+          },
+        }
+      );
+      const success = updatedPlaylist !== null;
+      const oldTrackIds = [...originalTrackIds];
+
+      let tracksAdded = 0;
+      for (let i = 0; i < playlistTracksIds.length; i++) {
+        const { trackId } = playlistTracksIds[i];
+        const index = oldTrackIds.indexOf(trackId);
+        if (index === -1) {
+          tracksAdded++;
+        } else {
+          oldTrackIds.splice(index, 1);
+        }
+      }
+
+      const newTrackIds = playlistTracksIds.map((t) => t.trackId);
+
+      let tracksRemoved = 0;
+      for (let i = 0; i < originalTrackIds.length; i++) {
+        const trackId = originalTrackIds[i];
+        const index = newTrackIds.indexOf(trackId);
+        if (index === -1) {
+          tracksRemoved++;
+        } else {
+          newTrackIds.splice(index, 1);
+        }
+      }
+
+      toast.update(toastId, {
+        render: (
+          <span>
+            {success ? (
+              <span>
+                Successfully updated playlist:
+                <br /> {tracksAdded} track{tracksAdded !== 1 ? "s" : ""} added
+                <br />
+                {tracksRemoved} track{tracksRemoved !== 1 ? "s" : ""} removed
+              </span>
+            ) : (
+              "Failed to update playlist!"
+            )}
+          </span>
+        ),
+        autoClose: 5000,
+        draggable: true,
+        closeOnClick: true,
+        closeButton: true,
+        isLoading: false,
+        type: success ? "success" : "error",
+      });
+    }
   };
-  if (originalPlaylistData === null || trackLoadState !== DataState.Loaded) {
+  if (trackLoadState !== DataState.Loaded) {
     return <FullCover />;
   }
 
   const hasPlaylistChanged =
+    originalPlaylistData === null ||
     originalTrackIds.length !== playlistTracksIds.length ||
     originalPlaylistData.title !== playlistTitle ||
     originalTrackIds.reduce(
       (same, id, index) => same || id !== playlistTracksIds[index].trackId,
       false
     );
-  const isSaveable = playlistTracksIds.length > 0 && hasPlaylistChanged;
+  const isSaveable =
+    playlistTracksIds.length > 0 &&
+    playlistTitle.trim().length > 0 &&
+    hasPlaylistChanged;
   return (
     <VerticalSplit
       minWidth={300}
