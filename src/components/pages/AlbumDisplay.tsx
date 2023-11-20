@@ -8,10 +8,12 @@ import Artwork from "@/src/components/media-displays/Artwork";
 import { usePageContext } from "@/src/contexts/PageContext";
 import { useAudioPlayer } from "@/src/hooks/use-audio-player";
 import LinkedArtistList from "@/src/components/media-displays/LinkedArtistList";
+import { useMediaContext } from "@/src/hooks/use-media-context";
 
 export default function AlbumDisplay() {
   const pages = usePageContext();
   const audioPlayer = useAudioPlayer();
+  const { show: showAlbumMenu } = useMediaContext("album");
   const [album, state] = useDatabase(
     () => MusicLibrary.db.album.get({ id: pages.data }),
     null,
@@ -83,8 +85,13 @@ export default function AlbumDisplay() {
               ))}
               <button
                 className="ml-auto"
-                onClick={() => {
-                  alert("This is not a functional feature yet!");
+                onClick={(event) => {
+                  showAlbumMenu({
+                    event,
+                    props: {
+                      albumId: album.id,
+                    },
+                  });
                 }}
               >
                 <CircleEllipsis />
