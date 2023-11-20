@@ -44,7 +44,7 @@ export default function PlaylistCtxMenu(props: PlaylistCtxMenuProps) {
     }
     pages.navigate("new", {
       type: "playlist editor",
-      data: playlistId,
+      data: { isNew: false, id: playlistId },
     });
   };
 

@@ -8,6 +8,8 @@ import Artwork from "@/src/components/media-displays/Artwork";
 import { usePageContext } from "@/src/contexts/PageContext";
 import { useAudioPlayer } from "@/src/hooks/use-audio-player";
 import { useMediaContext } from "@/src/hooks/use-media-context";
+import { useEffect } from "react";
+import { toast } from "react-toastify";
 
 export default function PlaylistDisplay() {
   const pages = usePageContext();
@@ -19,6 +21,13 @@ export default function PlaylistDisplay() {
     "Playlist",
     [pages]
   );
+
+  useEffect(() => {
+    if (state === DataState.Loaded && playlist === null) {
+      pages.navigate("back");
+      toast("This playlist could not be found!", { type: "error" });
+    }
+  }, [playlist, state, pages]);
 
   if (playlist === null) {
     return <FullCover />;

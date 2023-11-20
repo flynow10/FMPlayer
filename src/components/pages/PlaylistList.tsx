@@ -1,9 +1,11 @@
 import MediaCard from "@/src/components/media-displays/MediaCard";
 import { FullCover } from "@/src/components/utils/loading/FullCover";
+import { usePageContext } from "@/src/contexts/PageContext";
 import { DataState, useDatabase } from "@/src/hooks/use-database";
 import { MusicLibrary } from "@/src/music/library/music-library";
 
 export default function PlaylistList() {
+  const pages = usePageContext();
   const [playlistList, loadedState] = useDatabase(
     () => {
       return MusicLibrary.db.playlist.list();
@@ -25,7 +27,15 @@ export default function PlaylistList() {
             <span className="text">You have not created any playlists</span>
           )}
         </div>
-        <button className="btn ml-auto bg-accent dark:invert active:bg-accent-highlighted">
+        <button
+          onClick={() => {
+            pages.navigate("new", {
+              type: "playlist editor",
+              data: { isNew: true, id: null },
+            });
+          }}
+          className="btn ml-auto bg-accent dark:invert active:bg-accent-highlighted"
+        >
           New Playlist
         </button>
       </div>
