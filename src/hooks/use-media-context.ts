@@ -1,7 +1,7 @@
 import { usePageContext } from "@/src/contexts/PageContext";
 import { ShowContextMenuParams, useContextMenu } from "react-contexify";
 
-export type ContextMenuTypes = "playlist" | "album";
+export type ContextMenuTypes = "playlist" | "album" | "track";
 
 export type ContextMenuPropType<T extends ContextMenuTypes> = {
   playlist: {
@@ -9,6 +9,9 @@ export type ContextMenuPropType<T extends ContextMenuTypes> = {
   };
   album: {
     albumId: string;
+  };
+  track: {
+    trackId: string;
   };
 }[T];
 

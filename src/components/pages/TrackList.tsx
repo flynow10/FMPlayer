@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Music } from "@/src/types/music";
 import { DataState, useDatabase } from "@/src/hooks/use-database";
 import { useAudioPlayer } from "@/src/hooks/use-audio-player";
+import { useMediaContext } from "@/src/hooks/use-media-context";
 
 type Column = {
   name: string;
@@ -43,6 +44,7 @@ const columns: Column[] = [
 
 export default function TrackList() {
   const audioPlayer = useAudioPlayer();
+  const { show: showTrackMenu } = useMediaContext("track");
   const [sortBy, setSortBy] = useState<Column["prop"]>("title");
   const [sort, setSort] = useState<"asc" | "desc">("asc");
   const [trackList, loadedState] = useDatabase(
@@ -113,7 +115,17 @@ export default function TrackList() {
           </thead>
           <tbody className="relative">
             {sortedTrackList.map((track) => (
-              <tr key={track.id}>
+              <tr
+                key={track.id}
+                onContextMenu={(event) => {
+                  showTrackMenu({
+                    event,
+                    props: {
+                      trackId: track.id,
+                    },
+                  });
+                }}
+              >
                 <td
                   role="button"
                   className="p-2"

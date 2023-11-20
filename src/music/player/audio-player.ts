@@ -578,6 +578,34 @@ export class AudioPlayer implements HookKeys {
   };
 
   public queue = {
+    addTrack: async (
+      trackId: string | Music.DB.TableType<"Track">,
+      addNext = false
+    ) => {
+      const wasBlank = this._trackQueue.isBlank();
+      if (wasBlank) {
+        this.beginLoadingNewTrack();
+      }
+      if (typeof trackId !== "string") {
+        trackId = trackId.id;
+      }
+
+      const action: PlaySongAction = new PlaySongAction(trackId);
+      if (!addNext) {
+        this._trackQueue = this._trackQueue.addAction(action);
+      } else {
+        this._trackQueue = this._trackQueue.insertAction(
+          this.currentTrackIndex + 1,
+          action
+        );
+      }
+      this.callEvent("updateQueue");
+      if (wasBlank) {
+        this.callEvent("playNewQueue");
+        await this.setupTrack();
+      }
+      return true;
+    },
     /**
      * Adds Playlist to the queue by value not reference
      **/
