@@ -24,6 +24,8 @@ This project uses a myriad of services to accomplish various tasks. The biggest 
 - Audio Conversion: **[AWS Lambda](https://aws.amazon.com/lambda/)**
 - Realtime Updates: **[Ably](https://ably.com/)**
 
+The main feature of this project is the ability to write functional logic for how your music is played. The basic grammar for said logic is documented [here](grammar-planning.md).
+
 Please see the [getting started](getting-started.md) page for how to setup this project
 
 ## How to Contribute
