@@ -143,7 +143,7 @@ export default function VerticalSplit(props: VerticalSplitProps) {
       </div>
       <div
         ref={rightRef}
-        className="grow box-border"
+        className="grow box-border ml-px"
         style={{
           minWidth: props.minWidth
             ? getMinWidth(props.minWidth).right + "px"

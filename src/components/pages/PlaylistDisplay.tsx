@@ -7,19 +7,29 @@ import OrderedTrackList from "@/src/components/media-displays/OrderedTrackList";
 import Artwork from "@/src/components/media-displays/Artwork";
 import { usePageContext } from "@/src/contexts/PageContext";
 import { useAudioPlayer } from "@/src/hooks/use-audio-player";
-import LinkedArtistList from "@/src/components/media-displays/LinkedArtistList";
+import { useMediaContext } from "@/src/hooks/use-media-context";
+import { useEffect } from "react";
+import { toast } from "react-toastify";
 
-export default function AlbumDisplay() {
+export default function PlaylistDisplay() {
   const pages = usePageContext();
   const audioPlayer = useAudioPlayer();
-  const [album, state] = useDatabase(
-    () => MusicLibrary.db.album.get({ id: pages.data }),
+  const { show: showContextMenu } = useMediaContext("playlist");
+  const [playlist, state] = useDatabase(
+    () => MusicLibrary.db.playlist.get({ id: pages.data }),
     null,
-    "Album",
+    "Playlist",
     [pages]
   );
 
-  if (album === null) {
+  useEffect(() => {
+    if (state === DataState.Loaded && playlist === null) {
+      pages.navigate("back");
+      toast("This playlist could not be found!", { type: "error" });
+    }
+  }, [playlist, state, pages]);
+
+  if (playlist === null) {
     return <FullCover />;
   }
 
@@ -29,7 +39,7 @@ export default function AlbumDisplay() {
         <div className="flex flex-row gap-10">
           <div className="flex-none overflow-hidden w-1/5">
             <Artwork
-              id={album.artwork?.id ?? null}
+              id={playlist.artwork?.id ?? null}
               rounded={false}
               className="rounded-2xl"
             />
@@ -37,21 +47,10 @@ export default function AlbumDisplay() {
           <div className="grow flex flex-col justify-between">
             <div></div>
             <div className="flex flex-col">
-              <span className="text-2xl font-extrabold">{album.title}</span>
-              <span className="text-xl">
-                <LinkedArtistList
-                  artistList={album.artists}
-                  onClickArtist={(artistId) => {
-                    pages.navigate("new", {
-                      type: "artist list",
-                      data: artistId,
-                    });
-                  }}
-                />
-              </span>
+              <span className="text-2xl font-extrabold">{playlist.title}</span>
               <span className="text-xs font-semibold">
-                {album.genre.name.toUpperCase()} &bull;{" "}
-                {album.createdOn.getFullYear()}
+                {playlist.trackList.trackConnections.length} TRACKS &bull;{" "}
+                {playlist.createdOn.getFullYear()}
               </span>
             </div>
             <div className="flex gap-4 pb-4">
@@ -60,7 +59,7 @@ export default function AlbumDisplay() {
                   icon: <Play />,
                   name: "Play",
                   clickHandler: () => {
-                    audioPlayer.play.album(album);
+                    audioPlayer.play.trackList(playlist.trackList);
                     return;
                   },
                 },
@@ -83,8 +82,13 @@ export default function AlbumDisplay() {
               ))}
               <button
                 className="ml-auto"
-                onClick={() => {
-                  alert("This is not a functional feature yet!");
+                onClick={(event) => {
+                  showContextMenu({
+                    event,
+                    props: {
+                      playlistId: pages.data,
+                    },
+                  });
                 }}
               >
                 <CircleEllipsis />
@@ -92,22 +96,22 @@ export default function AlbumDisplay() {
             </div>
           </div>
         </div>
-        <OrderedTrackList list={album.trackList} />
+        <OrderedTrackList list={playlist.trackList} />
         <div className="font-light text-sm text-gray-500">
           <span>
-            Created on {album.createdOn.toLocaleDateString()} at{" "}
-            {album.createdOn.toLocaleTimeString()}
-            {album.createdOn.getTime() !== album.modifiedOn.getTime() && (
+            Created on {playlist.createdOn.toLocaleDateString()} at{" "}
+            {playlist.createdOn.toLocaleTimeString()}
+            {playlist.createdOn.getTime() !== playlist.modifiedOn.getTime() && (
               <>
                 <br />
-                Modified on {album.modifiedOn.toLocaleDateString()} at{" "}
-                {album.modifiedOn.toLocaleTimeString()}
+                Modified on {playlist.modifiedOn.toLocaleDateString()} at{" "}
+                {playlist.modifiedOn.toLocaleTimeString()}
               </>
             )}
-            {album.tags.length > 0 && (
+            {playlist.tags.length > 0 && (
               <>
                 <br />
-                Tags: {album.tags.map((tag) => "#" + tag.name).join(" ")}
+                Tags: {playlist.tags.map((tag) => "#" + tag.name).join(" ")}
               </>
             )}
           </span>
