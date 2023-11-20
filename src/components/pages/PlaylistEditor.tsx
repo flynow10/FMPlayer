@@ -296,7 +296,7 @@ export default function PlaylistEditor() {
         <div className="flex flex-col p-2 gap-2  overflow-hidden h-full">
           <input
             onChange={async (event) => {
-              const filter = event.currentTarget.value.trim().toLowerCase();
+              const filter = event.currentTarget.value;
               setFilter(filter);
             }}
             value={filter}
