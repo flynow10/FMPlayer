@@ -23,9 +23,6 @@ export default function PlaylistList() {
       <div className="flex flex-row">
         <div className="flex flex-col">
           <span className="text-xl">Your playlists</span>
-          {playlistList.length === 0 && (
-            <span className="text">You have not created any playlists</span>
-          )}
         </div>
         <button
           onClick={() => {
@@ -34,12 +31,15 @@ export default function PlaylistList() {
               data: { isNew: true, id: null },
             });
           }}
-          className="btn ml-auto bg-accent dark:invert active:bg-accent-highlighted"
+          className="btn accent ml-auto"
         >
           New Playlist
         </button>
       </div>
       <div className="flex flex-row flex-wrap gap-8 overflow-auto">
+        {playlistList.length === 0 && (
+          <span className="text">You have not created any playlists</span>
+        )}
         {playlistList.map((playlist) => (
           <MediaCard
             key={playlist.id}
