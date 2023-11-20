@@ -64,6 +64,7 @@ export default function MediaCard<T extends DisplayableMediaType>(
   const audioPlayer = useAudioPlayer();
   const { show: showPlaylistMenu } = useMediaContext("playlist");
   const { show: showAlbumMenu } = useMediaContext("album");
+  const { show: showTrackMenu } = useMediaContext("track");
   let artworkId: string | null = null;
   let titleText = "";
   let subText: string | ReactNode = "";
@@ -274,6 +275,16 @@ export default function MediaCard<T extends DisplayableMediaType>(
                 albumId: props.data.id,
               },
             });
+            break;
+          }
+          case "track": {
+            showTrackMenu({
+              event,
+              props: {
+                trackId: props.data.id,
+              },
+            });
+            break;
           }
         }
       }}
