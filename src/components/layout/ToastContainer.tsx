@@ -37,7 +37,7 @@ export default function ToastManager() {
 
   return (
     <ToastContainer
-      className="dark:invert"
+      className="dark:invert overflow-hidden"
       position="bottom-right"
       draggable={true}
       draggableDirection="x"
