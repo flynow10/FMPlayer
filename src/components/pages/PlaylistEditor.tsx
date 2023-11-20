@@ -230,6 +230,7 @@ export default function PlaylistEditor() {
                 setPlaylistTitle(newValue);
               }}
               value={playlistTitle}
+              placeholder="Untitled Playlist"
             />
           </div>
           <ReactSortable
