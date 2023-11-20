@@ -3,19 +3,26 @@ import { useEffect, useState } from "react";
 
 type TogglableInputProps = Omit<
   React.InputHTMLAttributes<HTMLInputElement>,
-  "value" | "onChange"
+  "value" | "onChange" | "placeholder"
 > & {
   containerProps?: React.HTMLAttributes<HTMLDivElement>;
   value: string;
   onChange: (newValue: string) => void;
   onToggleEdit?: (isEditing: boolean) => void;
+  placeholder?: string;
 };
 
 export default function TogglableInput(props: TogglableInputProps) {
   const [editing, setEditing] = useState(false);
 
-  const { value, containerProps, onChange, onToggleEdit, ...inputProps } =
-    props;
+  const {
+    value,
+    containerProps,
+    onChange,
+    onToggleEdit,
+    placeholder,
+    ...inputProps
+  } = props;
 
   useEffect(() => {
     onToggleEdit?.(editing);
@@ -27,6 +34,7 @@ export default function TogglableInput(props: TogglableInputProps) {
         <input
           className="grow border-2 p-1 rounded-md"
           {...inputProps}
+          placeholder={placeholder}
           value={value}
           onChange={(event) => {
             onChange(event.target.value);
@@ -45,9 +53,12 @@ export default function TogglableInput(props: TogglableInputProps) {
           onClick={() => {
             setEditing(true);
           }}
-          className={inputProps.className ?? "grow p-1"}
+          className={
+            (inputProps.className ?? "grow p-1") +
+            (value === "" ? " text-gray-400" : "")
+          }
         >
-          {value}
+          {value === "" ? placeholder : value}
         </span>
       )}
       <button
