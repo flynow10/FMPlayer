@@ -62,7 +62,7 @@ export default function PlaylistCtxMenu(props: PlaylistCtxMenuProps) {
       type: "info",
     });
 
-    const deletedPlaylist = await MusicLibrary.db.album.delete({
+    const deletedPlaylist = await MusicLibrary.db.playlist.delete({
       id: playlistId,
     });
     let success = deletedPlaylist !== null;
