@@ -32,7 +32,7 @@ export default function PlaylistCtxMenu(props: PlaylistCtxMenuProps) {
     if (
       !(await audioPlayer.queue.addTrackList(playlist.trackListId, addNext))
     ) {
-      alert("Failed to add track to queue!");
+      alert("Unable to add playlist to queue; reason unknown!");
     }
   };
 
@@ -48,7 +48,7 @@ export default function PlaylistCtxMenu(props: PlaylistCtxMenuProps) {
     });
   };
 
-  const deletePlaylist = (
+  const deletePlaylist = async (
     event: ItemParams<ContextMenuPropType<"playlist">>
   ) => {
     const playlistId = event.props?.playlistId;
@@ -61,30 +61,35 @@ export default function PlaylistCtxMenu(props: PlaylistCtxMenuProps) {
       autoClose: false,
       type: "info",
     });
-    MusicLibrary.db.playlist
-      .delete({
-        id: playlistId,
-      })
-      .then((deletedPlaylist) => {
-        const success = deletedPlaylist !== null;
-        const content = success
-          ? `Successfully deleted ${deletedPlaylist.title}`
-          : `Failed to delete playlist!`;
-        const type = success ? "success" : "error";
-        if (toast.isActive(toastId)) {
-          toast.update(toastId, {
-            render: content,
-            autoClose: 5000,
-            isLoading: false,
-            type,
-          });
-        } else {
-          toast(content, {
-            autoClose: 5000,
-            type: type,
-          });
-        }
+
+    const deletedPlaylist = await MusicLibrary.db.playlist.delete({
+      id: playlistId,
+    });
+    let success = deletedPlaylist !== null;
+    if (success) {
+      const deletedTrackList = await MusicLibrary.db.trackList.delete({
+        id: deletedPlaylist?.trackListId,
       });
+      success = deletedTrackList !== null;
+    }
+
+    const content = success
+      ? `Successfully deleted ${deletedPlaylist!.title}`
+      : `Failed to delete playlist!`;
+    const type = success ? "success" : "error";
+    if (toast.isActive(toastId)) {
+      toast.update(toastId, {
+        render: content,
+        autoClose: 5000,
+        isLoading: false,
+        type,
+      });
+    } else {
+      toast(content, {
+        autoClose: 5000,
+        type: type,
+      });
+    }
   };
 
   return (

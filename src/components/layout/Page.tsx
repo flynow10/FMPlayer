@@ -17,6 +17,8 @@ import PlaylistDisplay from "@/src/components/pages/PlaylistDisplay";
 import PlaylistCtxMenu from "@/src/components/context-menus/PlaylistCtxMenu";
 import { slugify } from "@/src/utils/string-utils";
 import PlaylistEditor from "@/src/components/pages/PlaylistEditor";
+import AlbumCtxMenu from "@/src/components/context-menus/AlbumCtxMenu";
+import TrackCtxMenu from "@/src/components/context-menus/TrackCtxMenu";
 
 type PageProps = {
   location: Pages.Location;
@@ -92,6 +94,8 @@ export default function Page(props: PageProps) {
         </div>
       </div>
       <PlaylistCtxMenu pageSlug={pageSlug} />
+      <AlbumCtxMenu pageSlug={pageSlug} />
+      <TrackCtxMenu pageSlug={pageSlug} />
     </PageContext.Provider>
   );
 }
