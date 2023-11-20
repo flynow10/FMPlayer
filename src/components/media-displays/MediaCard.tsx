@@ -63,6 +63,7 @@ export default function MediaCard<T extends DisplayableMediaType>(
   const pages = usePageContext();
   const audioPlayer = useAudioPlayer();
   const { show: showPlaylistMenu } = useMediaContext("playlist");
+  const { show: showAlbumMenu } = useMediaContext("album");
   let artworkId: string | null = null;
   let titleText = "";
   let subText: string | ReactNode = "";
@@ -256,13 +257,24 @@ export default function MediaCard<T extends DisplayableMediaType>(
   return (
     <div
       onContextMenu={(event) => {
-        if (props.type === "playlist") {
-          showPlaylistMenu({
-            event,
-            props: {
-              playlistId: props.data.id,
-            },
-          });
+        switch (props.type) {
+          case "playlist": {
+            showPlaylistMenu({
+              event,
+              props: {
+                playlistId: props.data.id,
+              },
+            });
+            break;
+          }
+          case "album": {
+            showAlbumMenu({
+              event,
+              props: {
+                albumId: props.data.id,
+              },
+            });
+          }
         }
       }}
       className={classNames("flex gap-3 shrink-0", {
