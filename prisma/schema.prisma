@@ -112,7 +112,7 @@ model TrackInList {
 
   modifiedOn DateTime @default(now()) @updatedAt
 
-  @@id([trackId, trackListId])
+  @@id([trackId, trackListId, trackNumber])
 }
 
 model AudioSource {

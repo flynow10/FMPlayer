@@ -233,6 +233,7 @@ export namespace Music {
 
   export type ActionType =
     | "play song"
+    | "play playlist"
     | "number"
     | "loop"
     | "end loop"

@@ -9,3 +9,7 @@
 .btn:disabled {
   @apply border-gray-500 bg-gray-500 active:bg-gray-500;
 }
+
+.btn.accent {
+  @apply border-accent-muted bg-accent active:bg-accent-highlighted dark:invert;
+}

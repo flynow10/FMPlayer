@@ -54,7 +54,7 @@ const createHook = <Key extends keyof KeyMap>(
 ): (() => KeyMap[Key]) => {
   const eventArray = typeof events === "string" ? [events] : events;
   return () => {
-    const [state, setState] = useState(audioPlayer[hookName]);
+    const [state, setState] = useState(() => audioPlayer[hookName]);
     useEffect(() => {
       const listener = () => {
         setState(audioPlayer[hookName]);
@@ -67,7 +67,7 @@ const createHook = <Key extends keyof KeyMap>(
           audioPlayer.removeEventListener(eventName, listener);
         });
       };
-    });
+    }, [state]);
     return state;
   };
 };
@@ -529,8 +529,7 @@ export class AudioPlayer implements HookKeys {
   public play = {
     track: (trackId: string) => {
       this.beginLoadingNewTrack();
-      const playlist = new Playlist();
-      playlist.addAction(new PlaySongAction(trackId));
+      const playlist = new Playlist().addAction(new PlaySongAction(trackId));
       return this.playPlaylist(playlist);
     },
     trackList: async (
@@ -575,6 +574,53 @@ export class AudioPlayer implements HookKeys {
       }
 
       return this.play.trackList(loadedAlbum.trackList, trackNumber);
+    },
+  };
+
+  public queue = {
+    /**
+     * Adds Playlist to the queue by value not reference
+     **/
+    addTrackList: async (
+      trackList: string | Music.HelperDB.ThinTrackList,
+      addNext = false
+    ) => {
+      const wasBlank = this._trackQueue.isBlank();
+      if (wasBlank) {
+        this.beginLoadingNewTrack();
+      }
+      let loadedTrackList: Music.HelperDB.ThinTrackList;
+      if (typeof trackList === "string") {
+        const nullableTrackList = await MusicLibrary.db.trackList.get({
+          id: trackList,
+        });
+        if (nullableTrackList === null) {
+          return false;
+        }
+        loadedTrackList = nullableTrackList;
+      } else {
+        loadedTrackList = trackList;
+      }
+
+      const actions: PlaySongAction[] = loadedTrackList.trackConnections.map(
+        (trackConn) => {
+          return new PlaySongAction(trackConn.trackId);
+        }
+      );
+      if (!addNext) {
+        this._trackQueue = this._trackQueue.addAction(...actions);
+      } else {
+        this._trackQueue = this._trackQueue.insertAction(
+          this.currentTrackIndex + 1,
+          ...actions
+        );
+      }
+      this.callEvent("updateQueue");
+      if (wasBlank) {
+        this.callEvent("playNewQueue");
+        await this.setupTrack();
+      }
+      return true;
     },
   };
 
