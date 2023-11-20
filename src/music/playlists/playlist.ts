@@ -26,29 +26,32 @@ export class Playlist {
   }
 
   public addAction(...action: Action[]) {
-    this._actionList.push(...action);
-    this.regenerateSongList();
-    return this;
+    const newPlaylist = this.copy();
+    newPlaylist._actionList.push(...action);
+    newPlaylist.regenerateSongList();
+    return newPlaylist;
   }
 
-  public insertAction(action: Action, index: number) {
-    this._actionList.splice(index, 0, action);
-    this.regenerateSongList();
-    return this;
+  public insertAction(index: number, ...actions: Action[]) {
+    const newPlaylist = this.copy();
+    newPlaylist._actionList.splice(index, 0, ...actions);
+    newPlaylist.regenerateSongList();
+    return newPlaylist;
   }
 
   public removeAction(action: Action): void;
   public removeAction(index: number): void;
 
   public removeAction(arg: Action | number) {
+    const newPlaylist = this.copy();
     if (arg instanceof Action) {
-      this._actionList.splice(this._actionList.indexOf(arg), 1);
+      newPlaylist._actionList.splice(this._actionList.indexOf(arg), 1);
     } else if (typeof arg === "number") {
-      this._actionList.splice(arg, 1);
+      newPlaylist._actionList.splice(arg, 1);
     }
 
-    this.regenerateSongList();
-    return this;
+    newPlaylist.regenerateSongList();
+    return newPlaylist;
   }
 
   public isBlank() {
@@ -57,6 +60,14 @@ export class Playlist {
 
   public getMediaType(): Music.MediaType {
     return "playlist";
+  }
+
+  public copy(): Playlist {
+    const newPlaylist = new Playlist();
+    newPlaylist.id = this.id;
+    newPlaylist._actionList = [...this.actionList];
+    newPlaylist.regenerateSongList();
+    return newPlaylist;
   }
 
   public static Blank() {

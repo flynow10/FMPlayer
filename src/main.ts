@@ -2,6 +2,7 @@ import ReactDOM from "react-dom/client";
 import React, { createElement } from "react";
 
 import "react-toastify/dist/ReactToastify.min.css";
+import "react-contexify/ReactContexify.css";
 import "@/src/assets/sass/index.scss";
 import ToastManager from "@/src/components/layout/ToastContainer";
 import Router from "@/src/Router";
