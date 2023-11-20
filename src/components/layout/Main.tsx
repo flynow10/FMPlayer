@@ -21,8 +21,9 @@ const DEFAULT_PAGES: Record<Pages.Location, Pages.PageStore> = {
   Playlists: { type: "playlist list" },
   Genres: { type: "genre list" },
   "Import Media": { type: "file search" },
-  Artists: { type: "artist list" }, // no page created yet
-  "Edit Playlists": { type: "album display" }, // no page created yet
+  Artists: { type: "artist list" },
+  Functions: { type: "album display" }, // no page created yet
+  Settings: { type: "album display" }, // no page created yet
   "Recently Added": { type: "recent list" },
 };
 const debug = getApplicationDebugConfig();
@@ -33,12 +34,13 @@ export default function Main(props: MainProps) {
   >({
     Albums: [],
     Artists: [],
-    "Edit Playlists": [],
+    Functions: [],
     Genres: [],
     "Import Media": [],
     Playlists: [],
     "Recently Added": [],
     Search: [],
+    Settings: [],
     Tracks: [],
   });
 

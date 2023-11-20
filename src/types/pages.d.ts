@@ -26,7 +26,8 @@ export namespace Pages {
     | "Playlists"
     | "Genres"
     | "Import Media"
-    | "Edit Playlists";
+    | "Functions"
+    | "Settings";
 
   export type PageType =
     | "search results"
