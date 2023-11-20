@@ -8,9 +8,6 @@ This page will take you through how to setup the FMPlayer for development. Deplo
   - This project works with NVM, so running `nvm use` in the project directory will install the necessary node version.
 - [Yarn](https://classic.yarnpkg.com/lang/en/) v1
 - [Git](https://git-scm.com/)
-- [Vercel Account](https://vercel.com/)
-- Vercel CLI
-  - This can be installed with npm using the command `npm i -g vercel@latest`
 - A text editor
   - This project works best with [VSCode](https://code.visualstudio.com/) as it has many extensions that enhance the development process.
 
@@ -28,7 +25,7 @@ git clone https://github.com/flynow10/FMPlayer.git
 
 Next, install a mysql database. This is necessary to store the metadata of your music library. You can find the community edition [here](https://www.mysql.com/products/community/).
 
-Once installed use connect to the database using the `mysql` command and create a new database named `fmplayer` with the command:
+Once installed, use connect to the database using the `mysql` command and create a new database named `fmplayer` with the command:
 
 ```sql
 CREATE DATABASE fmplayer;
@@ -60,7 +57,13 @@ The other two commands create the required tables and insert some test data into
 Finally run the dev command:
 
 ```sh
-yarn vercel-dev
+yarn dev
 ```
 
-Unfortunately it is not currently possible to run the development command without connecting the project to a vercel account, so the first time you run the `yarn vercel-dev` command it will require you to setup the project.
+If all goes well, you should now be able to use and develop the project on your local machine.
+
+---
+
+## Things to note
+
+When running the project locally, features that require aws will be disabled. This means that uploading songs will ONLY update the database. You will be required to manually add any actual song files to the static directory.
