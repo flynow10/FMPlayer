@@ -13,6 +13,7 @@ import classNames from "classnames";
 import { v4 as uuid } from "uuid";
 import { ReactSortable } from "react-sortablejs";
 import Artwork from "@/src/components/media-displays/Artwork";
+import TogglableInput from "@/src/components/utils/input-extensions/TogglableInput";
 
 type UniqueTrack = { trackId: string; id: string };
 
@@ -32,13 +33,13 @@ export default function PlaylistEditor() {
   const originalTrackIds = (
     originalPlaylistData?.trackList.trackConnections ?? []
   ).map((trackConn) => trackConn.trackId);
+
+  const [playlistTitle, setPlaylistTitle] = useState("");
   const [playlistTracksIds, setPlaylistTracksIds] = useState<UniqueTrack[]>([]);
-  const [playlistLoaded, setPlaylistLoaded] = useState(false);
 
   useEffect(() => {
     let active = true;
     const load = async () => {
-      setPlaylistLoaded(false);
       const playlistData = await MusicLibrary.db.playlist.get({
         id: pages.data,
       });
@@ -48,13 +49,13 @@ export default function PlaylistEditor() {
       }
       if (active) {
         setOriginalPlaylistData(playlistData);
+        setPlaylistTitle(playlistData.title);
         setPlaylistTracksIds(
           playlistData.trackList.trackConnections.map((trackConn) => ({
             trackId: trackConn.trackId,
             id: uuid(),
           }))
         );
-        setPlaylistLoaded(true);
       }
     };
     load();
@@ -94,6 +95,7 @@ export default function PlaylistEditor() {
         id: originalPlaylistData.id,
       },
       {
+        title: playlistTitle,
         trackList: {
           update: {
             trackConnections: {
@@ -134,17 +136,31 @@ export default function PlaylistEditor() {
       type: success ? "success" : "error",
     });
   };
-  if (!playlistLoaded || trackLoadState !== DataState.Loaded) {
+  if (originalPlaylistData === null || trackLoadState !== DataState.Loaded) {
     return <FullCover />;
   }
+
+  const hasPlaylistChanged =
+    originalTrackIds.length !== playlistTracksIds.length ||
+    originalPlaylistData.title !== playlistTitle ||
+    originalTrackIds.reduce(
+      (same, id, index) => same || id !== playlistTracksIds[index].trackId,
+      false
+    );
+  const isSaveable = playlistTracksIds.length > 0 && hasPlaylistChanged;
   return (
     <VerticalSplit
       minWidth={300}
       left={
         <div className="flex flex-col h-full">
-          <span className="text-xl p-4 border-b-2">
-            {originalPlaylistData?.title}
-          </span>
+          <div className="text-xl p-2 border-b-2">
+            <TogglableInput
+              onChange={(newValue) => {
+                setPlaylistTitle(newValue);
+              }}
+              value={playlistTitle}
+            />
+          </div>
           <ReactSortable
             className="flex flex-col grow overflow-y-auto"
             list={playlistTracksIds}
@@ -196,15 +212,7 @@ export default function PlaylistEditor() {
           <div className="flex flex-col border-t-2 p-2 mt-auto">
             <button
               onClick={savePlaylist}
-              disabled={
-                playlistTracksIds.length === 0 ||
-                (originalTrackIds.length === playlistTracksIds.length &&
-                  originalTrackIds.reduce(
-                    (same, id, index) =>
-                      same && id === playlistTracksIds[index].trackId,
-                    true
-                  ))
-              }
+              disabled={!isSaveable}
               className="btn success"
             >
               Save Playlist
@@ -221,7 +229,7 @@ export default function PlaylistEditor() {
             }}
             value={filter}
             className="input"
-            placeholder="Filter results..."
+            placeholder="Filter tracks..."
           />
           <div className="flex flex-col overflow-auto">
             {tracks.filter(trackFilter).map((track) => {
