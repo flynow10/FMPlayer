@@ -94,7 +94,6 @@
     "postcss": "^8.4.21",
     "postinstall-postinstall": "^2.1.0",
     "prisma": "^5.5.2",
-    "prisma-dbml-generator": "^0.10.0",
     "prisma-docs-generator": "^0.8.0",
     "stylelint": "^15.8.0",
     "stylelint-config-standard-scss": "^11.0.0",
