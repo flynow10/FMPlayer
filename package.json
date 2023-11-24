@@ -104,6 +104,5 @@
     "typescript": "^5.2.2",
     "vite": "^4.1.0",
     "vite-api-server": "0.5.2"
-  },
-  "packageManager": "yarn@3.6.0"
+  }
 }
