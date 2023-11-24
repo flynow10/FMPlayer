@@ -1,28 +1,25 @@
-import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
+import { FullCover } from "@/src/components/utils/loading/FullCover";
 import { useDatabase, DataState } from "@/src/hooks/use-database";
 import { MusicLibrary } from "@/src/music/library/music-library";
 import { CircleEllipsis, Play } from "lucide-react";
-import { Blur } from "@/src/components/utils/loading-pages/Blur";
+import { Blur } from "@/src/components/utils/loading/Blur";
 import OrderedTrackList from "@/src/components/media-displays/OrderedTrackList";
 import Artwork from "@/src/components/media-displays/Artwork";
 import { usePageContext } from "@/src/contexts/PageContext";
 import { useAudioPlayer } from "@/src/hooks/use-audio-player";
+import LinkedArtistList from "@/src/components/media-displays/LinkedArtistList";
+import { useMediaContext } from "@/src/hooks/use-media-context";
 
 export default function AlbumDisplay() {
   const pages = usePageContext();
   const audioPlayer = useAudioPlayer();
+  const { show: showAlbumMenu } = useMediaContext("album");
   const [album, state] = useDatabase(
     () => MusicLibrary.db.album.get({ id: pages.data }),
     null,
     "Album",
     [pages]
   );
-
-  // Unfinished! Setup after refactoring audio playing component
-  // const playAlbum = useCallback((startIndex = 0) => {
-
-  //   props.onPlayMedia(props.albumId, "album");
-  // }, [props.onPlayMedia, props.albumId]);
 
   if (album === null) {
     return <FullCover />;
@@ -43,20 +40,16 @@ export default function AlbumDisplay() {
             <div></div>
             <div className="flex flex-col">
               <span className="text-2xl font-extrabold">{album.title}</span>
-              <span className="text-xl text-accent dark:invert">
-                {album.artists.map(({ artist }) => (
-                  <a
-                    key={artist.id}
-                    onClick={() => {
-                      pages.navigate("new", {
-                        type: "artist list",
-                        data: artist.id,
-                      });
-                    }}
-                  >
-                    {artist.name}
-                  </a>
-                ))}
+              <span className="text-xl">
+                <LinkedArtistList
+                  artistList={album.artists}
+                  onClickArtist={(artistId) => {
+                    pages.navigate("new", {
+                      type: "artist list",
+                      data: artistId,
+                    });
+                  }}
+                />
               </span>
               <span className="text-xs font-semibold">
                 {album.genre.name.toUpperCase()} &bull;{" "}
@@ -69,7 +62,7 @@ export default function AlbumDisplay() {
                   icon: <Play />,
                   name: "Play",
                   clickHandler: () => {
-                    audioPlayer.play.album(pages.data);
+                    audioPlayer.play.album(album);
                     return;
                   },
                 },
@@ -92,8 +85,13 @@ export default function AlbumDisplay() {
               ))}
               <button
                 className="ml-auto"
-                onClick={() => {
-                  alert("This is not a functional feature yet!");
+                onClick={(event) => {
+                  showAlbumMenu({
+                    event,
+                    props: {
+                      albumId: album.id,
+                    },
+                  });
                 }}
               >
                 <CircleEllipsis />

@@ -1,6 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { PlaySongAction } from "@/src/music/actions/play-song-action";
 import { MusicLibrary } from "@/src/music/library/music-library";
+import { AudioTag } from "@/src/music/player/audio-tag";
 import { Playlist } from "@/src/music/playlists/playlist";
 import { PlaylistHelper } from "@/src/music/utils/playlist-helper";
 import { Music } from "@/src/types/music";
@@ -8,13 +8,16 @@ import { useEffect, useState } from "react";
 
 type AudioPlayerEventType =
   | AudioTagEvents
-  | "nexttrack"
-  | "previoustrack"
-  | "restartedtrack"
+  | "nextTrack"
+  | "previousTrack"
+  | "restartedTrack"
+  | "moveToTrack"
   | "setupNewTrack"
   | "createAudioContext"
   | "changeRepeatMode"
-  | "loadNewTrack";
+  | "loadNewTrack"
+  | "playNewQueue"
+  | "updateQueue";
 type AudioTagEvents =
   | "play"
   | "pause"
@@ -24,80 +27,18 @@ type AudioTagEvents =
   | "ended";
 type AudioPlayerEventListener = (audioPlayer: AudioPlayer) => void;
 
-type AudioTagListenerPair<K extends keyof HTMLMediaElementEventMap> = {
-  type: K;
-  listener: (this: HTMLAudioElement, ev: HTMLMediaElementEventMap[K]) => any;
-};
-
-class AudioTag extends Audio {
-  public trackId: string;
-  public listeners: AudioTagListenerPair<keyof HTMLMediaElementEventMap>[] = [];
-  public mediaSourceNode: MediaElementAudioSourceNode;
-
-  public constructor(trackId: string, audioContext: AudioContext) {
-    super();
-    this.mediaSourceNode = new MediaElementAudioSourceNode(audioContext, {
-      mediaElement: this,
-    });
-    this.trackId = trackId;
-    this.crossOrigin = "*";
-  }
-
-  public async play(): Promise<void> {
-    await this.setFileSrc();
-    await super.play();
-  }
-
-  public async startLoad(): Promise<void> {
-    await this.setFileSrc();
-    this.load();
-  }
-
-  private async setFileSrc() {
-    if (this.src === "") {
-      const trackUrl = await MusicLibrary.audio.getAudioFileUrl(this.trackId);
-      if (trackUrl === null) {
-        throw new Error("Failed to retrieve track url from aws!");
-      }
-      if (this.src !== trackUrl) {
-        this.src = trackUrl;
-      }
-    }
-  }
-
-  public addEventListener<K extends keyof HTMLMediaElementEventMap>(
-    type: K,
-    listener: (this: HTMLAudioElement, ev: HTMLMediaElementEventMap[K]) => any,
-    options?: boolean | AddEventListenerOptions | undefined
-  ): void {
-    super.addEventListener(type, listener, options);
-    this.listeners.push({
-      type,
-      listener: listener as (
-        this: HTMLAudioElement,
-        ev: HTMLMediaElementEventMap[keyof HTMLMediaElementEventMap]
-      ) => any,
-    });
-  }
-
-  public removeAllEventListeners() {
-    this.listeners.forEach((pair) => {
-      this.removeEventListener(pair.type, pair.listener);
-    });
-    this.listeners = [];
-  }
-}
-
 type KeyMap = {
   currentTime: number | null;
   duration: number | null;
-  isPlaying: boolean | null;
+  isPlaying: boolean;
   currentTrackId: string | null;
+  currentTrackIndex: number;
   hasPlayedOnce: boolean;
   repeatMode: Music.RepeatMode;
   percentLoaded: number;
   audioLoaded: boolean;
   loadingNewTrack: boolean;
+  trackQueue: Playlist;
 };
 
 type HookKeys = {
@@ -113,7 +54,7 @@ const createHook = <Key extends keyof KeyMap>(
 ): (() => KeyMap[Key]) => {
   const eventArray = typeof events === "string" ? [events] : events;
   return () => {
-    const [state, setState] = useState(audioPlayer[hookName]);
+    const [state, setState] = useState(() => audioPlayer[hookName]);
     useEffect(() => {
       const listener = () => {
         setState(audioPlayer[hookName]);
@@ -126,7 +67,7 @@ const createHook = <Key extends keyof KeyMap>(
           audioPlayer.removeEventListener(eventName, listener);
         });
       };
-    });
+    }, [state]);
     return state;
   };
 };
@@ -138,22 +79,25 @@ export class AudioPlayer implements HookKeys {
     [Key in AudioPlayerEventType]: AudioPlayerEventListener[];
   } = {
     canplaythrough: [],
-    nexttrack: [],
+    nextTrack: [],
+    moveToTrack: [],
     pause: [],
     play: [],
-    previoustrack: [],
+    previousTrack: [],
     progress: [],
-    restartedtrack: [],
+    restartedTrack: [],
     timeupdate: [],
     ended: [],
     setupNewTrack: [],
     createAudioContext: [],
     changeRepeatMode: [],
     loadNewTrack: [],
+    playNewQueue: [],
+    updateQueue: [],
   };
 
-  private currentTrackIndex = 0;
-  private trackQueue: Playlist = new Playlist();
+  private _currentTrackIndex = 0;
+  private _trackQueue: Playlist = new Playlist();
   private _repeatMode: Music.RepeatMode = "none";
   private wasPlayingBeforeSeek: boolean | null = null;
   private seeking = false;
@@ -201,9 +145,17 @@ export class AudioPlayer implements HookKeys {
     return this.currentAudioTag.duration;
   }
 
+  public get currentTrackIndex() {
+    return this._currentTrackIndex;
+  }
+
   public get currentTrackId() {
     if (this.currentAudioTag === null) return null;
     return this.currentAudioTag.trackId;
+  }
+
+  public get trackQueue() {
+    return this._trackQueue;
   }
 
   public constructor() {
@@ -231,6 +183,11 @@ export class AudioPlayer implements HookKeys {
     "currentTrackId",
     "setupNewTrack"
   );
+  public useCurrentTrackIndex = createHook(
+    this,
+    "currentTrackIndex",
+    "setupNewTrack"
+  );
   public useHasPlayedOnce = createHook(
     this,
     "hasPlayedOnce",
@@ -249,8 +206,14 @@ export class AudioPlayer implements HookKeys {
   public useLoadingNewTrack = createHook(this, "loadingNewTrack", [
     "loadNewTrack",
     "setupNewTrack",
-    "nexttrack",
-    "previoustrack",
+    "nextTrack",
+    "previousTrack",
+    "moveToTrack",
+  ]);
+
+  public useTrackQueue = createHook(this, "trackQueue", [
+    "playNewQueue",
+    "updateQueue",
   ]);
 
   public setRepeatMode(mode: Music.RepeatMode) {
@@ -419,24 +382,24 @@ export class AudioPlayer implements HookKeys {
   }
 
   private getTrackId(): string | null {
-    if (this.trackQueue.isBlank()) {
+    if (this._trackQueue.isBlank()) {
       return null;
     } else {
-      return this.trackQueue.songList[this.currentTrackIndex].songId;
+      return this._trackQueue.trackList[this._currentTrackIndex].songId;
     }
   }
 
   private getNextId(): string | null {
-    if (this.trackQueue.isBlank()) {
+    if (this._trackQueue.isBlank()) {
       return null;
     } else {
-      if (this.currentTrackIndex + 1 === this.trackQueue.songList.length) {
+      if (this._currentTrackIndex + 1 === this._trackQueue.trackList.length) {
         if (this.repeatMode === "none") {
           return null;
         }
       }
-      return this.trackQueue.songList[
-        (this.currentTrackIndex + 1) % this.trackQueue.songList.length
+      return this._trackQueue.trackList[
+        (this._currentTrackIndex + 1) % this._trackQueue.trackList.length
       ].songId;
     }
   }
@@ -480,7 +443,7 @@ export class AudioPlayer implements HookKeys {
       return false;
     }
     this.currentAudioTag.currentTime = 0;
-    this.callEvent("restartedtrack");
+    this.callEvent("restartedTrack");
     return true;
   }
 
@@ -496,25 +459,36 @@ export class AudioPlayer implements HookKeys {
     }
     this.isLoadingNewTrack = true;
 
-    if (this.currentTrackIndex > 0) {
-      this.currentTrackIndex--;
+    if (this._currentTrackIndex > 0) {
+      this._currentTrackIndex--;
     } else if (this.repeatMode === "all") {
-      this.currentTrackIndex = this.trackQueue.songList.length - 1;
+      this._currentTrackIndex = this._trackQueue.trackList.length - 1;
     }
-    this.callEvent("previoustrack");
+    this.callEvent("previousTrack");
     await this.setupTrack();
   }
 
   public async nextTrack() {
     this.isLoadingNewTrack = true;
-    if (this.currentTrackIndex < this.trackQueue.songList.length - 1) {
-      this.currentTrackIndex++;
-      this.callEvent("nexttrack");
+    if (this._currentTrackIndex < this._trackQueue.trackList.length - 1) {
+      this._currentTrackIndex++;
+      this.callEvent("nextTrack");
       await this.setupTrack();
     } else {
-      this.currentTrackIndex = 0;
-      this.callEvent("nexttrack");
+      this._currentTrackIndex = 0;
+      this.callEvent("nextTrack");
       await this.setupTrack(this.repeatMode !== "none");
+    }
+  }
+
+  public async moveToTrack(trackIndex: number) {
+    if (trackIndex >= 0 && trackIndex < this._trackQueue.trackList.length) {
+      this.isLoadingNewTrack = true;
+      this._currentTrackIndex = trackIndex;
+      this.callEvent("moveToTrack");
+      await this.setupTrack();
+    } else {
+      throw new Error("This track index could not be played!");
     }
   }
 
@@ -555,8 +529,7 @@ export class AudioPlayer implements HookKeys {
   public play = {
     track: (trackId: string) => {
       this.beginLoadingNewTrack();
-      const playlist = new Playlist();
-      playlist.addAction(new PlaySongAction(trackId));
+      const playlist = new Playlist().addAction(new PlaySongAction(trackId));
       return this.playPlaylist(playlist);
     },
     trackList: async (
@@ -604,15 +577,91 @@ export class AudioPlayer implements HookKeys {
     },
   };
 
+  public queue = {
+    addTrack: async (
+      trackId: string | Music.DB.TableType<"Track">,
+      addNext = false
+    ) => {
+      const wasBlank = this._trackQueue.isBlank();
+      if (wasBlank) {
+        this.beginLoadingNewTrack();
+      }
+      if (typeof trackId !== "string") {
+        trackId = trackId.id;
+      }
+
+      const action: PlaySongAction = new PlaySongAction(trackId);
+      if (!addNext) {
+        this._trackQueue = this._trackQueue.addAction(action);
+      } else {
+        this._trackQueue = this._trackQueue.insertAction(
+          this.currentTrackIndex + 1,
+          action
+        );
+      }
+      this.callEvent("updateQueue");
+      if (wasBlank) {
+        this.callEvent("playNewQueue");
+        await this.setupTrack();
+      }
+      return true;
+    },
+    /**
+     * Adds Playlist to the queue by value not reference
+     **/
+    addTrackList: async (
+      trackList: string | Music.HelperDB.ThinTrackList,
+      addNext = false
+    ) => {
+      const wasBlank = this._trackQueue.isBlank();
+      if (wasBlank) {
+        this.beginLoadingNewTrack();
+      }
+      let loadedTrackList: Music.HelperDB.ThinTrackList;
+      if (typeof trackList === "string") {
+        const nullableTrackList = await MusicLibrary.db.trackList.get({
+          id: trackList,
+        });
+        if (nullableTrackList === null) {
+          return false;
+        }
+        loadedTrackList = nullableTrackList;
+      } else {
+        loadedTrackList = trackList;
+      }
+
+      const actions: PlaySongAction[] = loadedTrackList.trackConnections.map(
+        (trackConn) => {
+          return new PlaySongAction(trackConn.trackId);
+        }
+      );
+      if (!addNext) {
+        this._trackQueue = this._trackQueue.addAction(...actions);
+      } else {
+        this._trackQueue = this._trackQueue.insertAction(
+          this.currentTrackIndex + 1,
+          ...actions
+        );
+      }
+      this.callEvent("updateQueue");
+      if (wasBlank) {
+        this.callEvent("playNewQueue");
+        await this.setupTrack();
+      }
+      return true;
+    },
+  };
+
   private async playPlaylist(
     playlist: Playlist,
     startIndex = 0
   ): Promise<boolean> {
-    if (playlist.songList.length <= startIndex) {
+    if (playlist.trackList.length <= startIndex) {
       return false;
     }
-    this.trackQueue = playlist;
-    this.currentTrackIndex = startIndex;
+    this._trackQueue = playlist;
+    this._currentTrackIndex = startIndex;
+    this.callEvent("playNewQueue");
     await this.setupTrack();
     return true;
   }
@@ -634,7 +683,6 @@ export class AudioPlayer implements HookKeys {
   }
 
   private callEvent(event: AudioPlayerEventType) {
-    console.log("Event: " + event);
     this.eventListeners[event].forEach((listener) => {
       listener(this);
     });

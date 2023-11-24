@@ -10,6 +10,7 @@ import { Pages } from "@/src/types/pages";
 export default function App() {
   const [location, setLocation] = useState<Pages.Location>("Recently Added");
   const [searchString, setSearchString] = useState("");
+  const [queueOpen, setQueueOpen] = useState(false);
 
   const navigationMethod = useRef<Pages.NavigationMethod>();
   const audioPlayer = useAudioPlayer();
@@ -33,7 +34,7 @@ export default function App() {
   };
 
   const audioComponent = (
-    <div className="audio-controls px-20 py-4 border-t-2">
+    <div className="audio-controls py-4 border-t-2">
       {!hasPlayedOnce ? (
         <AudioControlPlaceholder onPlay={beginPlayback} />
       ) : (
@@ -47,6 +48,9 @@ export default function App() {
             } else {
               alert("An error occurred! Unable to navigate artist page!");
             }
+          }}
+          onClickQueue={() => {
+            setQueueOpen(!queueOpen);
           }}
         />
       )}
@@ -79,6 +83,7 @@ export default function App() {
         location={location}
         searchString={searchString}
         navigationRef={navigationMethod}
+        queueOpen={queueOpen}
       />
       {audioComponent}
     </div>

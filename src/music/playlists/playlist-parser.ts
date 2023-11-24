@@ -2,7 +2,7 @@ import { Action } from "@/src/music/actions/action";
 import { LoopAction } from "@/src/music/actions/loop-action";
 import { NumberAction } from "@/src/music/actions/number-action";
 import { PlaySongAction } from "@/src/music/actions/play-song-action";
-import { ActionSongPair } from "./playlist";
+import { ActionTrackPair } from "./playlist";
 import { Music } from "@/src/types/music";
 
 export class PlaylistParser {
@@ -10,11 +10,11 @@ export class PlaylistParser {
   public currentAction = 0;
   private readonly TOKEN_MISMATCH = new Error("Token mismatch!");
 
-  parse(actionList: Action[]): ActionSongPair[] {
+  parse(actionList: Action[]): ActionTrackPair[] {
     return this.parseToSongList(this.parseToAST(actionList));
   }
 
-  parseToSongList(ast: Block): ActionSongPair[] {
+  parseToSongList(ast: Block): ActionTrackPair[] {
     const scope = new Scope();
     ast.walk(scope);
     return scope.songs;
@@ -188,7 +188,7 @@ class NumberNode implements ASTNode {
 }
 
 class Scope {
-  public songs: ActionSongPair[];
+  public songs: ActionTrackPair[];
   constructor() {
     this.songs = [];
   }

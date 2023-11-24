@@ -26,7 +26,8 @@ export namespace Pages {
     | "Playlists"
     | "Genres"
     | "Import Media"
-    | "Edit Playlists";
+    | "Functions"
+    | "Settings";
 
   export type PageType =
     | "search results"
@@ -40,6 +41,8 @@ export namespace Pages {
     | "file upload"
     | "youtube upload"
     | "album display"
+    | "playlist display"
+    | "playlist editor"
     | "testing page";
 
   export type NavigationType = "new" | "back";
@@ -61,5 +64,6 @@ export namespace Pages {
     location: Location;
     currentLocation: Location;
     data?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    pageSlug: string;
   };
 }

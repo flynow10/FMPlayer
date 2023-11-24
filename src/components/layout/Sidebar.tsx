@@ -4,6 +4,7 @@ import { Pages } from "@/src/types/pages";
 import classNames from "classnames";
 import {
   Clock3,
+  Code,
   Disc3,
   Drama,
   FolderInput,
@@ -11,8 +12,8 @@ import {
   ListMusic,
   LucideIcon,
   Mic2,
-  Pencil,
   Search,
+  Settings,
 } from "lucide-react";
 import { Suggestion } from "minisearch";
 import { useState } from "react";
@@ -31,11 +32,12 @@ const libraryButtons: Pages.Location[] = [
   "Tracks",
   "Playlists",
   "Genres",
+  "Functions",
 ];
 
-const managementButtons: Pages.Location[] = ["Import Media", "Edit Playlists"];
+const managementButtons: Pages.Location[] = ["Import Media", "Settings"];
 
-const disabled: Pages.Location[] = ["Playlists", "Edit Playlists"];
+const disabled: Pages.Location[] = ["Functions", "Settings"];
 
 const iconMap: { location: Pages.Location; icon: LucideIcon }[] = [
   { location: "Recently Added", icon: Clock3 },
@@ -45,7 +47,8 @@ const iconMap: { location: Pages.Location; icon: LucideIcon }[] = [
   { location: "Playlists", icon: ListMusic },
   { location: "Genres", icon: Drama },
   { location: "Import Media", icon: FolderInput },
-  { location: "Edit Playlists", icon: Pencil },
+  { location: "Functions", icon: Code },
+  { location: "Settings", icon: Settings },
 ];
 
 export default function Sidebar(props: SidebarProps) {

@@ -1,7 +1,7 @@
 import { VercelAPI } from "@/src/api/vercel-API";
 import App from "@/src/components/App";
 import { Login } from "@/src/components/auth/Login";
-import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
+import { FullCover } from "@/src/components/utils/loading/FullCover";
 import { getApplicationDebugConfig } from "@/config/app";
 import { Suspense } from "react";
 import {

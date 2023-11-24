@@ -12,6 +12,13 @@ import AlbumDisplay from "@/src/components/pages/AlbumDisplay";
 import ArtistList from "@/src/components/pages/ArtistList";
 import SearchResults from "@/src/components/pages/SearchResults";
 import { PageContext } from "@/src/contexts/PageContext";
+import PlaylistList from "@/src/components/pages/PlaylistList";
+import PlaylistDisplay from "@/src/components/pages/PlaylistDisplay";
+import PlaylistCtxMenu from "@/src/components/context-menus/PlaylistCtxMenu";
+import { slugify } from "@/src/utils/string-utils";
+import PlaylistEditor from "@/src/components/pages/PlaylistEditor";
+import AlbumCtxMenu from "@/src/components/context-menus/AlbumCtxMenu";
+import TrackCtxMenu from "@/src/components/context-menus/TrackCtxMenu";
 
 type PageProps = {
   location: Pages.Location;
@@ -23,15 +30,50 @@ type PageProps = {
   onNavigate: Pages.NavigationMethod;
 };
 
+const PageComponents: {
+  [Key in Pages.PageType]: typeof AlbumDisplay;
+} = {
+  "recent list": RecentlyAddedList,
+
+  "file search": UploadSearch,
+
+  "file upload": FileUpload,
+
+  "youtube upload": YoutubeUpload,
+
+  "album list": AlbumList,
+
+  "track list": TrackList,
+
+  "genre list": GenreList,
+
+  "artist list": ArtistList,
+
+  "album display": AlbumDisplay,
+
+  "search results": SearchResults,
+
+  "testing page": TestingPage,
+
+  "playlist list": PlaylistList,
+
+  "playlist display": PlaylistDisplay,
+
+  "playlist editor": PlaylistEditor,
+};
+
 export default function Page(props: PageProps) {
   const isHidden =
       props.location !== props.currentLocation ||
       props.locationPageCount !== props.index + 1,
     isHiddenClass = isHidden ? "hidden " : "";
   const pageClass = isHiddenClass + "relative max-h-full min-h-0 grow";
+  const pageSlug = slugify(props.location, props.type, props.index);
+  const PageComponent = PageComponents[props.type];
   return (
     <PageContext.Provider
       value={{
+        pageSlug,
         navigate: props.onNavigate,
         location: props.location,
         currentLocation: props.currentLocation,
@@ -47,60 +89,13 @@ export default function Page(props: PageProps) {
               </span>
             }
           >
-            {(() => {
-              switch (props.type) {
-                case "recent list": {
-                  return <RecentlyAddedList />;
-                }
-
-                case "file search": {
-                  return <UploadSearch />;
-                }
-
-                case "file upload": {
-                  return <FileUpload />;
-                }
-
-                case "youtube upload": {
-                  return <YoutubeUpload />;
-                }
-
-                case "album list": {
-                  return <AlbumList />;
-                }
-
-                case "track list": {
-                  return <TrackList />;
-                }
-
-                case "genre list": {
-                  return <GenreList />;
-                }
-
-                case "artist list": {
-                  return <ArtistList />;
-                }
-
-                case "album display": {
-                  return <AlbumDisplay />;
-                }
-
-                case "search results": {
-                  return <SearchResults />;
-                }
-
-                case "testing page": {
-                  return <TestingPage />;
-                }
-
-                default: {
-                  return <span>Page Missing! Type: {props.type}</span>;
-                }
-              }
-            })()}
+            <PageComponent />
           </ErrorBoundary>
         </div>
       </div>
+      <PlaylistCtxMenu pageSlug={pageSlug} />
+      <AlbumCtxMenu pageSlug={pageSlug} />
+      <TrackCtxMenu pageSlug={pageSlug} />
     </PageContext.Provider>
   );
 }

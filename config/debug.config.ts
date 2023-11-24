@@ -3,5 +3,6 @@ export function getDebugConfig() {
     useLogin: false,
     showDebugToolBar: true,
     showIds: false,
+    showRawUploadData: false,
   };
 }

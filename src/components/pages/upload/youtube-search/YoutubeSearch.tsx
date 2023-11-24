@@ -3,7 +3,7 @@ import { isYoutubeUrl } from "@/src/utils/url-utils";
 import { useState } from "react";
 import { API } from "@/src/types/api";
 import { YoutubeSearchResult } from "@/src/components/pages/upload/youtube-search/YoutubeSearchResult";
-import { FullCover } from "@/src/components/utils/loading-pages/FullCover";
+import { FullCover } from "@/src/components/utils/loading/FullCover";
 import SuggestionSearch from "@/src/components/utils/input-extensions/SuggestionSearch";
 
 type YoutubeSearchProps = {

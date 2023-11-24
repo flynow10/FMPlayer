@@ -6,11 +6,13 @@ import { Pages } from "@/src/types/pages";
 import AblyStatusSymbol from "@/src/components/utils/AblyStatusSymbol";
 import DebugToolbar from "@/src/components/utils/DebugToolbar";
 import { getApplicationDebugConfig } from "@/config/app";
+import QueuePanel from "@/src/components/layout/queue/QueuePanel";
 
 type MainProps = {
   location: Pages.Location;
   searchString: string;
   navigationRef: MutableRefObject<Pages.NavigationMethod | undefined>;
+  queueOpen: boolean;
 };
 const DEFAULT_PAGES: Record<Pages.Location, Pages.PageStore> = {
   Search: { type: "search results" },
@@ -19,8 +21,9 @@ const DEFAULT_PAGES: Record<Pages.Location, Pages.PageStore> = {
   Playlists: { type: "playlist list" },
   Genres: { type: "genre list" },
   "Import Media": { type: "file search" },
-  Artists: { type: "artist list" }, // no page created yet
-  "Edit Playlists": { type: "album display" }, // no page created yet
+  Artists: { type: "artist list" },
+  Functions: { type: "album display" }, // no page created yet
+  Settings: { type: "album display" }, // no page created yet
   "Recently Added": { type: "recent list" },
 };
 const debug = getApplicationDebugConfig();
@@ -31,12 +34,13 @@ export default function Main(props: MainProps) {
   >({
     Albums: [],
     Artists: [],
-    "Edit Playlists": [],
+    Functions: [],
     Genres: [],
     "Import Media": [],
     Playlists: [],
     "Recently Added": [],
     Search: [],
+    Settings: [],
     Tracks: [],
   });
 
@@ -114,7 +118,7 @@ export default function Main(props: MainProps) {
     }
   );
   return (
-    <div className="main overflow-clip flex flex-col">
+    <div className="main relative overflow-clip flex flex-col">
       <div className="py-3 border-b-2 px-4">
         <div className="flex items-center w-full">
           <div className="flex items-center grow">
@@ -146,6 +150,7 @@ export default function Main(props: MainProps) {
         )}
       </div>
       {pageElements}
+      <QueuePanel open={props.queueOpen} />
     </div>
   );
 }
