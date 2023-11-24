@@ -34,6 +34,8 @@ static/*
 
 # Seeded songs
 !static/songs
+
+# Config
 .env*.local
 
 # Prisma Docs
