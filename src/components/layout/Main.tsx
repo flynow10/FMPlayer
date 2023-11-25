@@ -22,7 +22,7 @@ const DEFAULT_PAGES: Record<Pages.Location, Pages.PageStore> = {
   Genres: { type: "genre list" },
   "Import Media": { type: "file search" },
   Artists: { type: "artist list" },
-  Functions: { type: "album display" }, // no page created yet
+  Functions: { type: "function list" },
   Settings: { type: "album display" }, // no page created yet
   "Recently Added": { type: "recent list" },
 };

@@ -19,6 +19,7 @@ import { slugify } from "@/src/utils/string-utils";
 import PlaylistEditor from "@/src/components/pages/PlaylistEditor";
 import AlbumCtxMenu from "@/src/components/context-menus/AlbumCtxMenu";
 import TrackCtxMenu from "@/src/components/context-menus/TrackCtxMenu";
+import FunctionEditor from "@/src/components/pages/FunctionEditor";
 
 type PageProps = {
   location: Pages.Location;
@@ -60,6 +61,10 @@ const PageComponents: {
   "playlist display": PlaylistDisplay,
 
   "playlist editor": PlaylistEditor,
+
+  "function editor": FunctionEditor,
+
+  "function list": PlaylistList,
 };
 
 export default function Page(props: PageProps) {
