@@ -10,6 +10,7 @@ type SortableActionProps = {
   action: Functions.FlattenedActionState;
   depth: number;
   clone: boolean;
+  childCount?: number;
 };
 
 export default function SortableAction(props: SortableActionProps) {
@@ -36,6 +37,7 @@ export default function SortableAction(props: SortableActionProps) {
       ghost={isDragging}
       inToolBox={false}
       style={style}
+      childCount={props.childCount}
       handleProps={{
         ...attributes,
         ...listeners,

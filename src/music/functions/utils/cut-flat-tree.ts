@@ -4,7 +4,7 @@ import { UniqueIdentifier } from "@dnd-kit/core";
 
 export function cutFlatTree(
   flatTree: Functions.FlattenedActionState[],
-  id: UniqueIdentifier
+  cutId: UniqueIdentifier
 ) {
-  return removeChildrenOf(flatTree, [id]).filter(({ id }) => id !== id);
+  return removeChildrenOf(flatTree, [cutId]).filter(({ id }) => id !== cutId);
 }

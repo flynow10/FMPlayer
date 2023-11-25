@@ -3,6 +3,7 @@ import { IndentationWidth } from "@/src/components/functions/FunctionEditorConte
 import SortableAction from "@/src/components/functions/SortableAction";
 import { FunctionEditor } from "@/src/contexts/FunctionEditor";
 import { useFlattenedTree } from "@/src/hooks/functions/use-flattened-tree";
+import { getChildCount } from "@/src/music/functions/utils/get-child-count";
 import { getDropProjection } from "@/src/music/functions/utils/get-drop-projection";
 import { Functions } from "@/src/types/functions";
 import {
@@ -10,6 +11,7 @@ import {
   DropAnimation,
   defaultDropAnimation,
 } from "@dnd-kit/core";
+import { restrictToWindowEdges } from "@dnd-kit/modifiers";
 import {
   SortableContext,
   verticalListSortingStrategy,
@@ -88,12 +90,23 @@ export default function SortableFunctionDisplay({
         ))}
       </ActionList>
       {createPortal(
-        <DragOverlay dropAnimation={dropAnimationConfig}>
+        <DragOverlay
+          modifiers={[
+            (args) => {
+              const newTransform = restrictToWindowEdges(args);
+              console.log("Old:", args.transform);
+              console.log("New:", newTransform);
+              return newTransform;
+            },
+          ]}
+          dropAnimation={dropAnimationConfig}
+        >
           {activeId && activeAction ? (
             <SortableAction
               id={activeAction.id}
               action={activeAction}
               depth={activeAction.depth}
+              childCount={getChildCount(functionTree, activeAction.id) + 1}
               clone
             />
           ) : null}
