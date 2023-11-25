@@ -31,3 +31,11 @@ img,
 iframe {
   @apply dark:invert;
 }
+
+@layer base {
+  *,
+  ::before,
+  ::after {
+    @apply border-accent dark:border-inverted-accent;
+  }
+}

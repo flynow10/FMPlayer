@@ -1,7 +1,7 @@
 import { IndentationWidth } from "@/src/components/functions/FunctionEditorContext";
 import { Functions } from "@/src/types/functions";
 import classNames from "classnames";
-import { Menu } from "lucide-react";
+import { Menu, Plus } from "lucide-react";
 import { HTMLAttributes, forwardRef } from "react";
 
 type ActionProps = Omit<HTMLAttributes<HTMLDivElement>, "id"> & {
@@ -9,8 +9,9 @@ type ActionProps = Omit<HTMLAttributes<HTMLDivElement>, "id"> & {
   clone: boolean;
   ghost: boolean;
   depth: number;
+  childCount?: number;
   inToolBox: boolean;
-  handleProps: HTMLAttributes<HTMLOrSVGElement>;
+  handleProps: HTMLAttributes<HTMLDivElement>;
   wrapperRef?: React.Ref<HTMLDivElement>;
 };
 
@@ -20,6 +21,7 @@ export default forwardRef<HTMLDivElement, ActionProps>(function Action(
     clone,
     ghost,
     depth,
+    childCount,
     inToolBox,
     wrapperRef,
     handleProps,
@@ -28,9 +30,10 @@ export default forwardRef<HTMLDivElement, ActionProps>(function Action(
   },
   ref
 ) {
+  const HandleElement = !inToolBox ? Menu : Plus;
   return (
     <div
-      className={classNames("box-border", {
+      className={classNames("box-border w-fit", {
         "inline-block pt-1 pointer-events-none": clone,
         "opacity-50": ghost,
       })}
@@ -49,11 +52,27 @@ export default forwardRef<HTMLDivElement, ActionProps>(function Action(
           className="h-full hover:bg-gray-400 m-1 p-1 rounded-sm"
           {...handleProps}
         >
-          <Menu className="my-auto text-accent" />
+          <HandleElement className="my-auto text-accent" />
         </div>
         <span>
           {action.type}: {JSON.stringify(inToolBox)}
         </span>
+        {!clone &&
+          depth > 0 &&
+          new Array(depth).fill(0).map((_, index) => (
+            <div
+              key={index}
+              className="absolute border-l-2 border-accent -bottom-1 -top-2"
+              style={{
+                left: `-${IndentationWidth * (index + 0.5)}px`,
+              }}
+            ></div>
+          ))}
+        {clone && childCount && childCount > 1 ? (
+          <span className="absolute -top-2 -right-2 rounded-[50%] flex items-center justify-center w-6 h-6 bg-accent-highlighted">
+            {childCount}
+          </span>
+        ) : null}
       </div>
     </div>
   );
