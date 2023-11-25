@@ -20,10 +20,10 @@ export default function DebugToolbar(props: DebugToolbarProps) {
         <button
           className="px-2 border-2 rounded-md"
           onClick={() =>
-            props.onNavigate(props.location, "new", { type: "testing page" })
+            props.onNavigate(props.location, "new", { type: "function editor" })
           }
         >
-          Go To Testing Page
+          Go To Function Builder
         </button>
       </div>
     </div>

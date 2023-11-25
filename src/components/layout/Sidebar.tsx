@@ -37,7 +37,7 @@ const libraryButtons: Pages.Location[] = [
 
 const managementButtons: Pages.Location[] = ["Import Media", "Settings"];
 
-const disabled: Pages.Location[] = ["Functions", "Settings"];
+const disabled: Pages.Location[] = ["Settings"];
 
 const iconMap: { location: Pages.Location; icon: LucideIcon }[] = [
   { location: "Recently Added", icon: Clock3 },

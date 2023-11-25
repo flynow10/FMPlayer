@@ -37,12 +37,14 @@ export namespace Pages {
     | "genre list"
     | "recent list"
     | "artist list"
+    | "function list"
     | "file search"
     | "file upload"
     | "youtube upload"
     | "album display"
     | "playlist display"
     | "playlist editor"
+    | "function editor"
     | "testing page";
 
   export type NavigationType = "new" | "back";
