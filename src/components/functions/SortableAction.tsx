@@ -8,6 +8,7 @@ import React from "react";
 type SortableActionProps = {
   id: UniqueIdentifier;
   action: Functions.FlattenedActionState;
+  setAction: Functions.SetAction<Functions.ActionState>;
   depth: number;
   clone: boolean;
   childCount?: number;
@@ -40,6 +41,7 @@ export default function SortableAction(props: SortableActionProps) {
       wrapperRef={setDroppableNodeRef}
       ref={setDraggableNodeRef}
       action={props.action}
+      setAction={props.setAction}
       clone={props.clone}
       depth={props.depth}
       ghost={isDragging}

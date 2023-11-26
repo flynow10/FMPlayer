@@ -34,10 +34,6 @@ export namespace Functions {
 
   export type FunctionTree = ActionState[];
 
-  export type SetFunctionTree = React.Dispatch<
-    React.SetStateAction<FunctionTree>
-  >;
-
   export type FlattenedActionState = ActionState & {
     parentId: UniqueIdentifier | null;
     depth: number;
@@ -45,4 +41,16 @@ export namespace Functions {
   };
 
   export type DraggingGroup = "actions" | "tracks" | "trash";
+
+  export type SetFunctionTree = React.Dispatch<
+    React.SetStateAction<FunctionTree>
+  >;
+
+  export type SetAction<A extends ActionState> = React.Dispatch<
+    React.SetStateAction<A>
+  >;
+
+  export type SetTrackExpression = React.Dispatch<
+    React.SetStateAction<TrackExpression | null>
+  >;
 }

@@ -6,11 +6,13 @@ import { UniqueIdentifier, useDroppable } from "@dnd-kit/core";
 type TrackDroppableProps = {
   actionId: UniqueIdentifier;
   trackExpression: Functions.TrackExpression | null;
+  setTrackExpression: Functions.SetTrackExpression;
 };
 
 export default function TrackDroppable({
   actionId,
   trackExpression,
+  setTrackExpression,
 }: TrackDroppableProps) {
   const { setNodeRef, isOver } = useDroppable({
     id: `tracks-${actionId}`,
@@ -22,7 +24,14 @@ export default function TrackDroppable({
           id={trackExpression.id}
           trackId={trackExpression.trackId}
           inToolBox={false}
-          setTrackId={() => {}}
+          clone={false}
+          setTrackId={(trackId) => {
+            setTrackExpression((prev) =>
+              prev !== null
+                ? { ...prev, trackId }
+                : { id: trackExpression.id, trackId }
+            );
+          }}
         />
       ) : (
         <span>Track Expression</span>

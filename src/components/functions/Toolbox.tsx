@@ -2,15 +2,9 @@ import Action from "@/src/components/functions/Action";
 import ActionList from "@/src/components/functions/ActionList";
 import Trash from "@/src/components/functions/Trash";
 import TrackLiteral from "@/src/components/functions/draggables/TrackLiteral";
-import { fadeOutAnimationConfig } from "@/src/components/functions/utils/fade-out-animation";
-import { FunctionEditor } from "@/src/contexts/FunctionEditor";
 import { generateGroupId } from "@/src/music/functions/utils/generate-group-id";
 import { Functions } from "@/src/types/functions";
-import { DragOverlay } from "@dnd-kit/core";
-import { restrictToWindowEdges } from "@dnd-kit/modifiers";
 import classNames from "classnames";
-import { useContext } from "react";
-import { createPortal } from "react-dom";
 
 type ToolboxProps = {
   setFunctionTree: Functions.SetFunctionTree;
@@ -31,7 +25,6 @@ const toolboxActionsTypes: Functions.ActionState[] = [
 ];
 
 export default function Toolbox({ setFunctionTree }: ToolboxProps) {
-  const { activeId, activeGroup } = useContext(FunctionEditor);
   return (
     <div className="border-r-2 flex flex-col">
       <span className="border-b-2 text-2xl text-center p-2">Toolbox</span>
@@ -41,6 +34,7 @@ export default function Toolbox({ setFunctionTree }: ToolboxProps) {
           <Action
             key={action.type}
             action={action}
+            setAction={() => {}}
             clone={false}
             ghost={false}
             depth={0}
@@ -67,24 +61,9 @@ export default function Toolbox({ setFunctionTree }: ToolboxProps) {
           id={generateGroupId("tracks")}
           trackId=""
           inToolBox
+          clone={false}
           setTrackId={() => {}}
         />
-        {createPortal(
-          <DragOverlay
-            dropAnimation={fadeOutAnimationConfig}
-            modifiers={[restrictToWindowEdges]}
-          >
-            {activeId && activeGroup === "tracks" ? (
-              <TrackLiteral
-                id={activeId}
-                trackId=""
-                inToolBox
-                setTrackId={() => {}}
-              />
-            ) : null}
-          </DragOverlay>,
-          document.body
-        )}
       </ActionList>
       <Trash>
         {(isOver, ref) => (
