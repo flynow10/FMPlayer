@@ -21,9 +21,16 @@ export default function TrackLiteral(props: TrackLiteralProps) {
   return (
     <TrackShape
       ref={setNodeRef}
-      className={classNames("bg-accent", "overflow-hidden", "flex", "gap-1", {
-        "opacity-0": isDragging,
-      })}
+      className={classNames(
+        "bg-accent",
+        "dark:bg-inverted-accent",
+        "overflow-hidden",
+        "flex",
+        "gap-1",
+        {
+          "opacity-20": isDragging,
+        }
+      )}
     >
       <div ref={setActivatorNodeRef} {...attributes} {...listeners}>
         <Menu />

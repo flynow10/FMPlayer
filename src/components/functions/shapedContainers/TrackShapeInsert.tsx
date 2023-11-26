@@ -12,14 +12,14 @@ export default forwardRef<HTMLDivElement, TrackShapeInsertProps>(
     return (
       <TrackShape
         ref={ref}
-        className={classNames({
-          "px-2": !children,
-          "bg-gray-900 border-accent border-2": over,
-          "bg-gray-700": !over,
+        className={classNames("px-2", {
+          "dark:bg-gray-200 bg-gray-400 border-accent dark:border-inverted-accent border-2":
+            over,
+          "bg-gray-300": !over,
         })}
         {...props}
       >
-        {!children ? <span>Track Input</span> : children}
+        {children}
       </TrackShape>
     );
   }
