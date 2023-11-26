@@ -65,7 +65,7 @@ export default forwardRef<HTMLDivElement, ActionProps>(function Action(
       {...divProps}
     >
       <div
-        className="relative items-center flex gap-2 p-2 rounded-md border-2 border-accent dark:border-inverted-accent"
+        className="relative items-center flex gap-2 p-2 rounded-md border-2 border-accent dark:border-inverted-accent bg-white"
         ref={ref}
         style={style}
       >
