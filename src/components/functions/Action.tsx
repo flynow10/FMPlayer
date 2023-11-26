@@ -55,7 +55,7 @@ export default forwardRef<HTMLDivElement, ActionProps>(function Action(
   return (
     <div
       className={classNames("box-border w-fit", {
-        "inline-block pt-1 pointer-events-none": clone,
+        "inline-block pointer-events-none": clone,
         "opacity-50": ghost,
       })}
       ref={wrapperRef}
