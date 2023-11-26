@@ -1,8 +1,10 @@
 import { IndentationWidth } from "@/src/components/functions/FunctionEditorContext";
+import PlayAction from "@/src/components/functions/actions/PlayAction";
+import { getActionName } from "@/src/music/functions/utils/get-action-name";
 import { Functions } from "@/src/types/functions";
 import classNames from "classnames";
 import { Menu, Plus } from "lucide-react";
-import { HTMLAttributes, forwardRef } from "react";
+import React, { HTMLAttributes, forwardRef } from "react";
 
 type ActionProps = Omit<HTMLAttributes<HTMLDivElement>, "id"> & {
   action: Functions.ActionState;
@@ -31,6 +33,16 @@ export default forwardRef<HTMLDivElement, ActionProps>(function Action(
   ref
 ) {
   const HandleElement = !inToolBox ? Menu : Plus;
+
+  const getActionComponent = () => {
+    switch (action.type) {
+      case "play": {
+        return <PlayAction action={action} />;
+      }
+    }
+    return <span>Missing action</span>;
+  };
+
   return (
     <div
       className={classNames("box-border w-fit", {
@@ -44,7 +56,7 @@ export default forwardRef<HTMLDivElement, ActionProps>(function Action(
       {...divProps}
     >
       <div
-        className="relative items-center flex gap-2 text-xl p-2 rounded-md border-2 border-accent dark:invert dark:text-white dark:bg-black bg-white"
+        className="relative items-center flex gap-2 p-2 rounded-md border-2 border-accent dark:invert dark:text-white dark:bg-black bg-white"
         ref={ref}
         style={style}
       >
@@ -54,9 +66,8 @@ export default forwardRef<HTMLDivElement, ActionProps>(function Action(
         >
           <HandleElement className="my-auto text-accent" />
         </div>
-        <span>
-          {action.type}: {JSON.stringify(inToolBox)}
-        </span>
+        <span className="text-xl">{getActionName(action.type)}</span>
+        {!inToolBox && getActionComponent()}
         {!clone &&
           depth > 0 &&
           new Array(depth).fill(0).map((_, index) => (
