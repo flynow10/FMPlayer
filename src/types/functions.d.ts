@@ -3,6 +3,7 @@ import React from "react";
 
 export namespace Functions {
   export type FunctionContext = {
+    activeGroup: DraggingGroup | null;
     activeId: UniqueIdentifier | null;
     overId: UniqueIdentifier | null;
     offsetLeft: number;
@@ -10,10 +11,25 @@ export namespace Functions {
 
   export type ActionType = "play" | "loop";
 
-  export type ActionState = {
+  export type BaseActionState = {
     id: string;
-    type: ActionType;
     children: ActionState[];
+  };
+  export type ActionState = PlayActionState | LoopActionState;
+
+  export type PlayActionState = BaseActionState & {
+    type: "play";
+    trackExpression: TrackExpression | null;
+  };
+
+  export type LoopActionState = BaseActionState & {
+    type: "loop";
+  };
+
+  export type TrackExpression = TrackLiteral;
+  export type TrackLiteral = {
+    id: UniqueIdentifier;
+    trackId: string;
   };
 
   export type FunctionTree = ActionState[];
@@ -27,4 +43,6 @@ export namespace Functions {
     depth: number;
     index: number;
   };
+
+  export type DraggingGroup = "actions" | "tracks" | "trash";
 }

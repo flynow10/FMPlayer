@@ -1,34 +1,37 @@
 import FunctionEditorContext from "@/src/components/functions/FunctionEditorContext";
 import SortableFunctionDisplay from "@/src/components/functions/SortableFunctionDisplay";
 import Toolbox from "@/src/components/functions/Toolbox";
+import { generateGroupId } from "@/src/music/functions/utils/generate-group-id";
 import { Functions } from "@/src/types/functions";
 import { useState } from "react";
-import { v4 as uuid } from "uuid";
 
 export default function FunctionEditor() {
   const [functionTree, setFunctionTree] = useState<Functions.FunctionTree>([
     {
-      id: uuid(),
+      id: generateGroupId("actions"),
       children: [],
       type: "play",
+      trackExpression: null,
     },
     {
-      id: uuid(),
+      id: generateGroupId("actions"),
       children: [
         {
-          id: uuid(),
+          id: generateGroupId("actions"),
           children: [],
           type: "play",
+          trackExpression: null,
         },
         {
-          id: uuid(),
+          id: generateGroupId("actions"),
           children: [],
           type: "loop",
         },
         {
-          id: uuid(),
+          id: generateGroupId("actions"),
           children: [],
           type: "play",
+          trackExpression: null,
         },
       ],
       type: "loop",

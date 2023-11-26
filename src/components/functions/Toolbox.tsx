@@ -1,30 +1,46 @@
 import Action from "@/src/components/functions/Action";
 import ActionList from "@/src/components/functions/ActionList";
-import { TRASH_ID } from "@/src/components/functions/FunctionEditorContext";
+import Trash from "@/src/components/functions/Trash";
+import TrackLiteral from "@/src/components/functions/draggables/TrackLiteral";
+import { fadeOutAnimationConfig } from "@/src/components/functions/utils/fade-out-animation";
+import { FunctionEditor } from "@/src/contexts/FunctionEditor";
+import { generateGroupId } from "@/src/music/functions/utils/generate-group-id";
 import { Functions } from "@/src/types/functions";
-import { useDroppable } from "@dnd-kit/core";
+import { DragOverlay } from "@dnd-kit/core";
+import { restrictToWindowEdges } from "@dnd-kit/modifiers";
 import classNames from "classnames";
-import { v4 as uuid } from "uuid";
+import { useContext } from "react";
+import { createPortal } from "react-dom";
 
 type ToolboxProps = {
   setFunctionTree: Functions.SetFunctionTree;
 };
 
-const toolboxActionsTypes: Functions.ActionType[] = ["play", "loop"];
+const toolboxActionsTypes: Functions.ActionState[] = [
+  {
+    id: generateGroupId("actions"),
+    children: [],
+    type: "play",
+    trackExpression: null,
+  },
+  {
+    id: generateGroupId("actions"),
+    children: [],
+    type: "loop",
+  },
+];
 
 export default function Toolbox({ setFunctionTree }: ToolboxProps) {
-  const { setNodeRef: setDeleteNodeRef, isOver } = useDroppable({
-    id: TRASH_ID,
-  });
-
+  const { activeId, activeGroup } = useContext(FunctionEditor);
   return (
     <div className="border-r-2 flex flex-col">
       <span className="border-b-2 text-2xl text-center p-2">Toolbox</span>
       <ActionList>
-        {toolboxActionsTypes.map((actionType) => (
+        <span className="text-xl border-b-2">Control</span>
+        {toolboxActionsTypes.map((action) => (
           <Action
-            key={actionType}
-            action={{ id: uuid(), children: [], type: actionType }}
+            key={action.type}
+            action={action}
             clone={false}
             ghost={false}
             depth={0}
@@ -34,9 +50,9 @@ export default function Toolbox({ setFunctionTree }: ToolboxProps) {
                   return [
                     ...prev,
                     {
-                      id: uuid(),
+                      ...action,
+                      id: generateGroupId("actions"),
                       children: [],
-                      type: actionType,
                     },
                   ];
                 });
@@ -46,24 +62,55 @@ export default function Toolbox({ setFunctionTree }: ToolboxProps) {
             inToolBox
           />
         ))}
+        <span className="text-xl border-b-2">Literals</span>
+        <div className="dark:invert">
+          <TrackLiteral
+            id={generateGroupId("tracks")}
+            trackId=""
+            inToolBox
+            setTrackId={() => {}}
+          />
+          {createPortal(
+            <DragOverlay
+              dropAnimation={fadeOutAnimationConfig}
+              modifiers={[restrictToWindowEdges]}
+            >
+              {activeId && activeGroup === "tracks" ? (
+                <div className="dark:invert">
+                  <TrackLiteral
+                    id={activeId}
+                    trackId=""
+                    inToolBox
+                    setTrackId={() => {}}
+                  />
+                </div>
+              ) : null}
+            </DragOverlay>,
+            document.body
+          )}
+        </div>
       </ActionList>
-      <div
-        ref={setDeleteNodeRef}
-        className={classNames(
-          "dark:invert",
-          "text-center",
-          "text-white",
-          "border-accent",
-          "border-t-2",
-          "p-4",
-          {
-            "bg-red-500": !isOver,
-            "bg-red-600": isOver,
-          }
+      <Trash>
+        {(isOver, ref) => (
+          <div
+            ref={ref}
+            className={classNames(
+              "dark:invert",
+              "text-center",
+              "text-white",
+              "border-accent",
+              "border-t-2",
+              "p-4",
+              {
+                "bg-red-500": !isOver,
+                "bg-red-600": isOver,
+              }
+            )}
+          >
+            <span className="text-xl">Delete</span>
+          </div>
         )}
-      >
-        <span className="text-xl">Delete</span>
-      </div>
+      </Trash>
     </div>
   );
 }

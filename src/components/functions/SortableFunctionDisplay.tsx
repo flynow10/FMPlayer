@@ -1,22 +1,18 @@
 import ActionList from "@/src/components/functions/ActionList";
 import { IndentationWidth } from "@/src/components/functions/FunctionEditorContext";
 import SortableAction from "@/src/components/functions/SortableAction";
+import { fadeOutAnimationConfig } from "@/src/components/functions/utils/fade-out-animation";
 import { FunctionEditor } from "@/src/contexts/FunctionEditor";
 import { useFlattenedTree } from "@/src/hooks/functions/use-flattened-tree";
 import { getChildCount } from "@/src/music/functions/utils/get-child-count";
 import { getDropProjection } from "@/src/music/functions/utils/get-drop-projection";
 import { Functions } from "@/src/types/functions";
-import {
-  DragOverlay,
-  DropAnimation,
-  defaultDropAnimation,
-} from "@dnd-kit/core";
+import { DragOverlay } from "@dnd-kit/core";
 import { restrictToWindowEdges } from "@dnd-kit/modifiers";
 import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
 import { useContext, useMemo } from "react";
 import { createPortal } from "react-dom";
 
@@ -24,33 +20,11 @@ type SortableFunctionDisplayProps = {
   functionTree: Functions.FunctionTree;
 };
 
-const dropAnimationConfig: DropAnimation = {
-  keyframes({ transform }) {
-    return [
-      { opacity: 1, transform: CSS.Transform.toString(transform.initial) },
-      {
-        opacity: 0,
-        transform: CSS.Transform.toString({
-          ...transform.final,
-          x: transform.final.x + 5,
-          y: transform.final.y + 5,
-        }),
-      },
-    ];
-  },
-  easing: "ease-out",
-  sideEffects({ active }) {
-    active.node.animate([{ opacity: 0 }, { opacity: 1 }], {
-      duration: defaultDropAnimation.duration,
-      easing: defaultDropAnimation.easing,
-    });
-  },
-};
-
 export default function SortableFunctionDisplay({
   functionTree,
 }: SortableFunctionDisplayProps) {
-  const { activeId, overId, offsetLeft } = useContext(FunctionEditor);
+  const { activeId, overId, offsetLeft, activeGroup } =
+    useContext(FunctionEditor);
 
   const flattenedActions = useFlattenedTree(functionTree, activeId);
   const sortedIds = useMemo(
@@ -59,7 +33,7 @@ export default function SortableFunctionDisplay({
   );
 
   const projectedDrop =
-    activeId && overId
+    activeId && overId && activeGroup === "actions"
       ? getDropProjection(
           flattenedActions,
           activeId,
@@ -91,17 +65,10 @@ export default function SortableFunctionDisplay({
       </ActionList>
       {createPortal(
         <DragOverlay
-          modifiers={[
-            (args) => {
-              const newTransform = restrictToWindowEdges(args);
-              console.log("Old:", args.transform);
-              console.log("New:", newTransform);
-              return newTransform;
-            },
-          ]}
-          dropAnimation={dropAnimationConfig}
+          modifiers={[restrictToWindowEdges]}
+          dropAnimation={fadeOutAnimationConfig}
         >
-          {activeId && activeAction ? (
+          {activeId && activeAction && activeGroup === "actions" ? (
             <SortableAction
               id={activeAction.id}
               action={activeAction}

@@ -4,6 +4,7 @@ import { buildTree } from "@/src/music/functions/utils/build-tree";
 import { cutFlatTree } from "@/src/music/functions/utils/cut-flat-tree";
 import { flattenTree } from "@/src/music/functions/utils/flatten-tree";
 import { getDropProjection } from "@/src/music/functions/utils/get-drop-projection";
+import { parseGroupFromId } from "@/src/music/functions/utils/parse-group-from-id";
 import { Functions } from "@/src/types/functions";
 import {
   CollisionDetection,
@@ -15,9 +16,9 @@ import {
   MeasuringStrategy,
   PointerSensor,
   UniqueIdentifier,
-  closestCenter,
   getFirstCollision,
   pointerWithin,
+  rectIntersection,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
@@ -43,8 +44,16 @@ const collisionDetection: CollisionDetection = (args) => {
   if (isInTrash) {
     return [{ id: TRASH_ID }];
   }
-  const collisions = closestCenter(args);
-  return collisions.filter(({ id }) => id !== TRASH_ID);
+  const filteredCollisions = rectIntersection(args).filter((collision) => {
+    if (collision.id === TRASH_ID) {
+      return false;
+    }
+    if (parseGroupFromId(args.active.id) === parseGroupFromId(collision.id)) {
+      return true;
+    }
+    return false;
+  });
+  return filteredCollisions;
 };
 
 export default function FunctionEditorContext({
@@ -52,6 +61,8 @@ export default function FunctionEditorContext({
   setFunctionTree,
   children,
 }: FunctionEditorContextProps) {
+  const [activeGroup, setActiveGroup] =
+    useState<Functions.DraggingGroup | null>(null);
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
   const [overId, setOverId] = useState<UniqueIdentifier | null>(null);
   const [offsetLeft, setOffsetLeft] = useState(0);
@@ -59,9 +70,8 @@ export default function FunctionEditorContext({
   const sensors = useSensors(useSensor(PointerSensor));
 
   const flattenedActions = useFlattenedTree(functionTree, activeId);
-
   const projectedDrop =
-    activeId && overId
+    activeId && overId && activeGroup === "actions"
       ? getDropProjection(
           flattenedActions,
           activeId,
@@ -74,6 +84,7 @@ export default function FunctionEditorContext({
   return (
     <FunctionEditor.Provider
       value={{
+        activeGroup,
         activeId,
         overId,
         offsetLeft,
@@ -97,21 +108,32 @@ export default function FunctionEditorContext({
   );
 
   function handleDragStart({ active }: DragStartEvent) {
-    setActiveId(active.id);
-    setOverId(active.id);
+    const group = parseGroupFromId(active.id);
+    if (group) {
+      setActiveGroup(group);
+      setActiveId(active.id);
+      setOverId(active.id);
 
-    document.body.style.setProperty("cursor", "grabbing");
+      document.body.style.setProperty("cursor", "grabbing");
+    }
   }
 
-  function handleDragMove({ delta }: DragMoveEvent) {
-    setOffsetLeft?.(delta.x);
+  function handleDragMove({ active, delta }: DragMoveEvent) {
+    if (parseGroupFromId(active.id) === "actions") {
+      setOffsetLeft(delta.x);
+    }
   }
 
   function handleDragOver({ over }: DragOverEvent) {
     if (over && over.id === TRASH_ID) {
       setOverId(null);
     } else {
-      setOverId(over?.id ?? null);
+      const overId = over?.id ?? null;
+      if (activeGroup === parseGroupFromId(overId)) {
+        setOverId(overId);
+      } else {
+        setOverId(null);
+      }
     }
   }
 
@@ -120,18 +142,64 @@ export default function FunctionEditorContext({
 
     // Handle dropping action in trash
     if (over && over.id === TRASH_ID) {
-      const flattentedActions = flattenTree(functionTree);
-      const newTree = buildTree(cutFlatTree(flattentedActions, active.id));
+      let flattenedActions = flattenTree(functionTree);
+      if (activeGroup === "actions") {
+        flattenedActions = cutFlatTree(flattenedActions, active.id);
+      }
+      if (activeGroup === "tracks") {
+        flattenedActions = flattenedActions.map((flatAction) => {
+          if (
+            flatAction.type === "play" &&
+            flatAction.trackExpression &&
+            flatAction.trackExpression.id === active.id
+          ) {
+            return {
+              ...flatAction,
+              trackExpression: null,
+            };
+          }
+          return flatAction;
+        });
+      }
+      const newTree = buildTree(flattenedActions);
       setFunctionTree(newTree);
+      return;
+    }
+
+    const overId = over?.id ?? null;
+    const overGroup = parseGroupFromId(overId);
+    if (overId && activeGroup !== null && activeGroup !== overGroup) {
+      return;
+    }
+
+    const clonedActions: Functions.FlattenedActionState[] = JSON.parse(
+      JSON.stringify(flattenTree(functionTree))
+    );
+
+    if (activeGroup === "tracks" && over && typeof over.id === "string") {
+      const overActionId = over.id.split("-").slice(1).join("-");
+      const overAction = clonedActions.find(({ id }) => id === overActionId);
+      const originalAction = clonedActions.find(
+        (action) =>
+          action.type === "play" && action.trackExpression?.id === active.id
+      );
+      if (overAction && overAction.type === "play") {
+        if (originalAction && originalAction.type === "play") {
+          originalAction.trackExpression = null;
+        }
+        overAction.trackExpression = {
+          id: active.id,
+          trackId: "",
+        };
+        const newActions = buildTree(clonedActions);
+        setFunctionTree(newActions);
+      }
       return;
     }
 
     if (projectedDrop && over) {
       const { depth, parentId } = projectedDrop;
 
-      const clonedActions: Functions.FlattenedActionState[] = JSON.parse(
-        JSON.stringify(flattenTree(functionTree))
-      );
       const overIndex = clonedActions.findIndex(({ id }) => id === over.id);
       const activeIndex = clonedActions.findIndex(({ id }) => id === active.id);
       const activeTreeItem = clonedActions[activeIndex];
@@ -153,6 +221,7 @@ export default function FunctionEditorContext({
   }
 
   function resetState() {
+    setActiveGroup(null);
     setActiveId(null);
     setOverId(null);
     setOffsetLeft?.(0);
