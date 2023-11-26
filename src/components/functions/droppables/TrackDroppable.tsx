@@ -24,7 +24,9 @@ export default function TrackDroppable({
           inToolBox={false}
           setTrackId={() => {}}
         />
-      ) : null}
+      ) : (
+        <span>Track Expression</span>
+      )}
     </TrackShapeInsert>
   );
 }

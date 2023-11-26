@@ -56,7 +56,7 @@ export default forwardRef<HTMLDivElement, ActionProps>(function Action(
       {...divProps}
     >
       <div
-        className="relative items-center flex gap-2 p-2 rounded-md border-2 border-accent dark:invert dark:text-white dark:bg-black bg-white"
+        className="relative items-center flex gap-2 p-2 rounded-md border-2 border-accent dark:border-inverted-accent"
         ref={ref}
         style={style}
       >
@@ -64,7 +64,7 @@ export default forwardRef<HTMLDivElement, ActionProps>(function Action(
           className="h-full hover:bg-gray-400 m-1 p-1 rounded-sm"
           {...handleProps}
         >
-          <HandleElement className="my-auto text-accent" />
+          <HandleElement className="my-auto text-accent dark:text-inverted-accent" />
         </div>
         <span className="text-xl">{getActionName(action.type)}</span>
         {!inToolBox && getActionComponent()}
@@ -73,7 +73,7 @@ export default forwardRef<HTMLDivElement, ActionProps>(function Action(
           new Array(depth).fill(0).map((_, index) => (
             <div
               key={index}
-              className="absolute border-l-2 border-accent -bottom-1 -top-2"
+              className="absolute border-l-2 border-accent dark:border-inverted-accent -bottom-1 -top-2"
               style={{
                 left: `-${IndentationWidth * (index + 0.5)}px`,
               }}

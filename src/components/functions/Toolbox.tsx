@@ -63,32 +63,28 @@ export default function Toolbox({ setFunctionTree }: ToolboxProps) {
           />
         ))}
         <span className="text-xl border-b-2">Literals</span>
-        <div className="dark:invert">
-          <TrackLiteral
-            id={generateGroupId("tracks")}
-            trackId=""
-            inToolBox
-            setTrackId={() => {}}
-          />
-          {createPortal(
-            <DragOverlay
-              dropAnimation={fadeOutAnimationConfig}
-              modifiers={[restrictToWindowEdges]}
-            >
-              {activeId && activeGroup === "tracks" ? (
-                <div className="dark:invert">
-                  <TrackLiteral
-                    id={activeId}
-                    trackId=""
-                    inToolBox
-                    setTrackId={() => {}}
-                  />
-                </div>
-              ) : null}
-            </DragOverlay>,
-            document.body
-          )}
-        </div>
+        <TrackLiteral
+          id={generateGroupId("tracks")}
+          trackId=""
+          inToolBox
+          setTrackId={() => {}}
+        />
+        {createPortal(
+          <DragOverlay
+            dropAnimation={fadeOutAnimationConfig}
+            modifiers={[restrictToWindowEdges]}
+          >
+            {activeId && activeGroup === "tracks" ? (
+              <TrackLiteral
+                id={activeId}
+                trackId=""
+                inToolBox
+                setTrackId={() => {}}
+              />
+            ) : null}
+          </DragOverlay>,
+          document.body
+        )}
       </ActionList>
       <Trash>
         {(isOver, ref) => (
