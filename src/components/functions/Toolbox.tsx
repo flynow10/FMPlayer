@@ -5,6 +5,7 @@ import TrackLiteral from "@/src/components/functions/draggables/TrackLiteral";
 import { generateGroupId } from "@/src/music/functions/utils/generate-group-id";
 import { Functions } from "@/src/types/functions";
 import classNames from "classnames";
+import { Trash2 } from "lucide-react";
 
 type ToolboxProps = {
   setFunctionTree: Functions.SetFunctionTree;
@@ -71,18 +72,37 @@ export default function Toolbox({ setFunctionTree }: ToolboxProps) {
             ref={ref}
             className={classNames(
               "dark:invert",
-              "text-center",
               "text-white",
               "border-accent",
               "border-t-2",
               "p-4",
+              "flex",
+              "items-center",
+              "gap-2",
+              "transition-colors",
               {
-                "bg-red-500": !isOver,
+                black: !isOver,
                 "bg-red-600": isOver,
               }
             )}
           >
-            <span className="text-xl">Delete</span>
+            <Trash2 />
+            <div className="overflow-hidden grow relative">
+              <span
+                className={classNames(
+                  "text-xl",
+                  "mx-auto",
+                  "relative",
+                  "-left-full",
+                  "transition-[left]",
+                  {
+                    "left-0": isOver,
+                  }
+                )}
+              >
+                Remove
+              </span>
+            </div>
           </div>
         )}
       </Trash>
