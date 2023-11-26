@@ -4,6 +4,8 @@ import SortableAction from "@/src/components/functions/SortableAction";
 import { fadeOutAnimationConfig } from "@/src/components/functions/utils/fade-out-animation";
 import { FunctionEditor } from "@/src/contexts/FunctionEditor";
 import { useFlattenedTree } from "@/src/hooks/functions/use-flattened-tree";
+import { buildTree } from "@/src/music/functions/utils/build-tree";
+import { flattenTree } from "@/src/music/functions/utils/flatten-tree";
 import { getChildCount } from "@/src/music/functions/utils/get-child-count";
 import { getDropProjection } from "@/src/music/functions/utils/get-drop-projection";
 import { Functions } from "@/src/types/functions";
@@ -18,10 +20,12 @@ import { createPortal } from "react-dom";
 
 type SortableFunctionDisplayProps = {
   functionTree: Functions.FunctionTree;
+  setFunctionTree: Functions.SetFunctionTree;
 };
 
 export default function SortableFunctionDisplay({
   functionTree,
+  setFunctionTree,
 }: SortableFunctionDisplayProps) {
   const { activeId, overId, offsetLeft, activeGroup } =
     useContext(FunctionEditor);
@@ -53,6 +57,29 @@ export default function SortableFunctionDisplay({
           <SortableAction
             key={action.id}
             id={action.id}
+            setAction={(value) => {
+              setFunctionTree((prevTree) => {
+                const clonedTree = JSON.parse(
+                  JSON.stringify(flattenTree(prevTree))
+                ) as Functions.FlattenedActionState[];
+                let newAction: Functions.ActionState;
+                const oldActionIndex = clonedTree.findIndex(
+                  ({ id }) => id === action.id
+                );
+                const oldAction = clonedTree.find(({ id }) => id === action.id);
+                if (!oldAction) {
+                  throw new Error("Trying to set action that does not exist!");
+                }
+                if (typeof value === "function") {
+                  newAction = value(oldAction);
+                } else {
+                  newAction = value;
+                }
+                clonedTree[oldActionIndex] = { ...oldAction, ...newAction };
+                const newTree = buildTree(clonedTree);
+                return newTree;
+              });
+            }}
             action={action}
             clone={false}
             depth={
@@ -72,6 +99,7 @@ export default function SortableFunctionDisplay({
             <SortableAction
               id={activeAction.id}
               action={activeAction}
+              setAction={() => {}}
               depth={activeAction.depth}
               childCount={getChildCount(functionTree, activeAction.id) + 1}
               clone

@@ -184,13 +184,19 @@ export default function FunctionEditorContext({
           action.type === "play" && action.trackExpression?.id === active.id
       );
       if (overAction && overAction.type === "play") {
-        if (originalAction && originalAction.type === "play") {
-          originalAction.trackExpression = null;
-        }
-        overAction.trackExpression = {
+        let trackExpression: Functions.TrackExpression = {
           id: active.id,
           trackId: "",
         };
+        if (
+          originalAction &&
+          originalAction.type === "play" &&
+          originalAction.trackExpression !== null
+        ) {
+          trackExpression = originalAction.trackExpression;
+          originalAction.trackExpression = null;
+        }
+        overAction.trackExpression = trackExpression;
         const newActions = buildTree(clonedActions);
         setFunctionTree(newActions);
       }

@@ -8,6 +8,7 @@ import React, { HTMLAttributes, forwardRef } from "react";
 
 type ActionProps = Omit<HTMLAttributes<HTMLDivElement>, "id"> & {
   action: Functions.ActionState;
+  setAction: Functions.SetAction<Functions.ActionState>;
   clone: boolean;
   ghost: boolean;
   depth: number;
@@ -20,6 +21,7 @@ type ActionProps = Omit<HTMLAttributes<HTMLDivElement>, "id"> & {
 export default forwardRef<HTMLDivElement, ActionProps>(function Action(
   {
     action,
+    setAction,
     clone,
     ghost,
     depth,
@@ -37,7 +39,14 @@ export default forwardRef<HTMLDivElement, ActionProps>(function Action(
   const getActionComponent = () => {
     switch (action.type) {
       case "play": {
-        return <PlayAction action={action} />;
+        return (
+          <PlayAction
+            action={action}
+            setAction={
+              setAction as Functions.SetAction<Functions.PlayActionState>
+            }
+          />
+        );
       }
     }
     return <span>Missing action</span>;
@@ -80,7 +89,7 @@ export default forwardRef<HTMLDivElement, ActionProps>(function Action(
             ></div>
           ))}
         {clone && childCount && childCount > 1 ? (
-          <span className="absolute -top-2 -right-2 rounded-[50%] flex items-center justify-center w-6 h-6 bg-accent-highlighted">
+          <span className="absolute -top-2 -right-2 rounded-[50%] flex items-center justify-center w-6 h-6 bg-accent-highlighted dark:bg-inverted-accent-highlighted">
             {childCount}
           </span>
         ) : null}
