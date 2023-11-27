@@ -20,6 +20,7 @@ import PlaylistEditor from "@/src/components/pages/PlaylistEditor";
 import AlbumCtxMenu from "@/src/components/context-menus/AlbumCtxMenu";
 import TrackCtxMenu from "@/src/components/context-menus/TrackCtxMenu";
 import FunctionEditor from "@/src/components/pages/FunctionEditor";
+import FunctionList from "@/src/components/pages/FunctionList";
 
 type PageProps = {
   location: Pages.Location;
@@ -34,13 +35,13 @@ type PageProps = {
 const PageComponents: {
   [Key in Pages.PageType]: typeof AlbumDisplay;
 } = {
-  "recent list": RecentlyAddedList,
-
   "file search": UploadSearch,
 
   "file upload": FileUpload,
 
   "youtube upload": YoutubeUpload,
+
+  "recent list": RecentlyAddedList,
 
   "album list": AlbumList,
 
@@ -50,13 +51,11 @@ const PageComponents: {
 
   "artist list": ArtistList,
 
-  "album display": AlbumDisplay,
-
-  "search results": SearchResults,
-
-  "testing page": TestingPage,
-
   "playlist list": PlaylistList,
+
+  "function list": FunctionList,
+
+  "album display": AlbumDisplay,
 
   "playlist display": PlaylistDisplay,
 
@@ -64,7 +63,9 @@ const PageComponents: {
 
   "function editor": FunctionEditor,
 
-  "function list": PlaylistList,
+  "search results": SearchResults,
+
+  "testing page": TestingPage,
 };
 
 export default function Page(props: PageProps) {
