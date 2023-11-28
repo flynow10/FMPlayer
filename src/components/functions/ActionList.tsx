@@ -6,7 +6,7 @@ type ActionListProps = {
 
 export default function ActionList({ children }: ActionListProps) {
   return (
-    <div className="flex grow flex-col gap-2 p-2 h-full overflow-auto">
+    <div className="flex flex-col grow shrink-0 gap-2 p-2 overflow-auto">
       {children}
     </div>
   );

@@ -51,9 +51,9 @@ export default function FunctionEditor() {
         />
         <TrackOverlay functionTree={functionTree} />
       </FunctionEditorContext>
-      <pre className="border-l-2 p-2 text-sm overflow-auto">
+      {/* <pre className="border-l-2 p-2 text-sm overflow-auto">
         {JSON.stringify(functionTree, null, 2)}
-      </pre>
+      </pre> */}
     </div>
   );
 }
