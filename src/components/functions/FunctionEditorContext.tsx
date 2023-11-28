@@ -7,6 +7,7 @@ import { getDropProjection } from "@/src/music/functions/utils/get-drop-projecti
 import { parseGroupFromId } from "@/src/music/functions/utils/parse-group-from-id";
 import { Functions } from "@/src/types/functions";
 import {
+  Collision,
   CollisionDetection,
   DndContext,
   DragEndEvent,
@@ -44,16 +45,31 @@ const collisionDetection: CollisionDetection = (args) => {
   if (isInTrash) {
     return [{ id: TRASH_ID }];
   }
-  const filteredCollisions = rectIntersection(args).filter((collision) => {
+  const activeGroup = parseGroupFromId(args.active.id);
+  const filterMethod = (collision: Collision) => {
     if (collision.id === TRASH_ID) {
       return false;
     }
-    if (parseGroupFromId(args.active.id) === parseGroupFromId(collision.id)) {
+    if (activeGroup === parseGroupFromId(collision.id)) {
       return true;
     }
     return false;
-  });
-  return filteredCollisions;
+  };
+  if (activeGroup === "actions") {
+    const rectIds = args.droppableRects.keys();
+    for (const rectId of rectIds) {
+      const oldRect = args.droppableRects.get(rectId);
+      if (oldRect && rectId !== TRASH_ID) {
+        args.droppableRects.set(rectId, {
+          ...oldRect,
+          width: 10000,
+          left: 0,
+          right: 10000,
+        });
+      }
+    }
+  }
+  return rectIntersection(args).filter(filterMethod);
 };
 
 export default function FunctionEditorContext({

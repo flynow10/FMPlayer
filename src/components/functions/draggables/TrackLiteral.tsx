@@ -1,4 +1,4 @@
-import TrackShape from "@/src/components/functions/shapedContainers/TrackShape";
+import TrackShape from "@/src/components/functions/shaped-containers/TrackShape";
 import { useDatabase } from "@/src/hooks/use-database";
 import { MusicLibrary } from "@/src/music/library/music-library";
 import { UniqueIdentifier, useDraggable } from "@dnd-kit/core";

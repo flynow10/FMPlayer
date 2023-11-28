@@ -1,5 +1,5 @@
 import TrackLiteral from "@/src/components/functions/draggables/TrackLiteral";
-import TrackShapeInsert from "@/src/components/functions/shapedContainers/TrackShapeInsert";
+import TrackShapeInsert from "@/src/components/functions/shaped-containers/TrackShapeInsert";
 import { Functions } from "@/src/types/functions";
 import { UniqueIdentifier, useDroppable } from "@dnd-kit/core";
 

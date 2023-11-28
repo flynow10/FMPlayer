@@ -1,4 +1,4 @@
-import TrackShape from "@/src/components/functions/shapedContainers/TrackShape";
+import TrackShape from "@/src/components/functions/shaped-containers/TrackShape";
 import classNames from "classnames";
 import { HTMLAttributes, ReactNode, forwardRef } from "react";
 
