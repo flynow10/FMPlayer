@@ -56,6 +56,9 @@ export default ({ mode }) => {
               } else if (id.includes("ably")) {
                 return "ably-vendor";
               }
+              if (id.includes("dnd-kit")) {
+                return "dnd-kit-vendor";
+              }
               return "vendor";
             }
           },
