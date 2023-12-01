@@ -28,7 +28,7 @@ export default function QueuePanel(props: QueuePanelProps) {
         { "right-6": props.open, "-right-full": !props.open }
       )}
     >
-      <div className="flex flex-col bg-white h-full max-w-xs p-4 rounded-lg border-2 border-accent dark:invert dark:bg-black dark:text-white">
+      <div className="flex flex-col bg-white h-full max-w-xs p-4 rounded-lg border-2 border-accent dark:border-inverted-accent">
         <div className="flex gap-8">
           <span className="font-bold text-lg">Up Next</span>
           <div className="ml-auto flex">
@@ -37,7 +37,7 @@ export default function QueuePanel(props: QueuePanelProps) {
                 setDisplayMode("tracks");
               }}
               className={classNames("p-1", "px-2", "rounded-l-md", "border", {
-                "bg-accent": displayMode === "tracks",
+                "bg-accent dark:bg-inverted-accent": displayMode === "tracks",
               })}
             >
               <List />
@@ -47,7 +47,7 @@ export default function QueuePanel(props: QueuePanelProps) {
                 setDisplayMode("code");
               }}
               className={classNames("p-1", "px-2", "rounded-r-md", "border", {
-                "bg-accent": displayMode === "code",
+                "bg-accent dark:bg-inverted-accent": displayMode === "code",
               })}
             >
               <Code />
