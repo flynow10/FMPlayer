@@ -1,10 +1,11 @@
 import TrackShape from "@/src/components/functions/shaped-containers/TrackShape";
+import { FunctionEditor } from "@/src/contexts/FunctionEditor";
 import { useDatabase } from "@/src/hooks/use-database";
 import { MusicLibrary } from "@/src/music/library/music-library";
 import { UniqueIdentifier, useDraggable } from "@dnd-kit/core";
 import classNames from "classnames";
 import { Menu } from "lucide-react";
-import { useMemo } from "react";
+import { useContext, useMemo } from "react";
 import Select from "react-select";
 
 type TrackLiteralProps = {
@@ -16,6 +17,8 @@ type TrackLiteralProps = {
 };
 
 export default function TrackLiteral(props: TrackLiteralProps) {
+  const functionEditorCtx = useContext(FunctionEditor);
+  const isEditable = functionEditorCtx !== null;
   const { setNodeRef, setActivatorNodeRef, attributes, listeners, isDragging } =
     useDraggable({
       id: props.id,
@@ -46,17 +49,19 @@ export default function TrackLiteral(props: TrackLiteralProps) {
         }
       )}
     >
-      <div
-        ref={setActivatorNodeRef}
-        {...attributes}
-        {...listeners}
-        className="p-2"
-      >
-        <Menu />
-      </div>
+      {isEditable && (
+        <div
+          ref={setActivatorNodeRef}
+          {...attributes}
+          {...listeners}
+          className="p-2"
+        >
+          <Menu />
+        </div>
+      )}
       <Select
         options={valueLabelTracks}
-        isDisabled={props.inToolBox || props.clone}
+        isDisabled={props.inToolBox || props.clone || !isEditable}
         menuPortalTarget={document.body}
         isSearchable
         placeholder={"Select a Track"}

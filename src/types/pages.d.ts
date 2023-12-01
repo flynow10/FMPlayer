@@ -44,6 +44,7 @@ export namespace Pages {
     | "album display"
     | "playlist display"
     | "playlist editor"
+    | "function display"
     | "function editor"
     | "testing page";
 

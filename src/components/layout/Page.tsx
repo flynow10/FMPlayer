@@ -21,6 +21,8 @@ import AlbumCtxMenu from "@/src/components/context-menus/AlbumCtxMenu";
 import TrackCtxMenu from "@/src/components/context-menus/TrackCtxMenu";
 import FunctionEditor from "@/src/components/pages/FunctionEditor";
 import FunctionList from "@/src/components/pages/FunctionList";
+import FunctionCtxMenu from "@/src/components/context-menus/FunctionCtxMenu";
+import FunctionDisplay from "@/src/components/pages/FunctionDisplay";
 
 type PageProps = {
   location: Pages.Location;
@@ -58,6 +60,8 @@ const PageComponents: {
   "album display": AlbumDisplay,
 
   "playlist display": PlaylistDisplay,
+
+  "function display": FunctionDisplay,
 
   "playlist editor": PlaylistEditor,
 
@@ -102,6 +106,7 @@ export default function Page(props: PageProps) {
       <PlaylistCtxMenu pageSlug={pageSlug} />
       <AlbumCtxMenu pageSlug={pageSlug} />
       <TrackCtxMenu pageSlug={pageSlug} />
+      <FunctionCtxMenu pageSlug={pageSlug} />
     </PageContext.Provider>
   );
 }

@@ -1,3 +1,4 @@
+import MediaCard from "@/src/components/media-displays/MediaCard";
 import { FullCover } from "@/src/components/utils/loading/FullCover";
 import { usePageContext } from "@/src/contexts/PageContext";
 import { DataState, useDatabase } from "@/src/hooks/use-database";
@@ -38,7 +39,12 @@ export default function PlaylistList() {
           <span className="text">You have not created any functions</span>
         )}
         {functionList.map((functionData) => (
-          <span key={functionData.id}>{functionData.title}</span>
+          <MediaCard
+            key={functionData.id}
+            data={functionData}
+            style="cover-card"
+            type="function"
+          />
         ))}
       </div>
     </div>

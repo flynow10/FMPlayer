@@ -1,10 +1,11 @@
 import { IndentationWidth } from "@/src/components/functions/FunctionEditorContext";
 import PlayAction from "@/src/components/functions/actions/PlayAction";
+import { FunctionEditor } from "@/src/contexts/FunctionEditor";
 import { getActionName } from "@/src/music/functions/utils/get-action-name";
 import { Functions } from "@/src/types/functions";
 import classNames from "classnames";
 import { Menu, Plus } from "lucide-react";
-import React, { HTMLAttributes, forwardRef } from "react";
+import React, { HTMLAttributes, forwardRef, useContext } from "react";
 
 type ActionProps = Omit<HTMLAttributes<HTMLDivElement>, "id"> & {
   action: Functions.ActionState;
@@ -34,6 +35,8 @@ export default forwardRef<HTMLDivElement, ActionProps>(function Action(
   },
   ref
 ) {
+  const functionEditorCtx = useContext(FunctionEditor);
+  const isEditable = functionEditorCtx !== null;
   const HandleElement = !inToolBox ? Menu : Plus;
 
   const getActionComponent = () => {
@@ -69,12 +72,14 @@ export default forwardRef<HTMLDivElement, ActionProps>(function Action(
         ref={ref}
         style={style}
       >
-        <div
-          className="h-full hover:bg-gray-400 m-1 p-1 rounded-sm"
-          {...handleProps}
-        >
-          <HandleElement className="my-auto text-accent dark:text-inverted-accent" />
-        </div>
+        {isEditable && (
+          <div
+            className="h-full hover:bg-gray-400 m-1 p-1 rounded-sm"
+            {...handleProps}
+          >
+            <HandleElement className="my-auto text-accent dark:text-inverted-accent" />
+          </div>
+        )}
         <span className="text-xl">{getActionName(action.type)}</span>
         {!inToolBox && getActionComponent()}
         {!clone &&

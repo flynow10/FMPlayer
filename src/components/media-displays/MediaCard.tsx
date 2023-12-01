@@ -10,7 +10,12 @@ import classNames from "classnames";
 import { Play } from "lucide-react";
 import { MouseEvent, ReactNode } from "react";
 
-export type DisplayableMediaType = "album" | "track" | "playlist" | "artist";
+export type DisplayableMediaType =
+  | "album"
+  | "track"
+  | "playlist"
+  | "artist"
+  | "function";
 type CardStyle = "cover-card" | "tab-card";
 
 type LimitedTableType = {
@@ -43,6 +48,7 @@ type LimitedTableType = {
     }
   >;
   artist: Music.DB.TableType<"Artist", object>;
+  function: Music.DB.TableType<"Function", { artwork: true }>;
 };
 
 export type MediaCardProps<T extends DisplayableMediaType> = {
@@ -65,12 +71,13 @@ export default function MediaCard<T extends DisplayableMediaType>(
   const { show: showPlaylistMenu } = useMediaContext("playlist");
   const { show: showAlbumMenu } = useMediaContext("album");
   const { show: showTrackMenu } = useMediaContext("track");
+  const { show: showFunctionMenu } = useMediaContext("function");
   let artworkId: string | null = null;
   let titleText = "";
   let subText: string | ReactNode = "";
   switch (props.type) {
     case "album": {
-      const album = props.data as Music.DB.TableType<"Album">;
+      const album = props.data as LimitedTableType["album"];
       artworkId = album.artwork?.id ?? null;
       titleText = album.title;
       if (album.artists.length > 0) {
@@ -86,21 +93,21 @@ export default function MediaCard<T extends DisplayableMediaType>(
       break;
     }
     case "artist": {
-      const artist = props.data as Music.DB.TableType<"Artist">;
+      const artist = props.data as LimitedTableType["artist"];
       artworkId = null;
       titleText = artist.name;
       subText = "";
       break;
     }
     case "playlist": {
-      const playlist = props.data as Music.DB.TableType<"Playlist">;
+      const playlist = props.data as LimitedTableType["playlist"];
       artworkId = playlist.artwork?.id ?? null;
       titleText = playlist.title;
       subText = "";
       break;
     }
     case "track": {
-      const track = props.data as Music.DB.TableType<"Track">;
+      const track = props.data as LimitedTableType["track"];
       artworkId = track.artwork?.id ?? null;
       titleText = track.title;
       if (track.artists.length > 0) {
@@ -114,6 +121,12 @@ export default function MediaCard<T extends DisplayableMediaType>(
         );
       }
       break;
+    }
+    case "function": {
+      const functionData = props.data as LimitedTableType["function"];
+      artworkId = functionData.artwork?.id ?? null;
+      titleText = functionData.title;
+      subText = "";
     }
   }
 
@@ -143,7 +156,9 @@ export default function MediaCard<T extends DisplayableMediaType>(
     }
   };
 
-  const visitable = ["album", "artist", "playlist"].includes(props.type);
+  const visitable = ["album", "artist", "playlist", "function"].includes(
+    props.type
+  );
   const gotoMediaPage = () => {
     let pageType: Pages.PageType | null = null;
     switch (props.type) {
@@ -159,6 +174,9 @@ export default function MediaCard<T extends DisplayableMediaType>(
         pageType = "playlist display";
         break;
       }
+      case "function": {
+        pageType = "function display";
+      }
     }
     if (pageType === null) {
       throw new Error("Cannot navigate to unvisitable page");
@@ -169,7 +187,9 @@ export default function MediaCard<T extends DisplayableMediaType>(
     });
     return;
   };
-  const playable = ["album", "track", "playlist"].includes(props.type);
+  const playable = ["album", "track", "playlist", "function"].includes(
+    props.type
+  );
   const clickablePhoto = props.onClickPhoto !== null;
 
   const ArtworkWrapper = clickablePhoto ? "button" : "div";
@@ -282,6 +302,15 @@ export default function MediaCard<T extends DisplayableMediaType>(
               event,
               props: {
                 trackId: props.data.id,
+              },
+            });
+            break;
+          }
+          case "function": {
+            showFunctionMenu({
+              event,
+              props: {
+                functionId: props.data.id,
               },
             });
             break;
