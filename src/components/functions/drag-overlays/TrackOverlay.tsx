@@ -13,7 +13,11 @@ type TrackOverlayProps = {
 };
 
 export default function TrackOverlay({ functionTree }: TrackOverlayProps) {
-  const { activeId, activeGroup } = useContext(FunctionEditor);
+  const functionCtx = useContext(FunctionEditor);
+  if (functionCtx === null) {
+    throw new Error("Track Overlay was used outside of a function context!");
+  }
+  const { activeId, activeGroup } = functionCtx;
   const trackExpression =
     activeGroup === "tracks" && activeId
       ? findTrackExpressionDeep(functionTree, activeId) ?? null

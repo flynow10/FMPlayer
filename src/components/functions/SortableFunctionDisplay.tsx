@@ -27,8 +27,11 @@ export default function SortableFunctionDisplay({
   functionTree,
   setFunctionTree,
 }: SortableFunctionDisplayProps) {
-  const { activeId, overId, offsetLeft, activeGroup } =
-    useContext(FunctionEditor);
+  const functionCtx = useContext(FunctionEditor);
+  if (functionCtx === null) {
+    throw new Error("Sortable list was used outside of a function context!");
+  }
+  const { activeId, overId, offsetLeft, activeGroup } = functionCtx;
 
   const flattenedActions = useFlattenedTree(functionTree, activeId);
   const sortedIds = useMemo(
