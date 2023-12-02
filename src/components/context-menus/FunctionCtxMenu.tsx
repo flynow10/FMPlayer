@@ -1,3 +1,4 @@
+import { usePageContext } from "@/src/contexts/PageContext";
 import { useAudioPlayer } from "@/src/hooks/use-audio-player";
 import { ContextMenuPropType } from "@/src/hooks/use-media-context";
 import { MusicLibrary } from "@/src/music/library/music-library";
@@ -11,6 +12,7 @@ type FunctionCtxMenuProps = {
 export default function FunctionCtxMenu(props: FunctionCtxMenuProps) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const audioPlayer = useAudioPlayer();
+  const pages = usePageContext();
 
   const addToQueue = async (
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -19,6 +21,17 @@ export default function FunctionCtxMenu(props: FunctionCtxMenuProps) {
     addNext: boolean
   ) => {
     alert("This feature has not been implemented yet!");
+  };
+  const editFunction = (event: ItemParams<ContextMenuPropType<"function">>) => {
+    const functionId = event.props?.functionId;
+    if (typeof functionId !== "string") {
+      alert("This context menu was not set up correctly!");
+      throw new Error("Unable to open function editor; missing function id!");
+    }
+    pages.navigate("new", {
+      type: "function editor",
+      data: { isNew: false, id: functionId },
+    });
   };
 
   const deleteFunction = async (
@@ -78,6 +91,7 @@ export default function FunctionCtxMenu(props: FunctionCtxMenuProps) {
         Play Next
       </Item>
       <Separator />
+      <Item onClick={editFunction}>Edit Playlist</Item>
       <Item
         onClick={(event) => {
           if (!confirm("Are you sure you want to delete this function?")) {

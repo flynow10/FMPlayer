@@ -106,6 +106,7 @@ export default function FunctionDisplay() {
             </div>
           </div>
         </div>
+        <hr />
         <ActionList>
           {flatTree.map((action) => (
             <Action
@@ -120,6 +121,7 @@ export default function FunctionDisplay() {
             />
           ))}
         </ActionList>
+        <hr />
         <div className="font-light text-sm text-gray-500">
           <span>
             Created on {functionData.createdOn.toLocaleDateString()} at{" "}
