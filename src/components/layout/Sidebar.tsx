@@ -1,3 +1,4 @@
+import { Logo } from "@/src/components/utils/Logo";
 import SuggestionSearch from "@/src/components/utils/input-extensions/SuggestionSearch";
 import { MusicLibrary } from "@/src/music/library/music-library";
 import { Pages } from "@/src/types/pages";
@@ -95,10 +96,7 @@ export default function Sidebar(props: SidebarProps) {
   return (
     <div className="sidebar flex flex-col border-r-2">
       <h3 className="text-4xl font-medium p-3 whitespace-nowrap overflow-clip">
-        <img
-          src="./colorIcon.svg"
-          className="dark:invert-0 inline mr-1 h-full"
-        />
+        <Logo className="inline mr-1 h-full" />
         FM Player
       </h3>
       <SuggestionSearch
