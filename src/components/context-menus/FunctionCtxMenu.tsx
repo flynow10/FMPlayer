@@ -91,7 +91,7 @@ export default function FunctionCtxMenu(props: FunctionCtxMenuProps) {
         Play Next
       </Item>
       <Separator />
-      <Item onClick={editFunction}>Edit Playlist</Item>
+      <Item onClick={editFunction}>Edit Function</Item>
       <Item
         onClick={(event) => {
           if (!confirm("Are you sure you want to delete this function?")) {
