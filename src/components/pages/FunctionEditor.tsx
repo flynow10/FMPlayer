@@ -15,6 +15,7 @@ import { tokyoNight } from "@uiw/codemirror-theme-tokyo-night";
 import { simpleLezerLinter } from "@/src/music/functions/codemirror/simple-lezer-linter";
 import { codeFolding } from "@codemirror/language";
 import { FMLanguage } from "@/src/music/functions/codemirror/fm-language";
+import ActionOverlay from "@/src/components/functions/drag-overlays/ActionOverlay";
 
 type DisplayMode = "text" | "blocks";
 
@@ -120,6 +121,7 @@ End;`);
               setFunctionTree={setFunctionTree}
             />
             <TrackOverlay functionTree={functionTree} />
+            <ActionOverlay functionTree={functionTree} />
           </FunctionEditorContext>
           {/* <pre className="border-l-2 p-2 text-sm overflow-auto">
         {JSON.stringify(functionTree, null, 2)}
