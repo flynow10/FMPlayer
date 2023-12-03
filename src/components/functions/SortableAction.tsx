@@ -7,7 +7,7 @@ import React from "react";
 
 type SortableActionProps = {
   id: UniqueIdentifier;
-  action: Functions.FlattenedActionState;
+  action: Functions.ActionState;
   setAction: Functions.SetAction<Functions.ActionState>;
   depth: number;
   clone: boolean;
