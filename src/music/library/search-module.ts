@@ -13,7 +13,13 @@ export type SearchMethods = {
   (search: string): Promise<SearchResult>;
 };
 
-type DocumentType = "track" | "album" | "playlist" | "artist" | "tag";
+type DocumentType =
+  | "track"
+  | "album"
+  | "playlist"
+  | "artist"
+  | "tag"
+  | "function";
 
 type DocumentList = {
   [Key in DocumentType as `${Key}s`]: Music.DB.TableType<Capitalize<Key>>[];
@@ -238,6 +244,7 @@ export function createSearchMethods(crud: CRUDObjects): SearchMethods {
     playlists: [],
     artists: [],
     tags: [],
+    functions: [],
   };
 
   const searchMethod = async function (search: string): Promise<SearchResult> {
@@ -258,6 +265,7 @@ export function createSearchMethods(crud: CRUDObjects): SearchMethods {
       playlists: rawDocumentList.playlists.filter(filter("playlist")),
       tags: rawDocumentList.tags.filter(filter("tag")),
       tracks: rawDocumentList.tracks.filter(filter("track")),
+      functions: rawDocumentList.functions.filter(filter("function")),
     };
     return {
       search,
@@ -328,6 +336,14 @@ export function createSearchMethods(crud: CRUDObjects): SearchMethods {
         type: "track",
       }))
     );
+    documentList.push(
+      ...rawDocumentList.functions.map<MiniSearchDocument>((functionData) => ({
+        id: functionData.id,
+        name: functionData.title,
+        description: "",
+        type: "function",
+      }))
+    );
     SearchEngine.addAll(documentList);
   };
 
@@ -351,6 +367,10 @@ export function createSearchMethods(crud: CRUDObjects): SearchMethods {
       }
       case "track": {
         rawDocumentList.tracks = await crud.track.list();
+        return;
+      }
+      case "function": {
+        rawDocumentList.functions = await crud.function.list();
         return;
       }
     }
