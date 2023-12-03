@@ -1,2 +1,3 @@
 *.config.cjs
 *.config.js
+src/music/functions/codemirror/fm-parser.ts

@@ -11,6 +11,10 @@ import CodeMirror from "@uiw/react-codemirror";
 import classNames from "classnames";
 import { Braces, Save, TextQuote } from "lucide-react";
 import { useState } from "react";
+import { tokyoNight } from "@uiw/codemirror-theme-tokyo-night";
+import { simpleLezerLinter } from "@/src/music/functions/codemirror/simple-lezer-linter";
+import { codeFolding } from "@codemirror/language";
+import { FMLanguage } from "@/src/music/functions/codemirror/fm-language";
 
 type DisplayMode = "text" | "blocks";
 
@@ -50,24 +54,9 @@ export default function FunctionEditor() {
   );
   const [title, setTitle] = useState("");
   const [displayMode, setDisplayMode] = useState<DisplayMode>("blocks");
-  const [code, setCode] = useState(`Play Tracks (<trackId>)
-Play Tracks (Get Playlist (<playlistId>))
-Begin Loop (Get World Variable ("day of the week")) (index)
-  Define Variable (list, Get Playlist (<playlistId>));
-  If (index < 3) Then
-    Play Tracks (Get Track From List(list, Random(Get Track List Property (list, "length"))))
-  End
-  If (index > 3) Then
-    If (index < 5) Then
-      Play Tracks (<trackId>)
-    Else
-      Play Tracks (<trackId>)
-    End
-  End
-  Play Tracks (list)
-End
-Play Tracks (Get Function (<functionId>, (4 + 3) * 2))`);
-
+  const [code, setCode] = useState(`Loop (3, index):
+  PlayTrack (GetTrackFromList(GetAlbum("hello"), 1+2*3+4));
+End;`);
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <div className="border-b-2 p-2 flex gap-2">
@@ -137,7 +126,8 @@ Play Tracks (Get Function (<functionId>, (4 + 3) * 2))`);
             className="invert grow"
             height="100%"
             value={code}
-            theme={"dark"} // Add theme switcher to match system theme
+            theme={tokyoNight} // Add theme switcher to match system theme
+            extensions={[FMLanguage, simpleLezerLinter(), codeFolding()]}
             onChange={(value) => {
               setCode(value);
             }}
