@@ -1,0 +1,133 @@
+@top Function { statement* }
+
+statement {
+  (playTrack
+  | playTrackList
+  | defineVariable
+  | loop) ";"
+}
+
+@skip { spaces | newline }
+
+@tokens {
+  spaces[@export] { $[\u0009 \u000b\u00a0]+ }
+  newline[@export] { $[\r\n] }
+  identifierChar { @asciiLetter }
+  Identifier { identifierChar (identifierChar | @digit)* }
+  Number { @digit+ }
+  MediaId { "\""$[a-zA-Z\-0-9]+"\"" }
+  "(" ")"
+  "="
+  ";" ":"
+}
+
+@precedence {
+  times @left,
+  plus @left
+}
+
+// Statements
+
+playTrack { kw<"PlayTrack"> parenthesizedExpression<TrackExpression> }
+playTrackList { kw<"PlayTrackList"> parenthesizedExpression<TrackListExpression>}
+
+defineVariable { kw<"Variable"> Identifier "=" variableExpression }
+
+loop {
+  kw<"Loop"> parenthesizedExpression<numberExpression "," Identifier> Block
+}
+
+end {
+  kw<"End">
+}
+
+// Track Expressions
+getTrack {
+  kw<"GetTrack"> parenthesizedExpression<mediaIdentifier>
+}
+
+getTrackFromList {
+  kw<"GetTrackFromList"> parenthesizedExpression<TrackListExpression "," numberExpression>
+}
+
+// Track List Expressions
+
+getAlbum {
+  kw<"GetAlbum"> parenthesizedExpression<mediaIdentifier>
+}
+
+getPlaylist {
+  kw<"GetPlaylist"> parenthesizedExpression<mediaIdentifier>
+}
+
+getFunction {
+  kw<"GetFunction"> parenthesizedExpression<mediaIdentifier ("," commaSep<numberExpression>)?>
+}
+
+// Expressions
+
+variableExpression {
+  Identifier
+  | Number
+  | BinaryExpression
+  | UnaryExpression
+  | getTrack
+  | getTrackFromList
+  | getAlbum
+  | getPlaylist
+  | getFunction
+}
+
+TrackExpression {
+  Identifier
+  | getTrack
+  | getTrackFromList
+}
+
+TrackListExpression {
+  Identifier
+  | getAlbum
+  | getPlaylist
+  | getFunction
+}
+
+numberExpression {
+  Identifier |
+  Number | 
+  BinaryExpression |
+  UnaryExpression
+}
+
+UnaryExpression {
+  !plus ArithOp<"+" | "-"> numberExpression |
+  parenthesizedExpression<numberExpression>
+}
+
+BinaryExpression {
+  numberExpression !times ArithOp<"/" | "*" | "%"> numberExpression |
+  numberExpression !plus ArithOp<"+" | "-"> numberExpression
+}
+
+// Helper
+
+Block {
+  ":" (statement*) end
+}
+
+mediaIdentifier {
+  Identifier | MediaId
+}
+
+ArithOp<expr> { expr }
+
+kw<term> { @specialize[@name={term}]<Identifier, term>}
+
+parenthesizedExpression<expression> {
+  "(" expression ")"
+}
+
+commaSep<content> {
+  content ("," content)*
+}
+
+@detectDelim
