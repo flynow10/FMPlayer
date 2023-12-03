@@ -9,7 +9,7 @@ import { generateGroupId } from "@/src/music/functions/utils/generate-group-id";
 import { Functions } from "@/src/types/functions";
 import CodeMirror from "@uiw/react-codemirror";
 import classNames from "classnames";
-import { Braces, Save, TextQuote } from "lucide-react";
+import { Braces, Save, TextQuote, X } from "lucide-react";
 import { useState } from "react";
 import { tokyoNight } from "@uiw/codemirror-theme-tokyo-night";
 import { simpleLezerLinter } from "@/src/music/functions/codemirror/simple-lezer-linter";
@@ -70,31 +70,38 @@ End;`);
           }}
         />
         <div className="ml-auto flex gap-2">
-          <button className="flex gap-2 items-center text-white bg-green-400 invert p-2 px-4 rounded-md">
+          <button
+            disabled
+            className="group flex gap-2 items-center text-white bg-green-500 dark:invert p-2 px-4 rounded-md disabled:bg-green-700"
+          >
             <span>Save</span>
-            <Save />
+            <Save className="group-disabled:hidden" />
+            <X className="group-disabled:block hidden" />
           </button>
           <div className="flex">
-            <button
-              onClick={() => {
-                setDisplayMode("blocks");
-              }}
-              className={classNames("p-1", "px-2", "rounded-l-md", "border", {
-                "bg-accent dark:bg-inverted-accent": displayMode === "blocks",
-              })}
-            >
-              <TextQuote />
-            </button>
-            <button
-              onClick={() => {
-                setDisplayMode("text");
-              }}
-              className={classNames("p-1", "px-2", "rounded-r-md", "border", {
-                "bg-accent dark:bg-inverted-accent": displayMode === "text",
-              })}
-            >
-              <Braces />
-            </button>
+            {(["blocks", "text"] as DisplayMode[]).map((type) => (
+              <button
+                disabled
+                key={type}
+                onClick={() => {
+                  setDisplayMode(type);
+                }}
+                className={classNames(
+                  "p-1",
+                  "px-2",
+                  "border",
+                  "disabled:bg-gray-400",
+                  "disabled:dark:bg-gray-200",
+                  {
+                    "bg-accent dark:bg-inverted-accent": displayMode === type,
+                    "rounded-l-md": type === "blocks",
+                    "rounded-r-md": type === "text",
+                  }
+                )}
+              >
+                {type === "blocks" ? <TextQuote /> : <Braces />}
+              </button>
+            ))}
           </div>
         </div>
       </div>
