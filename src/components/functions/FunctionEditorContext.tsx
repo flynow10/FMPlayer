@@ -1,10 +1,11 @@
 import { FunctionEditor } from "@/src/contexts/FunctionEditor";
 import { useFlattenedTree } from "@/src/hooks/functions/use-flattened-tree";
 import { buildTree } from "@/src/music/functions/utils/build-tree";
+import { createEmpty } from "@/src/music/functions/utils/create-empty";
 import { cutFlatTree } from "@/src/music/functions/utils/cut-flat-tree";
 import { flattenTree } from "@/src/music/functions/utils/flatten-tree";
 import { getDropProjection } from "@/src/music/functions/utils/get-drop-projection";
-import { parseGroupFromId } from "@/src/music/functions/utils/parse-group-from-id";
+import { parseId } from "@/src/music/functions/utils/parse-id";
 import { Functions } from "@/src/types/functions";
 import {
   Collision,
@@ -45,12 +46,16 @@ const collisionDetection: CollisionDetection = (args) => {
   if (isInTrash) {
     return [{ id: TRASH_ID }];
   }
-  const activeGroup = parseGroupFromId(args.active.id);
+  const id = args.active.id;
+  if (typeof id !== "string") {
+    return [];
+  }
+  const activeGroup = parseId(id).group;
   const filterMethod = (collision: Collision) => {
-    if (collision.id === TRASH_ID) {
+    if (collision.id === TRASH_ID || typeof collision.id !== "string") {
       return false;
     }
-    if (activeGroup === parseGroupFromId(collision.id)) {
+    if (activeGroup === parseId(collision.id).group) {
       return true;
     }
     return false;
@@ -124,18 +129,22 @@ export default function FunctionEditorContext({
   );
 
   function handleDragStart({ active }: DragStartEvent) {
-    const group = parseGroupFromId(active.id);
-    if (group) {
-      setActiveGroup(group);
-      setActiveId(active.id);
-      setOverId(active.id);
-
-      document.body.style.setProperty("cursor", "grabbing");
+    if (typeof active.id !== "string") {
+      return;
     }
+    const group = parseId(active.id).group;
+    setActiveGroup(group);
+    setActiveId(active.id);
+    setOverId(active.id);
+
+    document.body.style.setProperty("cursor", "grabbing");
   }
 
   function handleDragMove({ active, delta }: DragMoveEvent) {
-    if (parseGroupFromId(active.id) === "actions") {
+    if (
+      typeof active.id === "string" &&
+      parseId(active.id).group === "actions"
+    ) {
       setOffsetLeft(delta.x);
     }
   }
@@ -145,7 +154,7 @@ export default function FunctionEditorContext({
       setOverId(null);
     } else {
       const overId = over?.id ?? null;
-      if (activeGroup === parseGroupFromId(overId)) {
+      if (typeof overId === "string" && activeGroup === parseId(overId).group) {
         setOverId(overId);
       } else {
         setOverId(null);
@@ -155,7 +164,9 @@ export default function FunctionEditorContext({
 
   function handleDragEnd({ active, over }: DragEndEvent) {
     resetState();
-
+    if (typeof active.id !== "string") {
+      return;
+    }
     // Handle dropping action in trash
     if (over && over.id === TRASH_ID) {
       let flattenedActions = flattenTree(functionTree);
@@ -177,49 +188,43 @@ export default function FunctionEditorContext({
           return flatAction;
         });
       }
+      if (activeGroup === "numbers") {
+        flattenedActions = flattenedActions.map((flatAction) => {
+          if (
+            flatAction.type === "loop" &&
+            flatAction.numberExpression &&
+            flatAction.numberExpression.id === active.id
+          ) {
+            return {
+              ...flatAction,
+              numberExpression: null,
+            };
+          }
+          return flatAction;
+        });
+      }
       const newTree = buildTree(flattenedActions);
       setFunctionTree(newTree);
       return;
     }
 
     const overId = over?.id ?? null;
-    const overGroup = parseGroupFromId(overId);
-    if (overId && activeGroup !== null && activeGroup !== overGroup) {
+    if (typeof overId !== "string") {
+      return;
+    }
+    const overData = parseId(overId);
+    if (overId && activeGroup !== null && activeGroup !== overData.group) {
       return;
     }
 
     const clonedActions: Functions.FlattenedActionState[] = JSON.parse(
       JSON.stringify(flattenTree(functionTree))
     );
-
-    if (activeGroup === "tracks" && over && typeof over.id === "string") {
-      const overActionId = over.id.split("-").slice(1).join("-");
-      const overAction = clonedActions.find(({ id }) => id === overActionId);
-      const originalAction = clonedActions.find(
-        (action) =>
-          action.type === "play" && action.trackExpression?.id === active.id
-      );
-      if (overAction && overAction.type === "play") {
-        let trackExpression: Functions.TrackExpression = {
-          id: active.id,
-          trackId: "",
-        };
-        if (
-          originalAction &&
-          originalAction.type === "play" &&
-          originalAction.trackExpression !== null
-        ) {
-          trackExpression = originalAction.trackExpression;
-          originalAction.trackExpression = null;
-        }
-        overAction.trackExpression = trackExpression;
-        const newActions = buildTree(clonedActions);
-        setFunctionTree(newActions);
-      }
+    if (!over || typeof over.id !== "string") {
       return;
     }
 
-    if (projectedDrop && over) {
+    if (activeGroup === "actions" && projectedDrop) {
       const { depth, parentId } = projectedDrop;
 
       const overIndex = clonedActions.findIndex(({ id }) => id === over.id);
@@ -235,6 +240,64 @@ export default function FunctionEditorContext({
       const newActions = buildTree(sortedActions);
 
       setFunctionTree(newActions);
+      return;
+    }
+
+    const overParentId = overData.parentId ?? "";
+    const overAction = clonedActions.find(({ id }) => id === overParentId);
+
+    if (activeGroup === "numbers") {
+      const originalAction = clonedActions.find(
+        (action) =>
+          action.type === "loop" && action.numberExpression?.id === active.id
+      );
+      if (overAction && overAction.type === "loop") {
+        let numberExpression: Functions.NumberExpression;
+        if (
+          originalAction &&
+          originalAction.type === "loop" &&
+          originalAction.numberExpression !== null
+        ) {
+          numberExpression = originalAction.numberExpression;
+          originalAction.numberExpression = null;
+        } else {
+          const activeData = parseId(active.id);
+          numberExpression =
+            createEmpty.numbers[
+              activeData.type as Functions.NumberExpressionType
+            ]();
+          numberExpression.id = active.id;
+        }
+        overAction.numberExpression = numberExpression;
+        const newActions = buildTree(clonedActions);
+        setFunctionTree(newActions);
+      }
+    }
+
+    if (activeGroup === "tracks") {
+      const originalAction = clonedActions.find(
+        (action) =>
+          action.type === "play" && action.trackExpression?.id === active.id
+      );
+      if (overAction && overAction.type === "play") {
+        let trackExpression: Functions.TrackExpression = {
+          id: active.id,
+          trackId: "",
+          type: "literal",
+        };
+        if (
+          originalAction &&
+          originalAction.type === "play" &&
+          originalAction.trackExpression !== null
+        ) {
+          trackExpression = originalAction.trackExpression;
+          originalAction.trackExpression = null;
+        }
+        overAction.trackExpression = trackExpression;
+        const newActions = buildTree(clonedActions);
+        setFunctionTree(newActions);
+      }
+      return;
     }
   }
 

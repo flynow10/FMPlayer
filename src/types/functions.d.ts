@@ -10,6 +10,8 @@ export namespace Functions {
   };
 
   export type ActionType = "play" | "loop";
+  export type TrackExpressionType = "literal";
+  export type NumberExpressionType = "literal" | "binaryarith";
 
   export type BaseActionState = {
     id: string;
@@ -24,12 +26,30 @@ export namespace Functions {
 
   export type LoopActionState = BaseActionState & {
     type: "loop";
+    numberExpression: NumberExpression | null;
   };
 
   export type TrackExpression = TrackLiteral;
   export type TrackLiteral = {
-    id: UniqueIdentifier;
+    id: string;
     trackId: string;
+    type: "literal";
+  };
+
+  export type NumberExpression = NumberLiteral | BinaryArithmetic;
+  export type NumberLiteral = {
+    id: string;
+    value: number;
+    type: "literal";
+  };
+
+  export type BinaryOp = "+" | "-" | "*" | "/";
+  export type BinaryArithmetic = {
+    id: string;
+    op: BinaryOp;
+    left: NumberExpression | null;
+    right: NumberExpression | null;
+    type: "binaryarith";
   };
 
   export type FunctionTree = ActionState[];
@@ -40,17 +60,22 @@ export namespace Functions {
     index: number;
   };
 
-  export type DraggingGroup = "actions" | "tracks" | "trash";
+  export type DraggingGroup = "actions" | "tracks" | "numbers" | "trash";
 
-  export type SetFunctionTree = React.Dispatch<
-    React.SetStateAction<FunctionTree>
-  >;
+  export type IdData = {
+    group: DraggingGroup;
+    type: string;
+    id: string;
+    parentId?: string;
+  };
 
-  export type SetAction<A extends ActionState> = React.Dispatch<
-    React.SetStateAction<A>
-  >;
+  type SetState<T> = React.Dispatch<React.SetStateAction<T>>;
 
-  export type SetTrackExpression = React.Dispatch<
-    React.SetStateAction<TrackExpression | null>
-  >;
+  export type SetFunctionTree = SetState<FunctionTree>;
+
+  export type SetAction<A extends ActionState> = SetState<A>;
+
+  export type SetTrackExpression = SetState<TrackExpression | null>;
+
+  export type SetNumberExpression = SetState<NumberExpression | null>;
 }
