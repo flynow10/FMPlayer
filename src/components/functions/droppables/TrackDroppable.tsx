@@ -1,21 +1,27 @@
 import TrackLiteral from "@/src/components/functions/draggables/TrackLiteral";
 import TrackShapeInsert from "@/src/components/functions/shaped-containers/TrackShapeInsert";
+import { generateGroupId } from "@/src/music/functions/utils/generate-group-id";
 import { Functions } from "@/src/types/functions";
-import { UniqueIdentifier, useDroppable } from "@dnd-kit/core";
+import { useDroppable } from "@dnd-kit/core";
 
 type TrackDroppableProps = {
-  actionId: UniqueIdentifier;
+  parentId: string;
+  index?: number;
+  disabled?: boolean;
   trackExpression: Functions.TrackExpression | null;
   setTrackExpression: Functions.SetTrackExpression;
 };
 
 export default function TrackDroppable({
-  actionId,
+  parentId,
+  index = 0,
+  disabled,
   trackExpression,
   setTrackExpression,
 }: TrackDroppableProps) {
   const { setNodeRef, isOver } = useDroppable({
-    id: `tracks-${actionId}`,
+    id: generateGroupId("tracks", "drop", parentId, index),
+    disabled,
   });
   return (
     <TrackShapeInsert ref={setNodeRef} over={isOver}>
@@ -29,7 +35,7 @@ export default function TrackDroppable({
             setTrackExpression((prev) =>
               prev !== null
                 ? { ...prev, trackId }
-                : { id: trackExpression.id, trackId }
+                : { id: trackExpression.id, trackId, type: "literal" }
             );
           }}
         />

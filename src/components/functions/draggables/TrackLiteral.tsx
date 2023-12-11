@@ -2,14 +2,14 @@ import TrackShape from "@/src/components/functions/shaped-containers/TrackShape"
 import { FunctionEditor } from "@/src/contexts/FunctionEditor";
 import { useDatabase } from "@/src/hooks/use-database";
 import { MusicLibrary } from "@/src/music/library/music-library";
-import { UniqueIdentifier, useDraggable } from "@dnd-kit/core";
+import { useDraggable } from "@dnd-kit/core";
 import classNames from "classnames";
 import { Menu } from "lucide-react";
 import { useContext, useMemo } from "react";
 import Select from "react-select";
 
 type TrackLiteralProps = {
-  id: UniqueIdentifier;
+  id: string;
   trackId: string;
   setTrackId: (newTrackId: string) => void;
   clone: boolean;

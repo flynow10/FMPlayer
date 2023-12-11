@@ -9,7 +9,8 @@ type PlayActionProps = {
 export default function PlayAction(props: PlayActionProps) {
   return (
     <TrackDroppable
-      actionId={props.action.id}
+      parentId={props.action.id}
+      index={0}
       trackExpression={props.action.trackExpression}
       setTrackExpression={(value) => {
         props.setAction((prevAction) => {

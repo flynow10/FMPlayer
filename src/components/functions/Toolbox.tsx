@@ -1,7 +1,10 @@
 import Action from "@/src/components/functions/Action";
 import ActionList from "@/src/components/functions/ActionList";
 import Trash from "@/src/components/functions/Trash";
+import BinaryArithmetic from "@/src/components/functions/draggables/BinaryArithmetic";
+import NumberLiteral from "@/src/components/functions/draggables/NumberLiteral";
 import TrackLiteral from "@/src/components/functions/draggables/TrackLiteral";
+import { createEmpty } from "@/src/music/functions/utils/create-empty";
 import { generateGroupId } from "@/src/music/functions/utils/generate-group-id";
 import { Functions } from "@/src/types/functions";
 import classNames from "classnames";
@@ -12,25 +15,16 @@ type ToolboxProps = {
 };
 
 const toolboxActionsTypes: Functions.ActionState[] = [
-  {
-    id: generateGroupId("actions"),
-    children: [],
-    type: "play",
-    trackExpression: null,
-  },
-  {
-    id: generateGroupId("actions"),
-    children: [],
-    type: "loop",
-  },
+  createEmpty.actions.play(),
+  createEmpty.actions.loop(),
 ];
 
 export default function Toolbox({ setFunctionTree }: ToolboxProps) {
   return (
-    <div className="border-r-2 flex flex-col">
+    <div className="border-r-2 flex flex-col shrink-0">
       <span className="border-b-2 text-2xl text-center p-2">Toolbox</span>
       <ActionList>
-        <span className="text-xl border-b-2">Control</span>
+        <span className="text-xl border-b-2 pb-2 mb-4">Control</span>
         {toolboxActionsTypes.map((action) => (
           <Action
             key={action.type}
@@ -42,14 +36,7 @@ export default function Toolbox({ setFunctionTree }: ToolboxProps) {
             handleProps={{
               onClick: () => {
                 setFunctionTree((prev) => {
-                  return [
-                    ...prev,
-                    {
-                      ...action,
-                      id: generateGroupId("actions"),
-                      children: [],
-                    },
-                  ];
+                  return [...prev, createEmpty.actions[action.type]()];
                 });
               },
               style: { cursor: "pointer" },
@@ -57,14 +44,34 @@ export default function Toolbox({ setFunctionTree }: ToolboxProps) {
             inToolBox
           />
         ))}
-        <span className="text-xl border-b-2">Literals</span>
-        <TrackLiteral
-          id={generateGroupId("tracks")}
-          trackId=""
-          inToolBox
-          clone={false}
-          setTrackId={() => {}}
-        />
+        <span className="text-xl border-b-2 pb-2 mb-4">Literals</span>
+        <div className="flex flex-col gap-4 items-start">
+          <TrackLiteral
+            id={generateGroupId("tracks", "literal")}
+            trackId=""
+            inToolBox
+            clone={false}
+            setTrackId={() => {}}
+          />
+          <NumberLiteral
+            id={generateGroupId("numbers", "literal")}
+            value={0}
+            inToolBox
+            clone={false}
+            setValue={() => {}}
+          />
+          <BinaryArithmetic
+            id={generateGroupId("numbers", "binaryarith")}
+            left={null}
+            right={null}
+            op="+"
+            setLeft={() => {}}
+            setOp={() => {}}
+            setRight={() => {}}
+            inToolBox
+            clone={false}
+          />
+        </div>
       </ActionList>
       <Trash>
         {(isOver, ref) => (

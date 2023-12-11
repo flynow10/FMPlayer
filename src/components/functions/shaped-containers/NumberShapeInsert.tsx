@@ -1,16 +1,16 @@
-import TrackShape from "@/src/components/functions/shaped-containers/TrackShape";
+import NumberShape from "@/src/components/functions/shaped-containers/NumberShape";
 import classNames from "classnames";
 import { HTMLAttributes, ReactNode, forwardRef } from "react";
 
-type TrackShapeInsertProps = HTMLAttributes<HTMLDivElement> & {
+type NumberShapeInsertProps = HTMLAttributes<HTMLDivElement> & {
   over?: boolean;
   children?: ReactNode;
 };
 
-export default forwardRef<HTMLDivElement, TrackShapeInsertProps>(
-  function TrackShapeInsert({ children, over, ...props }, ref) {
+export default forwardRef<HTMLDivElement, NumberShapeInsertProps>(
+  function NumberShapeInsert({ children, over, ...props }, ref) {
     return (
-      <TrackShape
+      <NumberShape
         ref={ref}
         className={classNames("px-2", "border-2", {
           "dark:bg-gray-200 bg-gray-400 border-accent dark:border-inverted-accent":
@@ -20,7 +20,7 @@ export default forwardRef<HTMLDivElement, TrackShapeInsertProps>(
         {...props}
       >
         {children}
-      </TrackShape>
+      </NumberShape>
     );
   }
 );

@@ -15,7 +15,9 @@ export const ExpandingInput = forwardRef<
           whiteSpace: "pre",
         }}
       >
-        {props.value || props.placeholder}
+        {typeof props.value === "number"
+          ? props.value
+          : props.value || props.placeholder}
       </span>
       <input
         ref={ref}

@@ -1,4 +1,5 @@
 import { IndentationWidth } from "@/src/components/functions/FunctionEditorContext";
+import LoopAction from "@/src/components/functions/actions/LoopAction";
 import PlayAction from "@/src/components/functions/actions/PlayAction";
 import { FunctionEditor } from "@/src/contexts/FunctionEditor";
 import { getActionName } from "@/src/music/functions/utils/get-action-name";
@@ -47,6 +48,16 @@ export default forwardRef<HTMLDivElement, ActionProps>(function Action(
             action={action}
             setAction={
               setAction as Functions.SetAction<Functions.PlayActionState>
+            }
+          />
+        );
+      }
+      case "loop": {
+        return (
+          <LoopAction
+            action={action}
+            setAction={
+              setAction as Functions.SetAction<Functions.LoopActionState>
             }
           />
         );

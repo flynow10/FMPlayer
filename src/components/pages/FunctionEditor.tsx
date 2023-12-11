@@ -16,40 +16,24 @@ import { simpleLezerLinter } from "@/src/music/functions/codemirror/simple-lezer
 import { codeFolding } from "@codemirror/language";
 import { FMLanguage } from "@/src/music/functions/codemirror/fm-language";
 import ActionOverlay from "@/src/components/functions/drag-overlays/ActionOverlay";
+import NumberOverlay from "@/src/components/functions/drag-overlays/NumberOverlay";
+import { createEmpty } from "@/src/music/functions/utils/create-empty";
 
 type DisplayMode = "text" | "blocks";
 
 export default function FunctionEditor() {
   const [functionTree, setFunctionTree] = useState<Functions.FunctionTree>(
     () => [
+      createEmpty.actions.play(),
       {
-        id: generateGroupId("actions"),
-        children: [],
-        type: "play",
-        trackExpression: null,
-      },
-      {
-        id: generateGroupId("actions"),
+        id: generateGroupId("actions", "loop"),
         children: [
-          {
-            id: generateGroupId("actions"),
-            children: [],
-            type: "play",
-            trackExpression: null,
-          },
-          {
-            id: generateGroupId("actions"),
-            children: [],
-            type: "loop",
-          },
-          {
-            id: generateGroupId("actions"),
-            children: [],
-            type: "play",
-            trackExpression: null,
-          },
+          createEmpty.actions.play(),
+          createEmpty.actions.loop(),
+          createEmpty.actions.play(),
         ],
         type: "loop",
+        numberExpression: null,
       },
     ]
   );
@@ -122,10 +106,11 @@ End;`);
             />
             <TrackOverlay functionTree={functionTree} />
             <ActionOverlay functionTree={functionTree} />
+            <NumberOverlay functionTree={functionTree} />
           </FunctionEditorContext>
-          {/* <pre className="border-l-2 p-2 text-sm overflow-auto">
-        {JSON.stringify(functionTree, null, 2)}
-      </pre> */}
+          <pre className="border-l-2 p-2 text-sm overflow-auto">
+            {JSON.stringify(functionTree, null, 2)}
+          </pre>
         </FadeInOut>
         <FadeInOut
           shown={displayMode === "text"}
