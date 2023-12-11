@@ -32,9 +32,6 @@ coverage
 # Personal Music
 static/songs/*.ogg
 
-# Seeded songs
-static/songs/!PUT_SONGS_HERE.txt
-
 # Config
 .env*.local
 
