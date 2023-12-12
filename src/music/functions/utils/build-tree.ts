@@ -1,24 +1,23 @@
 import { Functions } from "@/src/types/functions";
-import { UniqueIdentifier } from "@dnd-kit/core";
 
-type TreeNode = { id: UniqueIdentifier; children: TreeNode[] };
+type TreeNode = { id: string; childNodes: TreeNode[] };
 export function buildTree(
   flattenedActions: Functions.FlattenedActionState[]
 ): Functions.ActionState[] {
-  const root = { id: "root", children: [] };
+  const root = { id: "root", childNodes: [] };
   const nodes: Record<string, TreeNode> = { [root.id]: root };
   const actions: Functions.FlattenedActionState[] = flattenedActions.map(
-    (action) => ({ ...action, children: [] })
+    (action) => ({ ...action, childNodes: [] })
   );
 
   for (const action of actions) {
-    const { id, children } = action;
+    const { id, childNodes } = action;
     const parentId = (action.parentId as string) ?? root.id;
     const parent = nodes[parentId] ?? actions.find(({ id }) => id === parentId);
 
-    nodes[id] = { id, children };
+    nodes[id] = { id, childNodes };
     const filteredAction = action as Functions.ActionState;
-    parent.children.push(filteredAction as Functions.ActionState);
+    parent.childNodes.push(filteredAction as Functions.ActionState);
   }
-  return root.children;
+  return root.childNodes as Functions.ActionState[];
 }

@@ -15,8 +15,8 @@ export function getChildCount(
 
 export function countChildren(action: Functions.ActionState) {
   let count = 0;
-  if (action.children) {
-    for (const child of action.children) {
+  if (action.childNodes) {
+    for (const child of action.childNodes) {
       count += countChildren(child) + 1;
     }
   }

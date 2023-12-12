@@ -5,16 +5,15 @@ import TrackOverlay from "@/src/components/functions/drag-overlays/TrackOverlay"
 import { Logo } from "@/src/components/utils/Logo";
 import FadeInOut from "@/src/components/utils/animated/FadeInOut";
 import { ExpandingInput } from "@/src/components/utils/input-extensions/ExpandingInput";
-import { generateGroupId } from "@/src/music/functions/utils/generate-group-id";
 import { Functions } from "@/src/types/functions";
 import CodeMirror from "@uiw/react-codemirror";
 import classNames from "classnames";
 import { Braces, Save, TextQuote, X } from "lucide-react";
 import { useState } from "react";
 import { tokyoNight } from "@uiw/codemirror-theme-tokyo-night";
-import { simpleLezerLinter } from "@/src/music/functions/codemirror/simple-lezer-linter";
-import { codeFolding } from "@codemirror/language";
-import { FMLanguage } from "@/src/music/functions/codemirror/fm-language";
+// import { simpleLezerLinter } from "@/src/music/functions/codemirror/simple-lezer-linter";
+// import { codeFolding } from "@codemirror/language";
+// import { FMLanguage } from "@/src/music/functions/codemirror/fm-language";
 import ActionOverlay from "@/src/components/functions/drag-overlays/ActionOverlay";
 import NumberOverlay from "@/src/components/functions/drag-overlays/NumberOverlay";
 import { createEmpty } from "@/src/music/functions/utils/create-empty";
@@ -23,25 +22,13 @@ type DisplayMode = "text" | "blocks";
 
 export default function FunctionEditor() {
   const [functionTree, setFunctionTree] = useState<Functions.FunctionTree>(
-    () => [
-      createEmpty.actions.play(),
-      {
-        id: generateGroupId("actions", "loop"),
-        children: [
-          createEmpty.actions.play(),
-          createEmpty.actions.loop(),
-          createEmpty.actions.play(),
-        ],
-        type: "loop",
-        numberExpression: null,
-      },
-    ]
+    () => [createEmpty.play(), createEmpty.loop()]
   );
   const [title, setTitle] = useState("");
   const [displayMode, setDisplayMode] = useState<DisplayMode>("blocks");
-  const [code, setCode] = useState(`Loop (3, index):
-  PlayTrack (GetTrackFromList(GetAlbum("hello"), 1+2*3+4));
-End;`);
+  //   const [code, setCode] = useState(`Loop (3, index):
+  //   PlayTrack (GetTrackFromList(GetAlbum("hello"), 1+2*3+4));
+  // End;`);
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <div className="border-b-2 p-2 flex gap-2">
@@ -66,7 +53,6 @@ End;`);
           <div className="flex">
             {(["blocks", "text"] as DisplayMode[]).map((type) => (
               <button
-                disabled
                 key={type}
                 onClick={() => {
                   setDisplayMode(type);
@@ -108,9 +94,6 @@ End;`);
             <ActionOverlay functionTree={functionTree} />
             <NumberOverlay functionTree={functionTree} />
           </FunctionEditorContext>
-          <pre className="border-l-2 p-2 text-sm overflow-auto">
-            {JSON.stringify(functionTree, null, 2)}
-          </pre>
         </FadeInOut>
         <FadeInOut
           shown={displayMode === "text"}
@@ -119,12 +102,16 @@ End;`);
           <CodeMirror
             className="invert grow"
             height="100%"
-            value={code}
+            value={JSON.stringify(functionTree, null, 2)}
             theme={tokyoNight} // Add theme switcher to match system theme
-            extensions={[FMLanguage, simpleLezerLinter(), codeFolding()]}
-            onChange={(value) => {
-              setCode(value);
-            }}
+            extensions={
+              [
+                /* FMLanguage, simpleLezerLinter(), codeFolding() */
+              ]
+            }
+            // onChange={(value) => {
+            //   setCode(value);
+            // }}
           />
         </FadeInOut>
       </div>

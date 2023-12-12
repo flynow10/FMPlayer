@@ -3,8 +3,8 @@ import NumberLiteral from "@/src/components/functions/draggables/NumberLiteral";
 import { fadeOutAnimationConfig } from "@/src/components/functions/utils/fade-out-animation";
 import { FunctionEditor } from "@/src/contexts/FunctionEditor";
 import { createEmpty } from "@/src/music/functions/utils/create-empty";
-import { findNumberExpressionDeep } from "@/src/music/functions/utils/find-number-expression-deep";
-import { parseId } from "@/src/music/functions/utils/parse-id";
+import { findActionDeep } from "@/src/music/functions/utils/find-action-deep";
+import { parseActionId } from "@/src/music/functions/utils/parse-action-id";
 import { Functions } from "@/src/types/functions";
 import { DragOverlay } from "@dnd-kit/core";
 import { restrictToWindowEdges } from "@dnd-kit/modifiers";
@@ -23,10 +23,8 @@ export default function NumberOverlay({ functionTree }: NumberOverlayProps) {
   const { activeId, activeGroup } = functionCtx;
   const numberExpression =
     activeGroup === "numbers" && activeId && typeof activeId === "string"
-      ? findNumberExpressionDeep(functionTree, activeId) ??
-        createEmpty.numbers[
-          parseId(activeId).type as Functions.NumberExpressionType
-        ]()
+      ? findActionDeep(functionTree, activeId) ??
+        createEmpty[parseActionId(activeId).type]()
       : null;
   return createPortal(
     <DragOverlay
@@ -34,22 +32,21 @@ export default function NumberOverlay({ functionTree }: NumberOverlayProps) {
       modifiers={[restrictToWindowEdges]}
     >
       {activeId && activeGroup === "numbers" && numberExpression ? (
-        numberExpression.type === "literal" ? (
+        numberExpression.type === "numberliteral" ? (
           <NumberLiteral
             id={numberExpression.id}
-            clone
-            inToolBox={false}
+            disabled
             setValue={() => {}}
-            value={numberExpression.value}
+            value={(numberExpression as Functions.NumberLiteral).data.value}
           />
         ) : (
           <BinaryArithmetic
             id={numberExpression.id}
             clone
             inToolBox={false}
-            left={numberExpression.left}
-            op={numberExpression.op}
-            right={numberExpression.right}
+            left={numberExpression.numberExpressions[0] ?? null}
+            op={(numberExpression as Functions.BinaryArithmetic).data.operator}
+            right={numberExpression.numberExpressions[1] ?? null}
             setLeft={() => {}}
             setOp={() => {}}
             setRight={() => {}}

@@ -3,9 +3,12 @@ import { useFlattenedTree } from "@/src/hooks/functions/use-flattened-tree";
 import { buildTree } from "@/src/music/functions/utils/build-tree";
 import { createEmpty } from "@/src/music/functions/utils/create-empty";
 import { cutFlatTree } from "@/src/music/functions/utils/cut-flat-tree";
+import { findActionDeep } from "@/src/music/functions/utils/find-action-deep";
+import { findParentActionDeep } from "@/src/music/functions/utils/find-parent-action-deep";
 import { flattenTree } from "@/src/music/functions/utils/flatten-tree";
 import { getDropProjection } from "@/src/music/functions/utils/get-drop-projection";
-import { parseId } from "@/src/music/functions/utils/parse-id";
+import { parseActionId } from "@/src/music/functions/utils/parse-action-id";
+import { parseDropId } from "@/src/music/functions/utils/parse-drop-id";
 import { Functions } from "@/src/types/functions";
 import {
   Collision,
@@ -50,12 +53,12 @@ const collisionDetection: CollisionDetection = (args) => {
   if (typeof id !== "string") {
     return [];
   }
-  const activeGroup = parseId(id).group;
+  const activeGroup = parseActionId(id).group;
   const filterMethod = (collision: Collision) => {
     if (collision.id === TRASH_ID || typeof collision.id !== "string") {
       return false;
     }
-    if (activeGroup === parseId(collision.id).group) {
+    if (activeGroup === parseDropId(collision.id).group) {
       return true;
     }
     return false;
@@ -82,8 +85,9 @@ export default function FunctionEditorContext({
   setFunctionTree,
   children,
 }: FunctionEditorContextProps) {
-  const [activeGroup, setActiveGroup] =
-    useState<Functions.DraggingGroup | null>(null);
+  const [activeGroup, setActiveGroup] = useState<Functions.ActionGroup | null>(
+    null
+  );
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
   const [overId, setOverId] = useState<UniqueIdentifier | null>(null);
   const [offsetLeft, setOffsetLeft] = useState(0);
@@ -132,7 +136,7 @@ export default function FunctionEditorContext({
     if (typeof active.id !== "string") {
       return;
     }
-    const group = parseId(active.id).group;
+    const group = parseActionId(active.id).group;
     setActiveGroup(group);
     setActiveId(active.id);
     setOverId(active.id);
@@ -143,7 +147,7 @@ export default function FunctionEditorContext({
   function handleDragMove({ active, delta }: DragMoveEvent) {
     if (
       typeof active.id === "string" &&
-      parseId(active.id).group === "actions"
+      parseActionId(active.id).group === "actions"
     ) {
       setOffsetLeft(delta.x);
     }
@@ -154,7 +158,10 @@ export default function FunctionEditorContext({
       setOverId(null);
     } else {
       const overId = over?.id ?? null;
-      if (typeof overId === "string" && activeGroup === parseId(overId).group) {
+      if (
+        typeof overId === "string" &&
+        activeGroup === parseDropId(overId).group
+      ) {
         setOverId(overId);
       } else {
         setOverId(null);
@@ -164,141 +171,108 @@ export default function FunctionEditorContext({
 
   function handleDragEnd({ active, over }: DragEndEvent) {
     resetState();
-    if (typeof active.id !== "string") {
+    if (!activeId || typeof activeId !== "string") {
       return;
     }
     // Handle dropping action in trash
     if (over && over.id === TRASH_ID) {
-      let flattenedActions = flattenTree(functionTree);
       if (activeGroup === "actions") {
-        flattenedActions = cutFlatTree(flattenedActions, active.id);
+        let flattenedActions = flattenTree(functionTree);
+        flattenedActions = cutFlatTree(flattenedActions, activeId);
+        const newTree = buildTree(flattenedActions);
+        setFunctionTree(newTree);
+        return;
       }
-      if (activeGroup === "tracks") {
-        flattenedActions = flattenedActions.map((flatAction) => {
-          if (
-            flatAction.type === "play" &&
-            flatAction.trackExpression &&
-            flatAction.trackExpression.id === active.id
-          ) {
-            return {
-              ...flatAction,
-              trackExpression: null,
-            };
-          }
-          return flatAction;
-        });
+      const clonedActions = JSON.parse(JSON.stringify(functionTree));
+      const parent = findParentActionDeep(clonedActions, activeId);
+      if (!parent) {
+        return;
       }
-      if (activeGroup === "numbers") {
-        flattenedActions = flattenedActions.map((flatAction) => {
-          if (
-            flatAction.type === "loop" &&
-            flatAction.numberExpression &&
-            flatAction.numberExpression.id === active.id
-          ) {
-            return {
-              ...flatAction,
-              numberExpression: null,
-            };
-          }
-          return flatAction;
-        });
+      switch (activeGroup) {
+        case "numbers": {
+          parent.numberExpressions = parent.numberExpressions.map((action) =>
+            !action || action.id !== activeId ? action : null
+          ) as Functions.ActionState[];
+          break;
+        }
+        case "tracks": {
+          parent.trackExpressions = parent.trackExpressions.map((action) =>
+            !action || action.id !== activeId ? action : null
+          ) as Functions.ActionState[];
+          break;
+        }
       }
-      const newTree = buildTree(flattenedActions);
-      setFunctionTree(newTree);
+      setFunctionTree(clonedActions);
       return;
     }
 
-    const overId = over?.id ?? null;
-    if (typeof overId !== "string") {
-      return;
-    }
-    const overData = parseId(overId);
-    if (overId && activeGroup !== null && activeGroup !== overData.group) {
-      return;
-    }
-
-    const clonedActions: Functions.FlattenedActionState[] = JSON.parse(
-      JSON.stringify(flattenTree(functionTree))
-    );
     if (!over || typeof over.id !== "string") {
       return;
     }
 
+    const overId = over.id;
+    const overData = parseDropId(overId);
+    if (activeGroup !== null && activeGroup !== overData.group) {
+      return;
+    }
+
+    const clonedActions = JSON.parse(JSON.stringify(functionTree));
+
     if (activeGroup === "actions" && projectedDrop) {
+      const clonedActionsFlat: Functions.FlattenedActionState[] =
+        flattenTree(clonedActions);
+
       const { depth, parentId } = projectedDrop;
 
-      const overIndex = clonedActions.findIndex(({ id }) => id === over.id);
-      const activeIndex = clonedActions.findIndex(({ id }) => id === active.id);
-      const activeTreeItem = clonedActions[activeIndex];
+      const overIndex = clonedActionsFlat.findIndex(({ id }) => id === over.id);
+      const activeIndex = clonedActionsFlat.findIndex(
+        ({ id }) => id === active.id
+      );
+      const activeTreeItem = clonedActionsFlat[activeIndex];
 
-      clonedActions[activeIndex] = {
+      clonedActionsFlat[activeIndex] = {
         ...activeTreeItem,
         depth,
         parentId,
       };
-      const sortedActions = arrayMove(clonedActions, activeIndex, overIndex);
+      const sortedActions = arrayMove(
+        clonedActionsFlat,
+        activeIndex,
+        overIndex
+      );
       const newActions = buildTree(sortedActions);
 
       setFunctionTree(newActions);
       return;
     }
 
-    const overParentId = overData.parentId ?? "";
-    const overAction = clonedActions.find(({ id }) => id === overParentId);
+    let currentAction = findActionDeep(clonedActions, activeId);
 
-    if (activeGroup === "numbers") {
-      const originalAction = clonedActions.find(
-        (action) =>
-          action.type === "loop" && action.numberExpression?.id === active.id
-      );
-      if (overAction && overAction.type === "loop") {
-        let numberExpression: Functions.NumberExpression;
-        if (
-          originalAction &&
-          originalAction.type === "loop" &&
-          originalAction.numberExpression !== null
-        ) {
-          numberExpression = originalAction.numberExpression;
-          originalAction.numberExpression = null;
-        } else {
-          const activeData = parseId(active.id);
-          numberExpression =
-            createEmpty.numbers[
-              activeData.type as Functions.NumberExpressionType
-            ]();
-          numberExpression.id = active.id;
-        }
-        overAction.numberExpression = numberExpression;
-        const newActions = buildTree(clonedActions);
-        setFunctionTree(newActions);
-      }
+    if (currentAction === undefined) {
+      const activeData = parseActionId(activeId);
+      currentAction = createEmpty[activeData.type]();
+      currentAction.id = activeId;
     }
 
-    if (activeGroup === "tracks") {
-      const originalAction = clonedActions.find(
-        (action) =>
-          action.type === "play" && action.trackExpression?.id === active.id
-      );
-      if (overAction && overAction.type === "play") {
-        let trackExpression: Functions.TrackExpression = {
-          id: active.id,
-          trackId: "",
-          type: "literal",
-        };
-        if (
-          originalAction &&
-          originalAction.type === "play" &&
-          originalAction.trackExpression !== null
-        ) {
-          trackExpression = originalAction.trackExpression;
-          originalAction.trackExpression = null;
-        }
-        overAction.trackExpression = trackExpression;
-        const newActions = buildTree(clonedActions);
-        setFunctionTree(newActions);
-      }
+    const overParent = overData.parentId;
+    const overIndex = overData.index;
+    const parentAction = findActionDeep(clonedActions, overParent);
+    if (!parentAction) {
       return;
     }
+
+    switch (activeGroup) {
+      case "numbers": {
+        parentAction.numberExpressions[overIndex] = currentAction;
+        break;
+      }
+      case "tracks": {
+        parentAction.trackExpressions[overIndex] = currentAction;
+        break;
+      }
+    }
+
+    setFunctionTree(clonedActions);
   }
 
   function handleDragCancel() {

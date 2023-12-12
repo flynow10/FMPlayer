@@ -1,15 +1,16 @@
 import TrackLiteral from "@/src/components/functions/draggables/TrackLiteral";
 import TrackShapeInsert from "@/src/components/functions/shaped-containers/TrackShapeInsert";
-import { generateGroupId } from "@/src/music/functions/utils/generate-group-id";
+import { generateDropId } from "@/src/music/functions/utils/generate-drop-id";
 import { Functions } from "@/src/types/functions";
 import { useDroppable } from "@dnd-kit/core";
+import { createEmpty } from "@/src/music/functions/utils/create-empty";
 
 type TrackDroppableProps = {
   parentId: string;
   index?: number;
   disabled?: boolean;
-  trackExpression: Functions.TrackExpression | null;
-  setTrackExpression: Functions.SetTrackExpression;
+  trackExpression: Functions.ActionState | null;
+  setTrackExpression: Functions.SetAction;
 };
 
 export default function TrackDroppable({
@@ -20,22 +21,22 @@ export default function TrackDroppable({
   setTrackExpression,
 }: TrackDroppableProps) {
   const { setNodeRef, isOver } = useDroppable({
-    id: generateGroupId("tracks", "drop", parentId, index),
+    id: generateDropId("tracks", index, parentId),
     disabled,
   });
   return (
     <TrackShapeInsert ref={setNodeRef} over={isOver}>
-      {trackExpression !== null ? (
+      {trackExpression !== null && trackExpression.type === "trackliteral" ? (
         <TrackLiteral
           id={trackExpression.id}
-          trackId={trackExpression.trackId}
+          trackId={(trackExpression as Functions.TrackLiteral).data.trackId}
           inToolBox={false}
           clone={false}
           setTrackId={(trackId) => {
             setTrackExpression((prev) =>
               prev !== null
-                ? { ...prev, trackId }
-                : { id: trackExpression.id, trackId, type: "literal" }
+                ? { ...prev, data: { trackId } }
+                : { ...createEmpty.trackliteral(), data: { trackId } }
             );
           }}
         />
