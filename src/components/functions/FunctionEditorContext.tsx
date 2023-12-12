@@ -3,6 +3,7 @@ import { useFlattenedTree } from "@/src/hooks/functions/use-flattened-tree";
 import { buildTree } from "@/src/music/functions/utils/build-tree";
 import { createEmpty } from "@/src/music/functions/utils/create-empty";
 import { cutFlatTree } from "@/src/music/functions/utils/cut-flat-tree";
+import { deleteExpression } from "@/src/music/functions/utils/delete-expression";
 import { findActionDeep } from "@/src/music/functions/utils/find-action-deep";
 import { findParentActionDeep } from "@/src/music/functions/utils/find-parent-action-deep";
 import { flattenTree } from "@/src/music/functions/utils/flatten-tree";
@@ -188,20 +189,11 @@ export default function FunctionEditorContext({
       if (!parent) {
         return;
       }
-      switch (activeGroup) {
-        case "numbers": {
-          parent.numberExpressions = parent.numberExpressions.map((action) =>
-            !action || action.id !== activeId ? action : null
-          ) as Functions.ActionState[];
-          break;
-        }
-        case "tracks": {
-          parent.trackExpressions = parent.trackExpressions.map((action) =>
-            !action || action.id !== activeId ? action : null
-          ) as Functions.ActionState[];
-          break;
-        }
-      }
+      deleteExpression(
+        parent,
+        activeGroup ? "numberExpressions" : "trackExpressions",
+        activeId
+      );
       setFunctionTree(clonedActions);
       return;
     }
@@ -247,6 +239,7 @@ export default function FunctionEditorContext({
     }
 
     let currentAction = findActionDeep(clonedActions, activeId);
+    const activeParent = findParentActionDeep(clonedActions, activeId);
 
     if (currentAction === undefined) {
       const activeData = parseActionId(activeId);
@@ -254,20 +247,26 @@ export default function FunctionEditorContext({
       currentAction.id = activeId;
     }
 
-    const overParent = overData.parentId;
+    const overParentId = overData.parentId;
     const overIndex = overData.index;
-    const parentAction = findActionDeep(clonedActions, overParent);
-    if (!parentAction) {
+    const overParent = findActionDeep(clonedActions, overParentId);
+    if (!overParent) {
       return;
     }
 
     switch (activeGroup) {
       case "numbers": {
-        parentAction.numberExpressions[overIndex] = currentAction;
+        if (activeParent !== undefined) {
+          deleteExpression(activeParent, "numberExpressions", currentAction.id);
+        }
+        overParent.numberExpressions[overIndex] = currentAction;
         break;
       }
       case "tracks": {
-        parentAction.trackExpressions[overIndex] = currentAction;
+        if (activeParent !== undefined) {
+          deleteExpression(activeParent, "trackExpressions", currentAction.id);
+        }
+        overParent.trackExpressions[overIndex] = currentAction;
         break;
       }
     }
