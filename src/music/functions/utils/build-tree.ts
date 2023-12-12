@@ -16,7 +16,10 @@ export function buildTree(
     const parent = nodes[parentId] ?? actions.find(({ id }) => id === parentId);
 
     nodes[id] = { id, childNodes };
-    const filteredAction = action as Functions.ActionState;
+    const filteredAction = action as Partial<Functions.FlattenedActionState>;
+    delete filteredAction.depth;
+    delete filteredAction.parentId;
+    delete filteredAction.index;
     parent.childNodes.push(filteredAction as Functions.ActionState);
   }
   return root.childNodes as Functions.ActionState[];
