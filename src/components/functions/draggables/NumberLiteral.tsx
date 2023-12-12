@@ -1,6 +1,8 @@
 import NumberShape from "@/src/components/functions/shaped-containers/NumberShape";
 import { ExpandingInput } from "@/src/components/utils/input-extensions/ExpandingInput";
+import { FunctionEditor } from "@/src/contexts/FunctionEditor";
 import classNames from "classnames";
+import { useContext } from "react";
 
 type NumberLiteralProps = {
   id: string;
@@ -10,6 +12,8 @@ type NumberLiteralProps = {
 };
 
 export default function NumberLiteral(props: NumberLiteralProps) {
+  const functionEditorCtx = useContext(FunctionEditor);
+  const isEditable = functionEditorCtx !== null;
   return (
     <NumberShape
       className={classNames(
@@ -23,9 +27,18 @@ export default function NumberLiteral(props: NumberLiteralProps) {
       <span className="flex gap-2 items-center">
         <ExpandingInput
           type="number"
-          className="py-1 p-2 rounded-full bg-white dark:invert disabled:bg-gray-300"
+          className={classNames(
+            "py-1",
+            "p-2",
+            "rounded-full",
+            "bg-white",
+            "dark:invert",
+            {
+              "disabled:bg-gray-300": isEditable,
+            }
+          )}
           value={props.value.toString()}
-          disabled={props.disabled}
+          disabled={props.disabled || !isEditable}
           onChange={(event) => {
             props.setValue(event.target.valueAsNumber);
           }}
