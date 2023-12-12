@@ -9,7 +9,7 @@ export function removeChildrenOf(
 
   return flatTree.filter((item) => {
     if (item.parentId && excludedParentIds.includes(item.parentId)) {
-      if (item.type === "loop" && item.children.length > 0) {
+      if (item.childNodes.length > 0) {
         excludedParentIds.push(item.id);
       }
       return false;

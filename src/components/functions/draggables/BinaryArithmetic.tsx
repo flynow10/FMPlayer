@@ -4,19 +4,28 @@ import { FunctionEditor } from "@/src/contexts/FunctionEditor";
 import { Functions } from "@/src/types/functions";
 import { useDraggable } from "@dnd-kit/core";
 import classNames from "classnames";
-import { Menu } from "lucide-react";
+import { Divide, LucideIcon, Menu, Minus, Plus, X } from "lucide-react";
 import { useContext } from "react";
 
 type BinaryArithmeticProps = {
   id: string;
   op: Functions.BinaryOp;
   setOp: (newOp: Functions.BinaryOp) => void;
-  left: Functions.NumberExpression | null;
-  setLeft: Functions.SetNumberExpression;
-  right: Functions.NumberExpression | null;
-  setRight: Functions.SetNumberExpression;
+  left: Functions.ActionState | null;
+  setLeft: Functions.SetAction;
+  right: Functions.ActionState | null;
+  setRight: Functions.SetAction;
   clone: boolean;
   inToolBox: boolean;
+};
+
+const operatorCycle: Functions.BinaryOp[] = ["+", "-", "*", "/"];
+
+const operatorIcons: Record<Functions.BinaryOp, LucideIcon> = {
+  "+": Plus,
+  "-": Minus,
+  "*": X,
+  "/": Divide,
 };
 
 export default function BinaryArithmetic(props: BinaryArithmeticProps) {
@@ -26,6 +35,7 @@ export default function BinaryArithmetic(props: BinaryArithmeticProps) {
     useDraggable({
       id: props.id,
     });
+  const OperatorIcon = operatorIcons[props.op];
   return (
     <NumberShape
       ref={setNodeRef}
@@ -55,15 +65,29 @@ export default function BinaryArithmetic(props: BinaryArithmeticProps) {
         <NumberDroppable
           parentId={props.id}
           index={0}
-          disabled={props.inToolBox}
+          clone={props.clone}
+          inToolBox={props.inToolBox}
           numberExpression={props.left}
           setNumberExpression={props.setLeft}
         />
-        <span>{props.op}</span>
+        <button
+          className="rounded-md disabled:hover:bg-transparent disabled:text-gray-700 hover:bg-gray-300 p-1"
+          disabled={props.clone || props.inToolBox}
+          onClick={() => {
+            const nextOp =
+              operatorCycle[
+                (operatorCycle.indexOf(props.op) + 1) % operatorCycle.length
+              ];
+            props.setOp(nextOp);
+          }}
+        >
+          <OperatorIcon />
+        </button>
         <NumberDroppable
           parentId={props.id}
           index={1}
-          disabled={props.inToolBox}
+          clone={props.clone}
+          inToolBox={props.inToolBox}
           numberExpression={props.right}
           setNumberExpression={props.setRight}
         />

@@ -46,9 +46,7 @@ export default forwardRef<HTMLDivElement, ActionProps>(function Action(
         return (
           <PlayAction
             action={action}
-            setAction={
-              setAction as Functions.SetAction<Functions.PlayActionState>
-            }
+            setAction={setAction as Functions.SetAction<Functions.ActionState>}
           />
         );
       }
@@ -56,9 +54,9 @@ export default forwardRef<HTMLDivElement, ActionProps>(function Action(
         return (
           <LoopAction
             action={action}
-            setAction={
-              setAction as Functions.SetAction<Functions.LoopActionState>
-            }
+            clone={clone}
+            inToolBox={inToolBox}
+            setAction={setAction as Functions.SetAction<Functions.ActionState>}
           />
         );
       }

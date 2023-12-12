@@ -1,64 +1,72 @@
-import { generateGroupId } from "@/src/music/functions/utils/generate-group-id";
+import { generateActionId } from "@/src/music/functions/utils/generate-action-id";
 import { Functions } from "@/src/types/functions";
 
 type GeneratorMap = {
-  actions: {
-    play: () => Functions.PlayActionState;
-    loop: () => Functions.LoopActionState;
-  };
-  numbers: {
-    literal: () => Functions.NumberLiteral;
-    binaryarith: () => Functions.BinaryArithmetic;
-  };
-  tracks: {
-    literal: () => Functions.TrackLiteral;
-  };
+  play: () => Functions.ActionState;
+  loop: () => Functions.ActionState;
+  numberliteral: () => Functions.NumberLiteral;
+  binaryarith: () => Functions.BinaryArithmetic;
+  trackliteral: () => Functions.TrackLiteral;
 };
 
 export const createEmpty: GeneratorMap = {
-  actions: {
-    loop() {
-      return {
-        id: generateGroupId("actions", "loop"),
-        children: [],
-        numberExpression: null,
-        type: "loop",
-      };
-    },
-    play() {
-      return {
-        id: generateGroupId("actions", "play"),
-        children: [],
-        trackExpression: null,
-        type: "play",
-      };
-    },
+  loop() {
+    return {
+      id: generateActionId("actions", "loop"),
+      childNodes: [],
+      group: "actions",
+      numberExpressions: [null],
+      trackExpressions: [],
+      type: "loop",
+    };
   },
-  numbers: {
-    binaryarith() {
-      return {
-        id: generateGroupId("numbers", "binaryarith"),
-        left: null,
-        op: "+",
-        right: null,
-        type: "binaryarith",
-      };
-    },
-    literal() {
-      return {
-        id: generateGroupId("numbers", "literal"),
-        type: "literal",
+  play() {
+    return {
+      id: generateActionId("actions", "play"),
+      childNodes: [],
+      group: "actions",
+      numberExpressions: [],
+      trackExpressions: [null],
+      type: "play",
+    };
+  },
+  binaryarith() {
+    return {
+      id: generateActionId("numbers", "binaryarith"),
+      childNodes: [],
+      data: {
+        operator: "+",
+      },
+      group: "numbers",
+      numberExpressions: [null, null],
+      trackExpressions: [],
+      type: "binaryarith",
+    } as Functions.BinaryArithmetic;
+  },
+  numberliteral() {
+    return {
+      id: generateActionId("numbers", "numberliteral"),
+      type: "numberliteral",
+      childNodes: [],
+      data: {
         value: 0,
-      };
-    },
+      },
+      group: "numbers",
+      numberExpressions: [],
+      trackExpressions: [],
+    };
   },
-  tracks: {
-    literal() {
-      return {
-        id: generateGroupId("tracks", "literal"),
+  trackliteral() {
+    return {
+      id: generateActionId("tracks", "trackliteral"),
+      childNodes: [],
+      data: {
         trackId: "",
-        type: "literal",
-      };
-    },
+      },
+      group: "tracks",
+      numberExpressions: [],
+      trackExpressions: [],
+      type: "trackliteral",
+    };
   },
-};
+} satisfies Record<Functions.ActionType, () => Functions.ActionState>;

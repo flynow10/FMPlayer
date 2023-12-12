@@ -13,7 +13,7 @@ export function flattenTree(
         ...acc,
         { ...action, parentId, depth, index },
         ...(BlockActions.includes(action.type)
-          ? flattenTree(action.children, action.id, depth + 1)
+          ? flattenTree(action.childNodes, action.id, depth + 1)
           : []),
       ];
     },
