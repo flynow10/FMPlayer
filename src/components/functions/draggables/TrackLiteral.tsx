@@ -81,7 +81,7 @@ export default function TrackLiteral(props: TrackLiteralProps) {
               "cursor-text",
               "box-border",
               {
-                "text-gray-700": state.isDisabled,
+                "text-gray-700": state.isDisabled && isEditable,
               }
             ),
           valueContainer: () => "py-1 px-2",

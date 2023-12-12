@@ -31,7 +31,9 @@ export default function FunctionDisplay() {
     if (!Array.isArray(functionData.functionData)) {
       throw new Error("Function data is malformed!");
     }
-    return flattenTree(functionData.functionData as Functions.ActionState[]);
+    return flattenTree(
+      functionData.functionData as unknown as Functions.ActionState[]
+    );
   }, [functionData]);
 
   if (functionData === null) {

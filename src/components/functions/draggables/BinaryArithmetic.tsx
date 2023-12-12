@@ -71,8 +71,11 @@ export default function BinaryArithmetic(props: BinaryArithmeticProps) {
           setNumberExpression={props.setLeft}
         />
         <button
-          className="rounded-md disabled:hover:bg-transparent disabled:text-gray-700 hover:bg-gray-300 p-1"
-          disabled={props.clone || props.inToolBox}
+          className={classNames("rounded-md", "p-1", {
+            "disabled:text-gray-700": isEditable,
+            "hover:bg-gray-300": isEditable,
+          })}
+          disabled={props.clone || props.inToolBox || !isEditable}
           onClick={() => {
             const nextOp =
               operatorCycle[
