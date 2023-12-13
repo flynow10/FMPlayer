@@ -35,14 +35,17 @@ export default function NumberDroppable({
   let contents = (
     <NumberLiteral
       id={numberExpression?.id ?? tempId}
-      value={(numberExpression as Functions.NumberLiteral)?.data?.value ?? 0}
+      value={(numberExpression as Functions.NumberLiteral)?.data?.value ?? NaN}
       disabled={disabled}
       setValue={(value) => {
-        setNumberExpression((prev) =>
-          prev && prev.type === "numberliteral"
+        setNumberExpression((prev) => {
+          if (Number.isNaN(value)) {
+            return null;
+          }
+          return prev && prev.type === "numberliteral"
             ? { ...prev, data: { value } }
-            : { ...createEmpty.numberliteral(), id: tempId, data: { value } }
-        );
+            : { ...createEmpty.numberliteral(), id: tempId, data: { value } };
+        });
       }}
     />
   );
