@@ -26,10 +26,10 @@ export default function NumberLiteral(props: NumberLiteralProps) {
     >
       <span className="flex gap-2 items-center">
         <ExpandingInput
-          type="number"
+          type="text"
           className={classNames(
             "py-1",
-            "p-2",
+            "p-3",
             "rounded-full",
             "bg-white",
             "dark:invert",
@@ -37,10 +37,16 @@ export default function NumberLiteral(props: NumberLiteralProps) {
               "disabled:bg-gray-300": isEditable,
             }
           )}
-          value={props.value.toString()}
+          placeholder=" "
+          value={Number.isNaN(props.value) ? "" : props.value}
           disabled={props.disabled || !isEditable}
           onChange={(event) => {
-            props.setValue(event.target.valueAsNumber);
+            try {
+              const number = parseInt(event.target.value);
+              props.setValue(number);
+            } catch (e) {
+              props.setValue(NaN);
+            }
           }}
         />
       </span>

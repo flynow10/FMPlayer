@@ -9,7 +9,7 @@ import { Functions } from "@/src/types/functions";
 import CodeMirror from "@uiw/react-codemirror";
 import classNames from "classnames";
 import { Braces, Save, TextQuote, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { tokyoNight } from "@uiw/codemirror-theme-tokyo-night";
 // import { simpleLezerLinter } from "@/src/music/functions/codemirror/simple-lezer-linter";
 // import { codeFolding } from "@codemirror/language";
@@ -17,6 +17,7 @@ import { tokyoNight } from "@uiw/codemirror-theme-tokyo-night";
 import ActionOverlay from "@/src/components/functions/drag-overlays/ActionOverlay";
 import NumberOverlay from "@/src/components/functions/drag-overlays/NumberOverlay";
 import { createEmpty } from "@/src/music/functions/utils/create-empty";
+import { validateFunction } from "@/src/music/functions/validation/validate-function";
 
 type DisplayMode = "text" | "blocks";
 
@@ -26,9 +27,22 @@ export default function FunctionEditor() {
   );
   const [title, setTitle] = useState("");
   const [displayMode, setDisplayMode] = useState<DisplayMode>("blocks");
-  //   const [code, setCode] = useState(`Loop (3, index):
-  //   PlayTrack (GetTrackFromList(GetAlbum("hello"), 1+2*3+4));
-  // End;`);
+  const [code, setCode] = useState("");
+
+  useEffect(() => {
+    setCode(JSON.stringify(functionTree, null, 2));
+  }, [functionTree]);
+
+  useEffect(() => {
+    let obj;
+    try {
+      obj = JSON.parse(code);
+      setIsValid(validateFunction(obj));
+    } catch (e) {
+      setIsValid(false);
+    }
+  }, [code]);
+  const [isValid, setIsValid] = useState(false);
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <div className="border-b-2 p-2 flex gap-2">
@@ -42,6 +56,7 @@ export default function FunctionEditor() {
           }}
         />
         <div className="ml-auto flex gap-2">
+          <span className="my-auto">Is Valid: {JSON.stringify(isValid)}</span>
           <button
             disabled
             className="group flex gap-2 items-center text-white bg-green-500 dark:invert p-2 px-4 rounded-md disabled:bg-green-700"
@@ -102,16 +117,16 @@ export default function FunctionEditor() {
           <CodeMirror
             className="invert grow"
             height="100%"
-            value={JSON.stringify(functionTree, null, 2)}
+            value={code}
             theme={tokyoNight} // Add theme switcher to match system theme
             extensions={
               [
                 /* FMLanguage, simpleLezerLinter(), codeFolding() */
               ]
             }
-            // onChange={(value) => {
-            //   setCode(value);
-            // }}
+            onChange={(value) => {
+              setCode(value);
+            }}
           />
         </FadeInOut>
       </div>
