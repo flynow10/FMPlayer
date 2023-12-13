@@ -172,7 +172,7 @@ export default function FunctionEditorContext({
 
   function handleDragEnd({ active, over }: DragEndEvent) {
     resetState();
-    if (!activeId || typeof activeId !== "string") {
+    if (!activeId || typeof activeId !== "string" || activeGroup === null) {
       return;
     }
     // Handle dropping action in trash
@@ -191,7 +191,7 @@ export default function FunctionEditorContext({
       }
       deleteExpression(
         parent,
-        activeGroup ? "numberExpressions" : "trackExpressions",
+        activeGroup === "numbers" ? "numberExpressions" : "trackExpressions",
         activeId
       );
       setFunctionTree(clonedActions);
@@ -204,7 +204,7 @@ export default function FunctionEditorContext({
 
     const overId = over.id;
     const overData = parseDropId(overId);
-    if (activeGroup !== null && activeGroup !== overData.group) {
+    if (activeGroup !== overData.group) {
       return;
     }
 
