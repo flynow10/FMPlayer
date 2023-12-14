@@ -25,7 +25,7 @@ export default function PlayAction(props: PlayActionProps) {
             newValue = value;
           }
           if (newValue === null) {
-            delete newAction.trackExpressions[0];
+            newAction.trackExpressions[0] = null;
           } else {
             newAction.trackExpressions[0] = newValue;
           }

@@ -16,6 +16,7 @@ type ActionProps = Omit<HTMLAttributes<HTMLDivElement>, "id"> & {
   depth: number;
   childCount?: number;
   inToolBox: boolean;
+  isActive?: boolean;
   handleProps: HTMLAttributes<HTMLDivElement>;
   wrapperRef?: React.Ref<HTMLDivElement>;
 };
@@ -29,6 +30,7 @@ export default forwardRef<HTMLDivElement, ActionProps>(function Action(
     depth,
     childCount,
     inToolBox,
+    isActive = false,
     wrapperRef,
     handleProps,
     style,
@@ -71,13 +73,28 @@ export default forwardRef<HTMLDivElement, ActionProps>(function Action(
         "opacity-50": ghost,
       })}
       ref={wrapperRef}
+      title={action.id}
       style={{
         paddingLeft: `${!clone ? IndentationWidth * depth : 0}px`,
       }}
       {...divProps}
     >
       <div
-        className="relative items-center flex gap-2 p-2 rounded-md border-2 border-accent dark:border-inverted-accent bg-white"
+        className={classNames(
+          "relative",
+          "items-center",
+          "flex",
+          "gap-2",
+          "p-2",
+          "rounded-md",
+          "border-2",
+          "border-accent",
+          "dark:border-inverted-accent",
+          "bg-white",
+          {
+            "bg-accent dark:bg-inverted-accent": isActive,
+          }
+        )}
         ref={ref}
         style={style}
       >

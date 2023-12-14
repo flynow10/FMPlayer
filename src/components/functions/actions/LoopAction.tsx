@@ -28,7 +28,7 @@ export default function LoopAction(props: LoopActionProps) {
             newValue = value;
           }
           if (newValue === null) {
-            delete newAction.numberExpressions[0];
+            newAction.numberExpressions[0] = null;
           } else {
             newAction.numberExpressions[0] = newValue;
           }
