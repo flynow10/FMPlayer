@@ -56,6 +56,13 @@ export namespace Functions {
     index: number;
   };
 
+  export type RuntimeState = {
+    currentActionId: string;
+    loopIndices: { [key: string]: number };
+    fromStart: boolean;
+    // currentScope: RuntimeScope
+  };
+
   export type DraggingGroup = ActionGroup | "trash";
 
   export type IdData = {
