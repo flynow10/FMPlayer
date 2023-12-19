@@ -184,10 +184,21 @@ export default function PlaylistEditor() {
           <span>
             {success ? (
               <span>
-                Successfully updated playlist:
-                <br /> {tracksAdded} track{tracksAdded !== 1 ? "s" : ""} added
-                <br />
-                {tracksRemoved} track{tracksRemoved !== 1 ? "s" : ""} removed
+                Successfully updated playlist
+                {tracksAdded > 0 || tracksRemoved > 0 ? ":" : "!"}
+                {tracksAdded > 0 && (
+                  <>
+                    <br /> {tracksAdded} track{tracksAdded !== 1 ? "s" : ""}{" "}
+                    added
+                  </>
+                )}
+                {tracksRemoved > 0 && (
+                  <>
+                    <br />
+                    {tracksRemoved} track{tracksRemoved !== 1 ? "s" : ""}{" "}
+                    removed
+                  </>
+                )}
               </span>
             ) : (
               "Failed to update playlist!"
