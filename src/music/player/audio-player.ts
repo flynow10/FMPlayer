@@ -71,7 +71,6 @@ const createHook = <Key extends keyof KeyMap>(
     return state;
   };
 };
-MusicLibrary.db.function.get({ id: "" });
 export class AudioPlayer implements HookKeys {
   public readonly PREVIOUS_TRACK_RESTART_DELAY = 3;
 
