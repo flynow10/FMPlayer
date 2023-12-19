@@ -12,10 +12,11 @@ import { flattenTree } from "@/src/music/functions/utils/flatten-tree";
 import { Functions } from "@/src/types/functions";
 import ActionList from "@/src/components/functions/ActionList";
 import Action from "@/src/components/functions/Action";
+import { useAudioPlayer } from "@/src/hooks/use-audio-player";
 
 export default function FunctionDisplay() {
   const pages = usePageContext();
-  // const audioPlayer = useAudioPlayer();
+  const audioPlayer = useAudioPlayer();
   const { show: showFunctionMenu } = useMediaContext("function");
   const [functionData, state] = useDatabase(
     () => MusicLibrary.db.function.get({ id: pages.data }),
@@ -71,7 +72,7 @@ export default function FunctionDisplay() {
                   icon: <Play />,
                   name: "Play",
                   clickHandler: () => {
-                    alert("Not implemented yet");
+                    audioPlayer.play.func(functionData);
                     return;
                   },
                 },

@@ -1,3 +1,4 @@
+import { getApplicationDebugConfig } from "@/config/app";
 import { IndentationWidth } from "@/src/components/functions/FunctionEditorContext";
 import LoopAction from "@/src/components/functions/actions/LoopAction";
 import PlayAction from "@/src/components/functions/actions/PlayAction";
@@ -65,7 +66,7 @@ export default forwardRef<HTMLDivElement, ActionProps>(function Action(
     }
     return <span>Missing action</span>;
   };
-
+  const debug = getApplicationDebugConfig();
   return (
     <div
       className={classNames("box-border w-fit", {
@@ -73,7 +74,7 @@ export default forwardRef<HTMLDivElement, ActionProps>(function Action(
         "opacity-50": ghost,
       })}
       ref={wrapperRef}
-      title={action.id}
+      title={debug?.showIds ? action.id : undefined}
       style={{
         paddingLeft: `${!clone ? IndentationWidth * depth : 0}px`,
       }}

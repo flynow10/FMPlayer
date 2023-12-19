@@ -1,8 +1,11 @@
-import QueueTrack from "@/src/components/layout/queue/QueueTrack";
+import Action from "@/src/components/functions/Action";
+import ActionList from "@/src/components/functions/ActionList";
 import { useAudioPlayer } from "@/src/hooks/use-audio-player";
+import { flattenTree } from "@/src/music/functions/utils/flatten-tree";
+import { Functions } from "@/src/types/functions";
 import classNames from "classnames";
 import { Code, List } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 type QueuePanelProps = {
   open: boolean;
@@ -13,9 +16,18 @@ type DisplayMode = "tracks" | "code";
 export default function QueuePanel(props: QueuePanelProps) {
   const [displayMode, setDisplayMode] = useState<DisplayMode>("tracks");
   const audioPlayer = useAudioPlayer();
-  const playlist = audioPlayer.useTrackQueue();
-  const isPlaying = audioPlayer.useIsPlaying();
-  const currentTrackIndex = audioPlayer.useCurrentTrackIndex();
+  const trackQueue = audioPlayer.useTrackQueue();
+  const currentFunctionState = audioPlayer.useCurrentFunctionState();
+
+  const flatTree = useMemo(() => {
+    if (!Array.isArray(trackQueue.functionTree)) {
+      throw new Error("Function data is malformed!");
+    }
+    return flattenTree(
+      trackQueue.functionTree as unknown as Functions.ActionState[]
+    );
+  }, [trackQueue]);
+
   return (
     <div
       className={classNames(
@@ -28,7 +40,7 @@ export default function QueuePanel(props: QueuePanelProps) {
         { "right-6": props.open, "-right-full": !props.open }
       )}
     >
-      <div className="flex flex-col bg-white h-full max-w-xs p-4 rounded-lg border-2 border-accent dark:border-inverted-accent">
+      <div className="flex flex-col bg-white h-full p-4 rounded-lg border-2 border-accent dark:border-inverted-accent">
         <div className="flex gap-8">
           <span className="font-bold text-lg">Up Next</span>
           <div className="ml-auto flex">
@@ -71,7 +83,21 @@ export default function QueuePanel(props: QueuePanelProps) {
               }
             )}
           >
-            <span>Not Implemented!</span>
+            <ActionList>
+              {flatTree.map((action) => (
+                <Action
+                  isActive={currentFunctionState?.currentActionId === action.id}
+                  key={action.id}
+                  action={action}
+                  clone={false}
+                  depth={action.depth}
+                  ghost={false}
+                  inToolBox={false}
+                  handleProps={{}}
+                  setAction={() => {}}
+                />
+              ))}
+            </ActionList>
           </div>
           <div
             className={classNames(
@@ -89,22 +115,7 @@ export default function QueuePanel(props: QueuePanelProps) {
               }
             )}
           >
-            {playlist.trackList.length === 0 && (
-              <span className="text-lg">Try picking something to play!</span>
-            )}
-            {playlist.trackList.map((value, index) => {
-              return (
-                <QueueTrack
-                  key={index}
-                  playing={isPlaying}
-                  activeTrack={index === currentTrackIndex}
-                  trackId={value.songId}
-                  onPlayTrack={() => {
-                    audioPlayer.moveToTrack(index);
-                  }}
-                />
-              );
-            })}
+            <span>Not Implemented!</span>
           </div>
         </div>
       </div>

@@ -149,6 +149,10 @@ export default function MediaCard<T extends DisplayableMediaType>(
         audioPlayer.play.trackList(playlist.trackListId);
         break;
       }
+      case "function": {
+        audioPlayer.play.func(props.data.id);
+        break;
+      }
       default: {
         alert("Unable to play this type of media!");
         break;

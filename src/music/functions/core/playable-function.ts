@@ -1,3 +1,4 @@
+import { createEmpty } from "@/src/music/functions/utils/create-empty";
 import { findActionDeep } from "@/src/music/functions/utils/find-action-deep";
 import { findParentActionDeep } from "@/src/music/functions/utils/find-parent-action-deep";
 import { flattenTree } from "@/src/music/functions/utils/flatten-tree";
@@ -16,6 +17,130 @@ export class PlayableFunction {
     this.flatTree = flattenTree(functionTree);
   }
 
+  public isBlank() {
+    return this.functionTree.length === 0;
+  }
+
+  public createInitialState(): Functions.RuntimeState {
+    return {
+      currentActionId: "",
+      currentTrackId: "",
+      isEnd: false,
+      nextActionId: this.functionTree[0].id,
+      loopIndices: {},
+    };
+  }
+
+  public addTrack(...trackId: string[]): PlayableFunction {
+    const clonedTree: Functions.FunctionTree = JSON.parse(
+      JSON.stringify(this.functionTree)
+    );
+    clonedTree.push(
+      ...trackId.map((id) => PlayableFunction.createNewTrackAction(id))
+    );
+
+    return new PlayableFunction(clonedTree);
+  }
+
+  public insertTrackAfter(
+    previousActionId: string,
+    ...trackId: string[]
+  ): PlayableFunction {
+    const clonedTree: Functions.FunctionTree = JSON.parse(
+      JSON.stringify(this.functionTree)
+    );
+    const rootIndex = clonedTree.findIndex(({ id }) => id === previousActionId);
+    const parentNode = findParentActionDeep(clonedTree, previousActionId);
+
+    let parentList: Functions.FunctionTree;
+    let previousActionIndex: number;
+    if (parentNode) {
+      parentList = parentNode.childNodes;
+      previousActionIndex = parentList.findIndex(
+        ({ id }) => id === previousActionId
+      );
+    } else if (rootIndex !== -1) {
+      parentList = clonedTree;
+      previousActionIndex = rootIndex;
+    } else {
+      throw new Error("Previous action couldn't be found in function tree!");
+    }
+
+    parentList.splice(
+      previousActionIndex,
+      0,
+      ...trackId.map((id) => PlayableFunction.createNewTrackAction(id))
+    );
+
+    return new PlayableFunction(clonedTree);
+  }
+
+  public getNextTrack(
+    currentState?: Functions.RuntimeState
+  ): [Functions.RuntimeState, boolean] {
+    if (!currentState) {
+      currentState = this.createInitialState();
+    }
+    let trackId: string | null = null;
+    let nextState = currentState;
+    let didEnd = nextState.isEnd;
+    while (trackId === null) {
+      nextState = this.evaluateState(nextState);
+      trackId = nextState.currentTrackId;
+      if (nextState.isEnd) {
+        didEnd = true;
+      }
+    }
+    return [nextState, didEnd];
+  }
+
+  public getLastTrack(): {
+    lastState: Functions.RuntimeState;
+    trackStates: Functions.RuntimeState[];
+  } {
+    let lastTrackState: Functions.RuntimeState | null = null;
+    let currentState = this.createInitialState();
+    const trackStates: Functions.RuntimeState[] = [];
+    while (!currentState.isEnd) {
+      currentState = this.evaluateState(currentState);
+      if (currentState.currentTrackId !== null) {
+        if (lastTrackState !== null) {
+          trackStates.push(lastTrackState);
+        }
+        lastTrackState = currentState;
+      }
+    }
+    if (!lastTrackState) {
+      throw this.stateError();
+    }
+    return {
+      lastState: lastTrackState,
+      trackStates: trackStates,
+    };
+  }
+
+  public getLastState(): Functions.RuntimeState {
+    let currentState = this.createInitialState();
+    while (!currentState.isEnd) {
+      currentState = this.evaluateState(currentState);
+    }
+    return currentState;
+  }
+
+  public static createNewTrackAction(trackId: string): Functions.ActionState {
+    return {
+      ...createEmpty.play(),
+      trackExpressions: [
+        {
+          ...createEmpty.trackliteral(),
+          data: {
+            trackId,
+          },
+        } as Functions.TrackLiteral,
+      ],
+    };
+  }
+
   private stateError() {
     return new Error(
       "There is something wrong with the current state! Unable to find next song"
@@ -25,137 +150,86 @@ export class PlayableFunction {
     return new Error("Unexpected action type!");
   }
 
-  getNextTrack(
-    currentState?: Functions.RuntimeState
-  ): [string | null, Functions.RuntimeState, Functions.RuntimeState] {
-    if (!currentState) {
-      currentState = {
-        currentActionId: this.functionTree[0].id,
-        fromStart: true,
-        loopIndices: {},
-      };
-    }
-    let trackId: string | null = null;
-    let nextState = currentState;
-    while (trackId === null) {
-      currentState = nextState;
-      [trackId, nextState] = this.evaluateState(currentState);
-    }
-    return [trackId, nextState, currentState];
-  }
-
-  private getParentStatementList(actionId: string) {
-    let currentAction = this.flatTree.find(({ id }) => id === actionId);
-    const parentArray: string[] = [actionId];
-    while (currentAction) {
-      if (typeof currentAction.parentId === "string") {
-        actionId = currentAction.parentId;
-        parentArray.unshift(actionId);
-        currentAction = this.flatTree.find(({ id }) => id === actionId);
-      } else {
-        currentAction = undefined;
+  private getParentNode(actionId: string): Functions.ActionState | undefined {
+    const isCurrentActionInRoot =
+      this.functionTree.findIndex(({ id }) => id === actionId) !== -1;
+    if (isCurrentActionInRoot) {
+      return undefined;
+    } else {
+      const parentNode =
+        findParentActionDeep(this.functionTree, actionId) ?? null;
+      if (!parentNode) {
+        throw this.stateError();
       }
+      return parentNode;
     }
-    return parentArray;
   }
 
   private evaluateState(
     currentState: Functions.RuntimeState
-  ): [string | null, Functions.RuntimeState] {
-    const nextState: Functions.RuntimeState = JSON.parse(
-      JSON.stringify(currentState)
-    );
-    nextState.fromStart = false;
+  ): Functions.RuntimeState {
+    const nextState: Functions.RuntimeState = {
+      currentActionId: currentState.nextActionId,
+      loopIndices: JSON.parse(JSON.stringify(currentState.loopIndices)),
+      isEnd: false,
+      nextActionId: "",
+      currentTrackId: null,
+    };
+
+    let nextActionId: string | null = null;
+
     const currentAction = findActionDeep(
       this.functionTree,
-      currentState.currentActionId
+      currentState.nextActionId
     );
-    if (!currentAction || currentAction.group !== "actions") {
+    if (!currentAction) {
       throw this.stateError();
     }
-    const isCurrentActionInRoot = this.functionTree.includes(currentAction);
-    let parentBlock: Functions.ActionState[];
-    if (isCurrentActionInRoot) {
-      parentBlock = this.functionTree;
-    } else {
-      const parentNode =
-        findParentActionDeep(this.functionTree, currentState.currentActionId) ??
-        null;
-      if (!parentNode) {
-        throw this.stateError();
-      }
-      parentBlock = parentNode.childNodes;
-    }
 
-    const nextIndex =
-      parentBlock.findIndex(({ id }) => id === currentState.currentActionId) +
-      1;
-    let nextAction: Functions.ActionState | null = null;
-    if (nextIndex === parentBlock.length) {
-      if (!isCurrentActionInRoot) {
-        const parentArray = this.getParentStatementList(currentAction.id);
-        let currentLoopAction = currentAction;
-        for (let i = parentArray.length - 1; i >= 0; i--) {
-          const parentAction = findActionDeep(
-            this.functionTree,
-            parentArray[i]
-          );
-          if (!parentAction) {
-            throw this.stateError();
-          }
-          const parentIndex =
-            parentAction.childNodes.indexOf(currentLoopAction);
-          if (parentAction.type === "loop") {
-            nextAction = parentAction;
-            break;
-          } else if (parentIndex !== parentAction.childNodes.length - 1) {
-            nextAction = parentAction.childNodes[parentIndex + 1];
-            break;
-          }
-          if (i === 0) {
-            const rootIndex = this.functionTree.indexOf(parentAction);
-            if (rootIndex + 1 === this.functionTree.length) {
-              nextAction = this.functionTree[rootIndex + 1];
-            }
-          }
-          currentLoopAction = parentAction;
-        }
-        if (nextAction === null) {
-          nextAction = this.functionTree[0];
-          nextState.fromStart = true;
-        }
-      } else {
-        nextAction = this.functionTree[0];
-        nextState.fromStart = true;
-      }
-    } else {
-      nextAction = parentBlock[nextIndex];
-    }
-    nextState.currentActionId = nextAction.id;
-
-    let trackId: string | null = null;
     if (currentAction.type === "play") {
-      trackId = this.evaluatePlayAction(currentAction, currentState);
+      nextState.currentTrackId = this.evaluatePlayAction(
+        currentAction,
+        currentState
+      );
     }
 
     if (currentAction.type === "loop") {
       const loopResult = this.evaluateLoopAction(currentAction, currentState);
       if (loopResult === "next") {
         delete nextState.loopIndices[currentAction.id];
-        if (
-          this.functionTree.indexOf(currentAction) ===
-          this.functionTree.length - 1
-        ) {
-          nextState.fromStart = true;
-        }
       } else {
         nextState.loopIndices[currentAction.id] = loopResult;
-        nextState.currentActionId = currentAction.childNodes[0].id;
-        nextState.fromStart = false;
+        nextActionId = currentAction.childNodes[0].id;
       }
     }
 
-    return [trackId, nextState];
+    let parentNode = this.getParentNode(currentAction.id);
+    while (nextActionId === null) {
+      const parentList = parentNode?.childNodes ?? this.functionTree;
+
+      const parentActionIndex = parentList.indexOf(currentAction);
+      if (parentActionIndex !== parentList.length - 1) {
+        nextActionId = parentList[parentActionIndex + 1].id;
+        break;
+      }
+
+      if (!parentNode) {
+        nextActionId = this.functionTree[0].id;
+        nextState.isEnd = true;
+        break;
+      }
+
+      if (parentNode.type === "loop") {
+        nextActionId = parentNode.id;
+        break;
+      }
+
+      parentNode = this.getParentNode(currentAction.id);
+    }
+
+    nextState.nextActionId = nextActionId;
+
+    return nextState;
   }
 
   private evaluateLoopAction(

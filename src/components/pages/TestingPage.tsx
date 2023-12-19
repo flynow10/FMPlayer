@@ -26,23 +26,32 @@ export default function TestingPage() {
   const flatTree = useMemo(() => {
     return flattenTree(playableFunction.functionTree);
   }, [playableFunction]);
-  const [nextState, setNextState] = useState<
-    Functions.RuntimeState | undefined
-  >();
   const [currentState, setCurrentState] = useState<
     Functions.RuntimeState | undefined
   >();
   const [currentTrack, setCurrentTrack] = useState("");
   const nextTrack = () => {
-    const [currentTrack, newNextState, newCurrentState] =
-      playableFunction.getNextTrack(nextState);
-    if (currentTrack) {
-      setCurrentTrack(currentTrack);
+    const [newCurrentState] = playableFunction.getNextTrack(currentState);
+    setState(newCurrentState);
+  };
+  const sendNextState = () => {
+    // const newCurrentState = playableFunction.evaluateState(
+    //   currentState ?? playableFunction.createInitialState()
+    // );
+    // setState(newCurrentState);
+  };
+  const setLastTrack = () => {
+    const { lastState } = playableFunction.getLastTrack();
+    setState(lastState);
+  };
+
+  const setState = (state: Functions.RuntimeState) => {
+    if (state.currentTrackId) {
+      setCurrentTrack(state.currentTrackId);
     } else {
       setCurrentTrack("");
     }
-    setNextState(newNextState);
-    setCurrentState(newCurrentState);
+    setCurrentState(state);
   };
   return (
     <div className="flex gap-2">
@@ -65,16 +74,17 @@ export default function TestingPage() {
         <button className="border rounded-md p-2" onClick={nextTrack}>
           Next Track
         </button>
+        <button className="border rounded-md p-2" onClick={setLastTrack}>
+          Last Track
+        </button>
+        <button className="border rounded-md p-2" onClick={sendNextState}>
+          Next State
+        </button>
         <span>Current Track ID: {currentTrack}</span>
         <hr />
         <div>
           <span>Current State:</span>
           <pre>{JSON.stringify(currentState, null, 2)}</pre>
-        </div>
-        <hr />
-        <div>
-          <span>Next State:</span>
-          <pre>{JSON.stringify(nextState, null, 2)}</pre>
         </div>
       </div>
     </div>
