@@ -62,8 +62,13 @@ export default function TrackLiteral(props: TrackLiteralProps) {
       <Select
         options={valueLabelTracks}
         isDisabled={props.inToolBox || props.clone || !isEditable}
-        menuPortalTarget={document.body}
         isSearchable
+        menuPortalTarget={document.body}
+        menuPlacement="auto"
+        menuPosition="absolute"
+        menuShouldBlockScroll={false}
+        menuShouldScrollIntoView={false}
+        minMenuHeight={300}
         placeholder={"Select a Track"}
         value={valueLabelTracks.find(({ id }) => id === props.trackId) ?? null}
         onChange={(track) => {
