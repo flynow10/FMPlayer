@@ -65,6 +65,7 @@ const collisionDetection: CollisionDetection = (args) => {
     return false;
   };
   if (activeGroup === "actions") {
+    // Improves detection when dragging outside of the action's ghost width
     const rectIds = args.droppableRects.keys();
     for (const rectId of rectIds) {
       const oldRect = args.droppableRects.get(rectId);
@@ -78,6 +79,13 @@ const collisionDetection: CollisionDetection = (args) => {
       }
     }
   }
+
+  // Dnd-kit seems to currently have a bug affecting the
+  //  rectIntersection collision detection method
+  // When dragging an action that scrolls the container, the
+  //  active drop rect becomes offset from the mouse position.
+  //  This leads to odd behavior for the user
+  // There may be a work around to this, but I don't have the time to find it right now
   return rectIntersection(args).filter(filterMethod);
 };
 
