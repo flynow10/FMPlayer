@@ -58,8 +58,10 @@ export namespace Functions {
 
   export type RuntimeState = {
     currentActionId: string;
+    currentTrackId: string | null;
+    nextActionId: string;
     loopIndices: { [key: string]: number };
-    fromStart: boolean;
+    isEnd: boolean;
     // currentScope: RuntimeScope
   };
 
