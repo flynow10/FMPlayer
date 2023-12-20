@@ -1,20 +1,17 @@
 import { createEmpty } from "@/src/music/functions/utils/create-empty";
 import { findActionDeep } from "@/src/music/functions/utils/find-action-deep";
 import { findParentActionDeep } from "@/src/music/functions/utils/find-parent-action-deep";
-import { flattenTree } from "@/src/music/functions/utils/flatten-tree";
 import { validateFunction } from "@/src/music/functions/validation/validate-function";
 import { Functions } from "@/src/types/functions";
 
 export class PlayableFunction {
   public readonly functionTree: Functions.FunctionTree;
-  private readonly flatTree: Functions.FlattenedActionState[];
 
   constructor(functionTree: Functions.FunctionTree) {
     if (!validateFunction(functionTree)) {
       throw new Error("Function tree is corrupt! Unable to play function");
     }
     this.functionTree = functionTree;
-    this.flatTree = flattenTree(functionTree);
   }
 
   public isBlank() {
