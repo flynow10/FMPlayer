@@ -1,9 +1,16 @@
 import { usePageContext } from "@/src/contexts/PageContext";
 import { useAudioPlayer } from "@/src/hooks/use-audio-player";
+import { useDatabase } from "@/src/hooks/use-database";
 import { ContextMenuPropType } from "@/src/hooks/use-media-context";
 import { MusicLibrary } from "@/src/music/library/music-library";
 
-import { Item, ItemParams, Menu, Separator } from "react-contexify-props";
+import {
+  HandlerParams,
+  Item,
+  ItemParams,
+  Menu,
+  Separator,
+} from "react-contexify-props";
 import { toast } from "react-toastify";
 
 type FunctionCtxMenuProps = {
@@ -77,6 +84,8 @@ export default function FunctionCtxMenu(props: FunctionCtxMenuProps) {
       theme="dark"
       className="dark:invert"
     >
+      <Item disabled>{(args) => <FunctionTitle {...args} />}</Item>
+      <Separator />
       <Item
         onClick={(event) => {
           addToQueue(event, false);
@@ -105,4 +114,25 @@ export default function FunctionCtxMenu(props: FunctionCtxMenuProps) {
       </Item>
     </Menu>
   );
+}
+
+// eslint-disable-next-line react/no-multi-comp
+function FunctionTitle(args: HandlerParams<ContextMenuPropType<"function">>) {
+  const functionId = args.props?.functionId;
+  if (typeof functionId !== "string") {
+    alert("This context menu was not set up correctly!");
+    throw new Error("Unable to open function editor; missing function id!");
+  }
+  const [functionData] = useDatabase(
+    () => {
+      return MusicLibrary.db.function.get({ id: functionId });
+    },
+    null,
+    "Function",
+    [functionId]
+  );
+  if (!functionData) {
+    return null;
+  }
+  return functionData.title;
 }

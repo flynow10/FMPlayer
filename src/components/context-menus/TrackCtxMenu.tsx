@@ -40,11 +40,7 @@ export default function TrackCtxMenu(props: TrackCtxMenuProps) {
 
   return (
     <Menu id={"track-" + props.pageSlug} theme="dark" className="dark:invert">
-      <Item disabled>
-        {(args: HandlerParams<ContextMenuPropType<"track">>) => {
-          return <TrackTitle {...args} />;
-        }}
-      </Item>
+      <Item disabled>{(args) => <TrackTitle {...args} />}</Item>
       <Separator />
       <Item
         onClick={(event) => {
