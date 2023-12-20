@@ -1,9 +1,11 @@
+import { useContext, useState } from "react";
+
 import { FileContext } from "@/src/contexts/FileContext";
 import { Music } from "@/src/types/music";
 import { Pages } from "@/src/types/pages";
+
 import classNames from "classnames";
 import { Check, CheckSquare, Loader2, MinusSquare, Square } from "lucide-react";
-import { useContext, useState } from "react";
 
 type FileListProps = {
   files: Music.Files.NewTrackMetadata[];

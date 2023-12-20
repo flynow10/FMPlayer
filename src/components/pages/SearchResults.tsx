@@ -1,11 +1,11 @@
-import MediaCard, {
-  DisplayableMediaType,
-} from "@/src/components/media-displays/MediaCard";
-import { MediaCarousel } from "@/src/components/media-displays/MediaCarousel";
-import { FullCover } from "@/src/components/utils/loading/FullCover";
+import MediaCard from "@/src/components/media-displays/MediaCard";
+import MediaCarousel from "@/src/components/media-displays/MediaCarousel";
+import FullCover from "@/src/components/utils/loading/FullCover";
+
 import { usePageContext } from "@/src/contexts/PageContext";
 import { useAsyncLoad } from "@/src/hooks/use-async-load";
 import { MusicLibrary } from "@/src/music/library/music-library";
+import { Pages } from "@/src/types/pages";
 
 export default function SearchResults() {
   const pages = usePageContext();
@@ -74,7 +74,7 @@ export default function SearchResults() {
               <MediaCard
                 key={result.id}
                 style="tab-card"
-                type={result.type as DisplayableMediaType}
+                type={result.type as Pages.MediaDisplay.DisplayableMediaType}
                 data={data}
                 shouldDisplayType={true}
               />

@@ -1,7 +1,11 @@
-import { Logo } from "@/src/components/utils/Logo";
+import { useState } from "react";
+
 import SuggestionSearch from "@/src/components/utils/input-extensions/SuggestionSearch";
+import Logo from "@/src/components/utils/Logo";
+
 import { MusicLibrary } from "@/src/music/library/music-library";
 import { Pages } from "@/src/types/pages";
+
 import classNames from "classnames";
 import {
   Clock3,
@@ -17,7 +21,6 @@ import {
   Settings,
 } from "lucide-react";
 import { Suggestion } from "minisearch";
-import { useState } from "react";
 
 type SidebarProps = {
   location: Pages.Location;

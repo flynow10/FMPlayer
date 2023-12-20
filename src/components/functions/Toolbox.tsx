@@ -1,11 +1,13 @@
 import Action from "@/src/components/functions/Action";
 import ActionList from "@/src/components/functions/ActionList";
-import Trash from "@/src/components/functions/Trash";
 import BinaryArithmetic from "@/src/components/functions/draggables/BinaryArithmetic";
 import TrackLiteral from "@/src/components/functions/draggables/TrackLiteral";
+import Trash from "@/src/components/functions/Trash";
+
 import { createEmpty } from "@/src/music/functions/utils/create-empty";
 import { generateActionId } from "@/src/music/functions/utils/generate-action-id";
 import { Functions } from "@/src/types/functions";
+
 import classNames from "classnames";
 import { Trash2 } from "lucide-react";
 

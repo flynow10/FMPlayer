@@ -1,27 +1,30 @@
-import FunctionEditorContext from "@/src/components/functions/FunctionEditorContext";
-import SortableFunctionDisplay from "@/src/components/functions/SortableFunctionDisplay";
-import Toolbox from "@/src/components/functions/Toolbox";
-import TrackOverlay from "@/src/components/functions/drag-overlays/TrackOverlay";
-import { Logo } from "@/src/components/utils/Logo";
-import FadeInOut from "@/src/components/utils/animated/FadeInOut";
-import { ExpandingInput } from "@/src/components/utils/input-extensions/ExpandingInput";
-import { Functions } from "@/src/types/functions";
-import CodeMirror from "@uiw/react-codemirror";
-import classNames from "classnames";
-import { Braces, Save, TextQuote, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { tokyoNight } from "@uiw/codemirror-theme-tokyo-night";
+
 // import { simpleLezerLinter } from "@/src/music/functions/codemirror/simple-lezer-linter";
 // import { codeFolding } from "@codemirror/language";
 // import { FMLanguage } from "@/src/music/functions/codemirror/fm-language";
 import ActionOverlay from "@/src/components/functions/drag-overlays/ActionOverlay";
 import NumberOverlay from "@/src/components/functions/drag-overlays/NumberOverlay";
-import { validateFunction } from "@/src/music/functions/validation/validate-function";
+import TrackOverlay from "@/src/components/functions/drag-overlays/TrackOverlay";
+import FunctionEditorContext from "@/src/components/functions/FunctionEditorContext";
+import SortableFunctionDisplay from "@/src/components/functions/SortableFunctionDisplay";
+import Toolbox from "@/src/components/functions/Toolbox";
+import FadeInOut from "@/src/components/utils/animated/FadeInOut";
+import ExpandingInput from "@/src/components/utils/input-extensions/ExpandingInput";
+import Logo from "@/src/components/utils/Logo";
+
 import { usePageContext } from "@/src/contexts/PageContext";
+import { validateFunction } from "@/src/music/functions/validation/validate-function";
 import { MusicLibrary } from "@/src/music/library/music-library";
+import { Functions } from "@/src/types/functions";
 import { Music } from "@/src/types/music";
-import { toast } from "react-toastify";
+
 import { Prisma } from "@prisma/client";
+import { tokyoNight } from "@uiw/codemirror-theme-tokyo-night";
+import CodeMirror from "@uiw/react-codemirror";
+import classNames from "classnames";
+import { Braces, Save, TextQuote, X } from "lucide-react";
+import { toast } from "react-toastify";
 
 type DisplayMode = "text" | "blocks";
 

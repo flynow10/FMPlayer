@@ -1,8 +1,11 @@
-import NumberShape from "@/src/components/functions/shaped-containers/NumberShape";
-import { ExpandingInput } from "@/src/components/utils/input-extensions/ExpandingInput";
-import { FunctionEditor } from "@/src/contexts/FunctionEditor";
-import classNames from "classnames";
 import { useContext } from "react";
+
+import NumberShape from "@/src/components/functions/shaped-containers/NumberShape";
+import ExpandingInput from "@/src/components/utils/input-extensions/ExpandingInput";
+
+import { FunctionEditor } from "@/src/contexts/FunctionEditor";
+
+import classNames from "classnames";
 
 type NumberLiteralProps = {
   id: string;

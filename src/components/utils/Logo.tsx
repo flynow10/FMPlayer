@@ -1,7 +1,8 @@
-import { HTMLAttributes, forwardRef } from "react";
+import { forwardRef, HTMLAttributes } from "react";
+
 import logoSrc from "/colorIcon.svg";
 
-export const Logo = forwardRef<
+export default forwardRef<
   HTMLImageElement,
   Omit<HTMLAttributes<HTMLImageElement>, "src">
 >(function Logo(props, ref) {

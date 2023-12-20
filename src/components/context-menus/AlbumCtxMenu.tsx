@@ -1,7 +1,8 @@
 import { useAudioPlayer } from "@/src/hooks/use-audio-player";
 import { ContextMenuPropType } from "@/src/hooks/use-media-context";
 import { MusicLibrary } from "@/src/music/library/music-library";
-import { Item, ItemParams, Menu, Separator } from "react-contexify";
+
+import { Item, ItemParams, Menu, Separator } from "react-contexify-props";
 import { toast } from "react-toastify";
 
 type AlbumCtxMenuProps = {

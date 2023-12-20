@@ -1,13 +1,16 @@
-import { getApplicationDebugConfig } from "@/config/app";
-import { IndentationWidth } from "@/src/components/functions/FunctionEditorContext";
+import React, { forwardRef, HTMLAttributes, useContext } from "react";
+
 import LoopAction from "@/src/components/functions/actions/LoopAction";
 import PlayAction from "@/src/components/functions/actions/PlayAction";
+
+import { getApplicationDebugConfig } from "@/config/app";
 import { FunctionEditor } from "@/src/contexts/FunctionEditor";
+import { IndentationWidth } from "@/src/music/functions/core/constants";
 import { getActionName } from "@/src/music/functions/utils/get-action-name";
 import { Functions } from "@/src/types/functions";
+
 import classNames from "classnames";
 import { Menu, Plus } from "lucide-react";
-import React, { HTMLAttributes, forwardRef, useContext } from "react";
 
 type ActionProps = Omit<HTMLAttributes<HTMLDivElement>, "id"> & {
   action: Functions.ActionState;

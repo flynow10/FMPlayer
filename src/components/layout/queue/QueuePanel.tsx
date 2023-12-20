@@ -1,11 +1,14 @@
+import { useMemo, useState } from "react";
+
 import Action from "@/src/components/functions/Action";
 import ActionList from "@/src/components/functions/ActionList";
+
 import { useAudioPlayer } from "@/src/hooks/use-audio-player";
-import { flattenTree } from "@/src/music/functions/utils/flatten-tree";
+import { flattenTree } from "@/src/music/functions/core/flatten-tree";
 import { Functions } from "@/src/types/functions";
+
 import classNames from "classnames";
 import { Code, List } from "lucide-react";
-import { useMemo, useState } from "react";
 
 type QueuePanelProps = {
   open: boolean;

@@ -2,6 +2,7 @@ import { FunctionBuilder } from "@/src/music/functions/core/function-builder";
 import { PlayableFunction } from "@/src/music/functions/core/playable-function";
 import { createEmpty } from "@/src/music/functions/utils/create-empty";
 import { Functions } from "@/src/types/functions";
+
 import { v4 as uuid } from "uuid";
 
 describe("Playable Function", () => {

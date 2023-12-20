@@ -1,13 +1,13 @@
-import { createCRUDModule, CRUDObjects } from "@/src/music/library/crud-module";
 import {
   AudioMethods,
   createAudioMethods,
 } from "@/src/music/library/audio-module";
-import { Music } from "@/src/types/music";
+import { createCRUDModule,CRUDObjects } from "@/src/music/library/crud-module";
 import {
   createSearchMethods,
   SearchMethods,
 } from "@/src/music/library/search-module";
+import { Music } from "@/src/types/music";
 
 export type MusicLibrary = {
   db: CRUDObjects;

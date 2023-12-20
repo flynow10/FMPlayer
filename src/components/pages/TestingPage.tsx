@@ -1,11 +1,13 @@
+import { useMemo, useState } from "react";
+
 import Action from "@/src/components/functions/Action";
 import ActionList from "@/src/components/functions/ActionList";
+
 import { useDatabase } from "@/src/hooks/use-database";
+import { flattenTree } from "@/src/music/functions/core/flatten-tree";
 import { PlayableFunction } from "@/src/music/functions/core/playable-function";
-import { flattenTree } from "@/src/music/functions/utils/flatten-tree";
 import { MusicLibrary } from "@/src/music/library/music-library";
 import { Functions } from "@/src/types/functions";
-import { useMemo, useState } from "react";
 
 export default function TestingPage() {
   const [playableFunction] = useDatabase<PlayableFunction>(

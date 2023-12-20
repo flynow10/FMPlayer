@@ -1,5 +1,6 @@
 import { CRUDObjects } from "@/src/music/library/crud-module";
 import { Music } from "@/src/types/music";
+
 import MiniSearch, {
   SearchResult as ParentSearchResult,
   Suggestion,

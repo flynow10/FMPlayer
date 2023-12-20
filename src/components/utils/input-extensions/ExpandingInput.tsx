@@ -1,7 +1,8 @@
-import { Utils } from "@/src/types/utils";
-import { InputHTMLAttributes, forwardRef } from "react";
+import { forwardRef, InputHTMLAttributes } from "react";
 
-export const ExpandingInput = forwardRef<
+import { Utils } from "@/src/types/utils";
+
+export default forwardRef<
   HTMLInputElement,
   Utils.MakeRequired<InputHTMLAttributes<HTMLInputElement>, "value">
 >(function ExpandingInput(props, ref) {

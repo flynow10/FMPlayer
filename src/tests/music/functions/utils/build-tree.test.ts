@@ -1,5 +1,5 @@
-import { buildTree } from "@/src/music/functions/utils/build-tree";
-import { flattenTree } from "@/src/music/functions/utils/flatten-tree";
+import { buildTree } from "@/src/music/functions/core/build-tree";
+import { flattenTree } from "@/src/music/functions/core/flatten-tree";
 import { createTreePair } from "@/src/tests/music/functions/utils/flat-upright-tree-pair";
 import { createTestTree } from "@/src/tests/music/functions/utils/test-tree";
 

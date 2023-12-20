@@ -1,6 +1,7 @@
 import { usePageContext } from "@/src/contexts/PageContext";
 import { Utils } from "@/src/types/utils";
-import { ShowContextMenuParams, useContextMenu } from "react-contexify";
+
+import { ShowContextMenuParams, useContextMenu } from "react-contexify-props";
 
 export type ContextMenuTypes = "playlist" | "album" | "track" | "function";
 

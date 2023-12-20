@@ -1,9 +1,11 @@
 import Artwork from "@/src/components/media-displays/Artwork";
+import LoadingSpinner from "@/src/components/utils/loading/LoadingSpinner";
+
 import { DataState, useDatabase } from "@/src/hooks/use-database";
 import { MusicLibrary } from "@/src/music/library/music-library";
+
 import classNames from "classnames";
 import bouncingLines from "/bouncing-lines.svg";
-import LoadingSpinner from "@/src/components/utils/loading/LoadingSpinner";
 
 type QueueTrackProps = {
   trackId: string;

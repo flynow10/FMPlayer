@@ -1,8 +1,5 @@
 // Built off of http://react-autosuggest.js.org/
 
-import SuggestionList from "@/src/components/utils/input-extensions/SuggestionList";
-import { InputExtensions } from "@/src/types/input-extensions";
-import { mergeClasses } from "@/src/utils/component-utils";
 import {
   FocusEvent,
   FormEvent,
@@ -11,6 +8,11 @@ import {
   useRef,
   useState,
 } from "react";
+
+import SuggestionList from "@/src/components/utils/input-extensions/SuggestionList";
+
+import { InputExtensions } from "@/src/types/input-extensions";
+import { mergeClasses } from "@/src/utils/component-utils";
 
 type BaseSuggestionInputProps<S> = {
   suggestions: S[];

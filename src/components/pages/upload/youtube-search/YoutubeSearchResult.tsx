@@ -1,8 +1,10 @@
-import { YoutubeAPI } from "@/src/api/youtube-API";
 import ChannelDisplay from "@/src/components/utils/youtube/ChannelDisplay";
+
+import { YoutubeAPI } from "@/src/api/youtube-API";
 import { API } from "@/src/types/api";
-import { shortenNumberString } from "@/src/utils/string-utils";
 import { formatIsoDuration, timeSince } from "@/src/utils/date-utils";
+import { shortenNumberString } from "@/src/utils/string-utils";
+
 import { ExternalLink } from "lucide-react";
 
 type YoutubeSearchResultProps = {
@@ -11,7 +13,7 @@ type YoutubeSearchResultProps = {
   onClickDownLoad: () => void;
 };
 
-export function YoutubeSearchResult(props: YoutubeSearchResultProps) {
+export default function YoutubeSearchResult(props: YoutubeSearchResultProps) {
   const videoLink = `https://youtube.com/watch?v=${props.videoId}`;
 
   const videoSnippet = props.video.snippet;

@@ -1,4 +1,4 @@
-import { DropAnimation, defaultDropAnimation } from "@dnd-kit/core";
+import { defaultDropAnimation,DropAnimation } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 
 export const fadeOutAnimationConfig: DropAnimation = {

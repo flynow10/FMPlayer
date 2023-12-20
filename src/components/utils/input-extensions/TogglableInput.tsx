@@ -1,5 +1,6 @@
-import { Edit } from "lucide-react";
 import { useEffect, useState } from "react";
+
+import { Edit } from "lucide-react";
 
 type TogglableInputProps = Omit<
   React.InputHTMLAttributes<HTMLInputElement>,

@@ -1,10 +1,11 @@
+import { useEffect, useState } from "react";
+
 import { PlayableFunction } from "@/src/music/functions/core/playable-function";
 import { validateFunction } from "@/src/music/functions/validation/validate-function";
 import { MusicLibrary } from "@/src/music/library/music-library";
 import { AudioTag } from "@/src/music/player/audio-tag";
 import { Functions } from "@/src/types/functions";
 import { Music } from "@/src/types/music";
-import { useEffect, useState } from "react";
 
 type AudioPlayerEventType =
   | AudioTagEvents

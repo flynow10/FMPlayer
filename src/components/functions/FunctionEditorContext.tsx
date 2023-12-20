@@ -1,16 +1,23 @@
+import React, { useState } from "react";
+
 import { FunctionEditor } from "@/src/contexts/FunctionEditor";
 import { useFlattenedTree } from "@/src/hooks/functions/use-flattened-tree";
-import { buildTree } from "@/src/music/functions/utils/build-tree";
+import { buildTree } from "@/src/music/functions/core/build-tree";
+import {
+  IndentationWidth,
+  TRASH_ID,
+} from "@/src/music/functions/core/constants";
+import { flattenTree } from "@/src/music/functions/core/flatten-tree";
 import { createEmpty } from "@/src/music/functions/utils/create-empty";
 import { cutFlatTree } from "@/src/music/functions/utils/cut-flat-tree";
 import { deleteExpression } from "@/src/music/functions/utils/delete-expression";
 import { findActionDeep } from "@/src/music/functions/utils/find-action-deep";
 import { findParentActionDeep } from "@/src/music/functions/utils/find-parent-action-deep";
-import { flattenTree } from "@/src/music/functions/utils/flatten-tree";
 import { getDropProjection } from "@/src/music/functions/utils/get-drop-projection";
 import { parseActionId } from "@/src/music/functions/utils/parse-action-id";
 import { parseDropId } from "@/src/music/functions/utils/parse-drop-id";
 import { Functions } from "@/src/types/functions";
+
 import {
   Collision,
   CollisionDetection,
@@ -19,29 +26,22 @@ import {
   DragMoveEvent,
   DragOverEvent,
   DragStartEvent,
+  getFirstCollision,
   MeasuringStrategy,
   PointerSensor,
-  UniqueIdentifier,
-  getFirstCollision,
   pointerWithin,
   rectIntersection,
+  UniqueIdentifier,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
-import React, { useState } from "react";
 
 type FunctionEditorContextProps = {
   children?: React.ReactNode;
   functionTree: Functions.FunctionTree;
   setFunctionTree: Functions.SetFunctionTree;
 };
-
-// px width of nested actions indent
-export const IndentationWidth = 40;
-
-// Reserved IDs
-export const TRASH_ID = "TRASH";
 
 // Only drop trash actions when the mouse pointer is in the trash instead of closest center
 const collisionDetection: CollisionDetection = (args) => {

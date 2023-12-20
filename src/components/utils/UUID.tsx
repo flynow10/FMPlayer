@@ -1,7 +1,8 @@
 import { useState } from "react";
+
 import { v4 as uuidGen } from "uuid";
 
-export function UUID() {
+export default function UUID() {
   const [uuid, setUuid] = useState(uuidGen());
   return (
     <div>

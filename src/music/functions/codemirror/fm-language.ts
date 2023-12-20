@@ -1,12 +1,12 @@
-import { parser } from "./fm-parser";
-import { styleTags, tags as t } from "@lezer/highlight";
 import {
-  indentNodeProp,
+  delimitedIndent,
   foldInside,
   foldNodeProp,
+  indentNodeProp,
   LRLanguage,
-  delimitedIndent,
 } from "@codemirror/language";
+import { styleTags, tags as t } from "@lezer/highlight";
+import { parser } from "./fm-parser";
 
 const parserWithMetaData = parser.configure({
   props: [

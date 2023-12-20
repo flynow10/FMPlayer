@@ -1,5 +1,6 @@
-import { Music } from "@/src/types/music";
 import React from "react";
+
+import { Music } from "@/src/types/music";
 
 type LinkedArtistListProps = {
   onClickArtist: (artistId: string) => void;

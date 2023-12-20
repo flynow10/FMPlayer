@@ -1,9 +1,11 @@
 import TrackLiteral from "@/src/components/functions/draggables/TrackLiteral";
 import TrackShapeInsert from "@/src/components/functions/shaped-containers/TrackShapeInsert";
+
+import { createEmpty } from "@/src/music/functions/utils/create-empty";
 import { generateDropId } from "@/src/music/functions/utils/generate-drop-id";
 import { Functions } from "@/src/types/functions";
+
 import { useDroppable } from "@dnd-kit/core";
-import { createEmpty } from "@/src/music/functions/utils/create-empty";
 
 type TrackDroppableProps = {
   parentId: string;

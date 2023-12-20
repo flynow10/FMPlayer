@@ -1,4 +1,4 @@
-import { flattenTree } from "@/src/music/functions/utils/flatten-tree";
+import { flattenTree } from "@/src/music/functions/core/flatten-tree";
 import { createTreePair } from "@/src/tests/music/functions/utils/flat-upright-tree-pair";
 
 describe("Flatten Tree", () => {

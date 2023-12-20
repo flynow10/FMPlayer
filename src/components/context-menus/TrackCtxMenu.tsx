@@ -1,3 +1,8 @@
+import { useAudioPlayer } from "@/src/hooks/use-audio-player";
+import { useDatabase } from "@/src/hooks/use-database";
+import { ContextMenuPropType } from "@/src/hooks/use-media-context";
+import { MusicLibrary } from "@/src/music/library/music-library";
+
 import {
   HandlerParams,
   Item,
@@ -5,11 +10,6 @@ import {
   Menu,
   Separator,
 } from "react-contexify-props";
-
-import { useAudioPlayer } from "@/src/hooks/use-audio-player";
-import { useDatabase } from "@/src/hooks/use-database";
-import { ContextMenuPropType } from "@/src/hooks/use-media-context";
-import { MusicLibrary } from "@/src/music/library/music-library";
 
 type TrackCtxMenuProps = {
   pageSlug: string;

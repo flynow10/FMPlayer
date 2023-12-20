@@ -1,70 +1,21 @@
-import { getApplicationDebugConfig } from "@/config/app";
+import { ReactNode } from "react";
+
 import Artwork from "@/src/components/media-displays/Artwork";
 import LinkedArtistList from "@/src/components/media-displays/LinkedArtistList";
+
+import { getApplicationDebugConfig } from "@/config/app";
 import { usePageContext } from "@/src/contexts/PageContext";
 import { useAudioPlayer } from "@/src/hooks/use-audio-player";
 import { useMediaContext } from "@/src/hooks/use-media-context";
 import { Music } from "@/src/types/music";
 import { Pages } from "@/src/types/pages";
+
 import classNames from "classnames";
 import { Play } from "lucide-react";
-import { MouseEvent, ReactNode } from "react";
 
-export type DisplayableMediaType =
-  | "album"
-  | "track"
-  | "playlist"
-  | "artist"
-  | "function";
-type CardStyle = "cover-card" | "tab-card";
-
-type LimitedTableType = {
-  album: Music.DB.TableType<
-    "Album",
-    {
-      artists: {
-        include: {
-          artist: true;
-        };
-      };
-      artwork: true;
-    }
-  >;
-  track: Music.DB.TableType<
-    "Track",
-    {
-      artists: {
-        include: {
-          artist: true;
-        };
-      };
-      artwork: true;
-    }
-  >;
-  playlist: Music.DB.TableType<
-    "Playlist",
-    {
-      artwork: true;
-    }
-  >;
-  artist: Music.DB.TableType<"Artist", object>;
-  function: Music.DB.TableType<"Function", { artwork: true }>;
-};
-
-export type MediaCardProps<T extends DisplayableMediaType> = {
-  type: T;
-  data: LimitedTableType[T];
-  style: CardStyle;
-  hideLinks?: boolean;
-  shouldDisplayType?: boolean;
-  onClickPhoto?: (event: MouseEvent) => void | null;
-  onClickTitle?: (event: MouseEvent) => void;
-  onClickSubText?: (event: MouseEvent) => void;
-};
-
-export default function MediaCard<T extends DisplayableMediaType>(
-  props: MediaCardProps<T>
-) {
+export default function MediaCard<
+  T extends Pages.MediaDisplay.DisplayableMediaType
+>(props: Pages.MediaDisplay.MediaCardProps<T>) {
   const debugConfig = getApplicationDebugConfig();
   const pages = usePageContext();
   const audioPlayer = useAudioPlayer();
@@ -77,7 +28,7 @@ export default function MediaCard<T extends DisplayableMediaType>(
   let subText: string | ReactNode = "";
   switch (props.type) {
     case "album": {
-      const album = props.data as LimitedTableType["album"];
+      const album = props.data as Pages.MediaDisplay.LimitedTableType["album"];
       artworkId = album.artwork?.id ?? null;
       titleText = album.title;
       if (album.artists.length > 0) {
@@ -93,21 +44,23 @@ export default function MediaCard<T extends DisplayableMediaType>(
       break;
     }
     case "artist": {
-      const artist = props.data as LimitedTableType["artist"];
+      const artist =
+        props.data as Pages.MediaDisplay.LimitedTableType["artist"];
       artworkId = null;
       titleText = artist.name;
       subText = "";
       break;
     }
     case "playlist": {
-      const playlist = props.data as LimitedTableType["playlist"];
+      const playlist =
+        props.data as Pages.MediaDisplay.LimitedTableType["playlist"];
       artworkId = playlist.artwork?.id ?? null;
       titleText = playlist.title;
       subText = "";
       break;
     }
     case "track": {
-      const track = props.data as LimitedTableType["track"];
+      const track = props.data as Pages.MediaDisplay.LimitedTableType["track"];
       artworkId = track.artwork?.id ?? null;
       titleText = track.title;
       if (track.artists.length > 0) {
@@ -123,7 +76,8 @@ export default function MediaCard<T extends DisplayableMediaType>(
       break;
     }
     case "function": {
-      const functionData = props.data as LimitedTableType["function"];
+      const functionData =
+        props.data as Pages.MediaDisplay.LimitedTableType["function"];
       artworkId = functionData.artwork?.id ?? null;
       titleText = functionData.title;
       subText = "";

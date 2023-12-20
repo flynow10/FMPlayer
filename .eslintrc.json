@@ -7,6 +7,8 @@
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:react/recommended",
+    "plugin:import/warnings",
+    "plugin:import/typescript",
     "prettier"
   ],
   "parser": "@typescript-eslint/parser",
@@ -17,15 +19,49 @@
       "jsx": true
     }
   },
-  "plugins": ["@typescript-eslint", "react", "react-hooks"],
+  "plugins": [
+    "@typescript-eslint",
+    "react",
+    "react-hooks",
+    "simple-import-sort",
+    "import"
+  ],
   "rules": {
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "warn",
     "react/react-in-jsx-scope": "off",
     "react/prop-types": "warn",
     "@typescript-eslint/explicit-module-boundary-types": "off",
-    "react/no-multi-comp": ["warn"]
+    "react/no-multi-comp": "warn",
+    "import/first": "warn",
+    "import/no-default-export": "error",
+    "simple-import-sort/imports": [
+      "warn",
+      {
+        "groups": [
+          ["^react$"],
+          ["^@/src/components"],
+          ["^@/"],
+          ["^\\u0000", "^node:", "^@?\\w", "^", "^\\."]
+        ]
+      }
+    ]
   },
+  "overrides": [
+    {
+      "files": ["./api/*"],
+      "rules": {
+        "import/no-default-export": "off"
+      }
+    },
+    {
+      "files": ["./src/components/**"],
+      "rules": {
+        "import/no-default-export": "off",
+        "import/no-named-export": "error"
+      }
+    }
+  ],
   "settings": {
     "react": {
       "version": "detect"

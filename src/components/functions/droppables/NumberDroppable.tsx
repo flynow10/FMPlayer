@@ -1,11 +1,13 @@
 import BinaryArithmetic from "@/src/components/functions/draggables/BinaryArithmetic";
 import NumberLiteral from "@/src/components/functions/draggables/NumberLiteral";
 import NumberShapeInsert from "@/src/components/functions/shaped-containers/NumberShapeInsert";
+
 import { checkActionParams } from "@/src/music/functions/utils/check-action-params";
 import { createEmpty } from "@/src/music/functions/utils/create-empty";
 import { generateActionId } from "@/src/music/functions/utils/generate-action-id";
 import { generateDropId } from "@/src/music/functions/utils/generate-drop-id";
 import { Functions } from "@/src/types/functions";
+
 import { useDroppable } from "@dnd-kit/core";
 
 type NumberDroppableProps = {

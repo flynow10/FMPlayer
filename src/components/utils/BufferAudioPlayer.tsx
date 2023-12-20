@@ -1,6 +1,8 @@
-import { useAsyncLoad } from "@/src/hooks/use-async-load";
-import { Loader2, Pause, Play } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+
+import { useAsyncLoad } from "@/src/hooks/use-async-load";
+
+import { Loader2, Pause, Play } from "lucide-react";
 
 type BufferAudioPlayer = {
   data: Uint8Array;

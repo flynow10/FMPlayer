@@ -1,5 +1,6 @@
-import { BlockActions } from "@/src/music/functions/utils/actions-types";
+import { BlockActions } from "@/src/music/functions/core/actions-types";
 import { Functions } from "@/src/types/functions";
+
 import { UniqueIdentifier } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
 

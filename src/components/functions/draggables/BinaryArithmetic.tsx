@@ -1,11 +1,14 @@
+import { useContext } from "react";
+
 import NumberDroppable from "@/src/components/functions/droppables/NumberDroppable";
 import NumberShape from "@/src/components/functions/shaped-containers/NumberShape";
+
 import { FunctionEditor } from "@/src/contexts/FunctionEditor";
 import { Functions } from "@/src/types/functions";
+
 import { useDraggable } from "@dnd-kit/core";
 import classNames from "classnames";
 import { Divide, LucideIcon, Menu, Minus, Plus, X } from "lucide-react";
-import { useContext } from "react";
 
 type BinaryArithmeticProps = {
   id: string;

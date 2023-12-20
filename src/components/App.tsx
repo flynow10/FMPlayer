@@ -1,10 +1,12 @@
 import { useRef, useState } from "react";
-import { Audio } from "@/src/components/layout/Audio";
-import { MusicLibrary } from "@/src/music/library/music-library";
+
+import Audio from "@/src/components/layout/Audio";
 import AudioControlPlaceholder from "@/src/components/layout/AudioControlPlaceholder";
-import { useAudioPlayer } from "@/src/hooks/use-audio-player";
 import Main from "@/src/components/layout/Main";
 import Sidebar from "@/src/components/layout/Sidebar";
+
+import { useAudioPlayer } from "@/src/hooks/use-audio-player";
+import { MusicLibrary } from "@/src/music/library/music-library";
 import { Pages } from "@/src/types/pages";
 
 export default function App() {

@@ -1,7 +1,8 @@
+import { useEffect, useState } from "react";
+
 import { RealtimeStatus } from "@/src/api/ably-client";
 import { useAsyncLoad } from "@/src/hooks/use-async-load";
 import { Music } from "@/src/types/music";
-import { useEffect, useState } from "react";
 
 export enum DataState {
   Loading,

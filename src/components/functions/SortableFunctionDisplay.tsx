@@ -1,17 +1,20 @@
+import { useContext, useMemo } from "react";
+
 import ActionList from "@/src/components/functions/ActionList";
-import { IndentationWidth } from "@/src/components/functions/FunctionEditorContext";
 import SortableAction from "@/src/components/functions/SortableAction";
+
 import { FunctionEditor } from "@/src/contexts/FunctionEditor";
 import { useFlattenedTree } from "@/src/hooks/functions/use-flattened-tree";
-import { buildTree } from "@/src/music/functions/utils/build-tree";
-import { flattenTree } from "@/src/music/functions/utils/flatten-tree";
+import { buildTree } from "@/src/music/functions/core/build-tree";
+import { IndentationWidth } from "@/src/music/functions/core/constants";
+import { flattenTree } from "@/src/music/functions/core/flatten-tree";
 import { getDropProjection } from "@/src/music/functions/utils/get-drop-projection";
 import { Functions } from "@/src/types/functions";
+
 import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { useContext, useMemo } from "react";
 
 type SortableFunctionDisplayProps = {
   functionTree: Functions.FunctionTree;

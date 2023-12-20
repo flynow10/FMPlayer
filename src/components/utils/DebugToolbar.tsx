@@ -1,5 +1,6 @@
-import { UUID } from "@/src/components/utils/UUID";
 import ToastTest from "@/src/components/utils/ToastTest";
+import UUID from "@/src/components/utils/UUID";
+
 import { Pages } from "@/src/types/pages";
 
 type DebugToolbarProps = {

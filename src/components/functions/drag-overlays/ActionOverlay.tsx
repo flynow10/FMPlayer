@@ -1,12 +1,15 @@
+import { useContext } from "react";
+
 import SortableAction from "@/src/components/functions/SortableAction";
-import { fadeOutAnimationConfig } from "@/src/components/functions/utils/fade-out-animation";
+
 import { FunctionEditor } from "@/src/contexts/FunctionEditor";
+import { fadeOutAnimationConfig } from "@/src/music/functions/core/fade-out-animation";
 import { findActionDeep } from "@/src/music/functions/utils/find-action-deep";
 import { getChildCount } from "@/src/music/functions/utils/get-child-count";
 import { Functions } from "@/src/types/functions";
+
 import { DragOverlay } from "@dnd-kit/core";
 import { restrictToWindowEdges } from "@dnd-kit/modifiers";
-import { useContext } from "react";
 import { createPortal } from "react-dom";
 
 type ActionOverlayProps = {

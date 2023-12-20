@@ -1,5 +1,6 @@
 import MediaCard from "@/src/components/media-displays/MediaCard";
-import { FullCover } from "@/src/components/utils/loading/FullCover";
+import FullCover from "@/src/components/utils/loading/FullCover";
+
 import { usePageContext } from "@/src/contexts/PageContext";
 import { DataState, useDatabase } from "@/src/hooks/use-database";
 import { MusicLibrary } from "@/src/music/library/music-library";

@@ -1,18 +1,21 @@
-import { FullCover } from "@/src/components/utils/loading/FullCover";
-import { useDatabase, DataState } from "@/src/hooks/use-database";
-import { MusicLibrary } from "@/src/music/library/music-library";
-import { CircleEllipsis, Play } from "lucide-react";
-import { Blur } from "@/src/components/utils/loading/Blur";
+import { useMemo } from "react";
+
+import Action from "@/src/components/functions/Action";
+import ActionList from "@/src/components/functions/ActionList";
 import Artwork from "@/src/components/media-displays/Artwork";
+import Blur from "@/src/components/utils/loading/Blur";
+import FullCover from "@/src/components/utils/loading/FullCover";
+
 import { usePageContext } from "@/src/contexts/PageContext";
+import { useAudioPlayer } from "@/src/hooks/use-audio-player";
+import { DataState, useDatabase } from "@/src/hooks/use-database";
 // import { useAudioPlayer } from "@/src/hooks/use-audio-player";
 import { useMediaContext } from "@/src/hooks/use-media-context";
-import { useMemo } from "react";
-import { flattenTree } from "@/src/music/functions/utils/flatten-tree";
+import { flattenTree } from "@/src/music/functions/core/flatten-tree";
+import { MusicLibrary } from "@/src/music/library/music-library";
 import { Functions } from "@/src/types/functions";
-import ActionList from "@/src/components/functions/ActionList";
-import Action from "@/src/components/functions/Action";
-import { useAudioPlayer } from "@/src/hooks/use-audio-player";
+
+import { CircleEllipsis, Play } from "lucide-react";
 
 export default function FunctionDisplay() {
   const pages = usePageContext();

@@ -1,5 +1,6 @@
-import { Pages } from "@/src/types/pages";
 import { createContext, useContext } from "react";
+
+import { Pages } from "@/src/types/pages";
 
 export const PageContext = createContext<Pages.PageContext | null>(null);
 

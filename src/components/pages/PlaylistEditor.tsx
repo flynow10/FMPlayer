@@ -1,19 +1,22 @@
+import { useEffect, useState } from "react";
+
+import Artwork from "@/src/components/media-displays/Artwork";
 import LinkedArtistList from "@/src/components/media-displays/LinkedArtistList";
+import TogglableInput from "@/src/components/utils/input-extensions/TogglableInput";
+import FullCover from "@/src/components/utils/loading/FullCover";
 import VerticalSplit from "@/src/components/utils/VerticalSplit";
-import { FullCover } from "@/src/components/utils/loading/FullCover";
+
 import { usePageContext } from "@/src/contexts/PageContext";
 import { useAudioPlayer } from "@/src/hooks/use-audio-player";
 import { DataState, useDatabase } from "@/src/hooks/use-database";
 import { MusicLibrary } from "@/src/music/library/music-library";
 import { Music } from "@/src/types/music";
-import { Menu, Play, Plus, PlusCircle, Trash } from "lucide-react";
-import { useEffect, useState } from "react";
-import { toast } from "react-toastify";
+
 import classNames from "classnames";
-import { v4 as uuid } from "uuid";
+import { Menu, Play, Plus, PlusCircle, Trash } from "lucide-react";
 import { ReactSortable } from "react-sortablejs";
-import Artwork from "@/src/components/media-displays/Artwork";
-import TogglableInput from "@/src/components/utils/input-extensions/TogglableInput";
+import { toast } from "react-toastify";
+import { v4 as uuid } from "uuid";
 
 type UniqueTrack = { trackId: string; id: string };
 

@@ -1,9 +1,12 @@
+import React from "react";
+
 import Action from "@/src/components/functions/Action";
+
 import { Functions } from "@/src/types/functions";
+
 import { UniqueIdentifier } from "@dnd-kit/core";
 import { AnimateLayoutChanges, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import React from "react";
 
 type SortableActionProps = {
   id: UniqueIdentifier;

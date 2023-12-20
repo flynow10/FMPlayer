@@ -1,14 +1,16 @@
-import { FullCover } from "@/src/components/utils/loading/FullCover";
-import { useDatabase, DataState } from "@/src/hooks/use-database";
-import { MusicLibrary } from "@/src/music/library/music-library";
-import { CircleEllipsis, Play } from "lucide-react";
-import { Blur } from "@/src/components/utils/loading/Blur";
-import OrderedTrackList from "@/src/components/media-displays/OrderedTrackList";
 import Artwork from "@/src/components/media-displays/Artwork";
+import LinkedArtistList from "@/src/components/media-displays/LinkedArtistList";
+import OrderedTrackList from "@/src/components/media-displays/OrderedTrackList";
+import Blur from "@/src/components/utils/loading/Blur";
+import FullCover from "@/src/components/utils/loading/FullCover";
+
 import { usePageContext } from "@/src/contexts/PageContext";
 import { useAudioPlayer } from "@/src/hooks/use-audio-player";
-import LinkedArtistList from "@/src/components/media-displays/LinkedArtistList";
+import { DataState, useDatabase } from "@/src/hooks/use-database";
 import { useMediaContext } from "@/src/hooks/use-media-context";
+import { MusicLibrary } from "@/src/music/library/music-library";
+
+import { CircleEllipsis, Play } from "lucide-react";
 
 export default function AlbumDisplay() {
   const pages = usePageContext();

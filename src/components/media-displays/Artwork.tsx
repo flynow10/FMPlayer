@@ -1,4 +1,5 @@
 import placeholder from "@/src/assets/imgs/square-placeholder.jpg";
+
 import classNames from "classnames";
 type ArtworkProps = {
   id: string | null;

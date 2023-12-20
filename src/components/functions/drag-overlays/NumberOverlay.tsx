@@ -1,14 +1,17 @@
+import { useContext } from "react";
+
 import BinaryArithmetic from "@/src/components/functions/draggables/BinaryArithmetic";
 import NumberLiteral from "@/src/components/functions/draggables/NumberLiteral";
-import { fadeOutAnimationConfig } from "@/src/components/functions/utils/fade-out-animation";
+
 import { FunctionEditor } from "@/src/contexts/FunctionEditor";
+import { fadeOutAnimationConfig } from "@/src/music/functions/core/fade-out-animation";
 import { createEmpty } from "@/src/music/functions/utils/create-empty";
 import { findActionDeep } from "@/src/music/functions/utils/find-action-deep";
 import { parseActionId } from "@/src/music/functions/utils/parse-action-id";
 import { Functions } from "@/src/types/functions";
+
 import { DragOverlay } from "@dnd-kit/core";
 import { restrictToWindowEdges } from "@dnd-kit/modifiers";
-import { useContext } from "react";
 import { createPortal } from "react-dom";
 
 type NumberOverlayProps = {

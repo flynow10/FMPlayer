@@ -1,7 +1,9 @@
+import { HTMLAttributes, RefCallback } from "react";
+
 import Item from "@/src/components/utils/input-extensions/SuggestionItem";
+
 import { InputExtensions } from "@/src/types/input-extensions";
 import { mergeClasses } from "@/src/utils/component-utils";
-import { HTMLAttributes, RefCallback } from "react";
 
 type SuggestionListProps<S> = {
   suggestions: S[];
