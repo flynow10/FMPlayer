@@ -120,6 +120,7 @@ export default function TrackList() {
             {sortedTrackList.map((track) => (
               <tr
                 key={track.id}
+                className="odd:bg-gray-300 p-2"
                 onContextMenu={(event) => {
                   showTrackMenu({
                     event,

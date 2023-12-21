@@ -195,7 +195,14 @@ function createArtistMusicList(
             },
           ]
             .filter((obj) => obj.count > 0)
-            .map((obj) => `${obj.count} ${obj.name}`)
+            .map(
+              (obj) =>
+                `${obj.count} ${
+                  obj.count === 1
+                    ? obj.name.slice(0, obj.name.length - 1)
+                    : obj.name
+                }`
+            )
             .join(", ")}
         </span>
       </div>
@@ -219,7 +226,7 @@ function createArtistMusicList(
                         data: album.id,
                       });
                     }}
-                    className="font-extrabold text-lg text-accent dark:invert"
+                    className="cursor-pointer font-extrabold w-fit text-lg text-accent dark:invert"
                   >
                     {album.title}
                   </a>
