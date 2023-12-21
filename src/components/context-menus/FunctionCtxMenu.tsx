@@ -18,17 +18,19 @@ type FunctionCtxMenuProps = {
 };
 
 export default function FunctionCtxMenu(props: FunctionCtxMenuProps) {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const audioPlayer = useAudioPlayer();
   const pages = usePageContext();
 
   const addToQueue = async (
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     event: ItemParams<ContextMenuPropType<"function">>,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     addNext: boolean
   ) => {
-    alert("This feature has not been implemented yet!");
+    const functionId = event.props?.functionId;
+    if (typeof functionId !== "string") {
+      alert("This context menu was not set up correctly!");
+      throw new Error("Unable to open function editor; missing function id!");
+    }
+    audioPlayer.queue.addFunction(functionId, addNext);
   };
   const editFunction = (event: ItemParams<ContextMenuPropType<"function">>) => {
     const functionId = event.props?.functionId;
