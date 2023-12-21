@@ -1,3 +1,4 @@
+/* eslint-disable import/no-default-export */
 import type { Config } from "jest";
 const config: Config = {
   preset: "ts-jest",
@@ -12,7 +13,10 @@ const config: Config = {
     "^@/config/(.*)$": "<rootDir>/config/$1",
   },
   collectCoverage: false,
-  // collectCoverageFrom: ["./src/**/*.(ts|tsx|js|jsx)"],
+  collectCoverageFrom: ["./src/**/*.(ts|js)"],
+  transform: {
+    "^.+\\.(t|j)s$": ["ts-jest", { isolatedModules: true }],
+  },
   coverageReporters: ["cobertura", "lcov"],
 };
 export default config;

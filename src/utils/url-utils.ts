@@ -57,7 +57,7 @@ export function splitOutUrls(text: string): URLSplitObject[] {
     }
   }
 
-  return output;
+  return output.filter(({ data }) => data !== "");
 }
 
 export function isUrl(url: string) {
@@ -76,7 +76,10 @@ export function getFileNameFromUrl(url: string): string | undefined {
     .pop()
     ?.match(/^((?:[A-z0-9\-_~!$&'()*,+;=:@]|(?:%[0-9a-fA-F]{2}))*)/)?.[0];
 
-  if (undecodedFileName === undefined) {
+  if (
+    undecodedFileName === undefined ||
+    undecodedFileName.trim().length === 0
+  ) {
     return undefined;
   }
 
