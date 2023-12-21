@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 
+import { playableFunctionFromTracks } from "@/src/music/functions/core/function-helper";
 import { PlayableFunction } from "@/src/music/functions/core/playable-function";
 import { validateFunction } from "@/src/music/functions/validation/validate-function";
 import { MusicLibrary } from "@/src/music/library/music-library";
@@ -553,12 +554,9 @@ export class AudioPlayer implements HookKeys {
   }
 
   public play = {
-    track: (trackId: string) => {
+    track: async (trackId: string) => {
       this.beginLoadingNewTrack();
-      const playlist = new PlayableFunction([
-        PlayableFunction.createNewTrackAction(trackId),
-      ]);
-      return this.playFunction(playlist);
+      return this.playFunction(playableFunctionFromTracks(trackId));
     },
     trackList: async (
       trackList: string | Music.HelperDB.ThinTrackList,
@@ -581,12 +579,11 @@ export class AudioPlayer implements HookKeys {
       // const index = loadedTrackList.trackConnections
       //   .sort((a, b) => a.trackNumber - b.trackNumber)
       //   .findIndex((connection) => connection.trackNumber === trackNumber);
-      const playlist = new PlayableFunction(
-        loadedTrackList.trackConnections.map(({ trackId }) =>
-          PlayableFunction.createNewTrackAction(trackId)
+      return this.playFunction(
+        playableFunctionFromTracks(
+          ...loadedTrackList.trackConnections.map(({ trackId }) => trackId)
         )
       );
-      return this.playFunction(playlist);
     },
     album: async (
       album: string | Music.DB.TableType<"Album">,
@@ -630,31 +627,49 @@ export class AudioPlayer implements HookKeys {
   };
 
   public queue = {
+    addFunction: async (
+      data:
+        | string
+        | Music.DB.TableType<"Function">
+        | Functions.FunctionTree
+        | PlayableFunction,
+      addNext = false
+    ) => {
+      let functionTree: Functions.FunctionTree;
+      if (data instanceof PlayableFunction) {
+        functionTree = data.functionTree;
+      } else if (Array.isArray(data)) {
+        if (!validateFunction(data)) {
+          return false;
+        }
+        functionTree = data;
+      } else if (typeof data === "string" || typeof data === "object") {
+        if (typeof data === "string") {
+          const result = await MusicLibrary.db.function.get({ id: data });
+          if (!result) {
+            return false;
+          }
+          data = result;
+        }
+        if (!validateFunction(data.functionData)) {
+          return false;
+        }
+        functionTree = data.functionData;
+      } else {
+        return false;
+      }
+
+      this.queueFunction(new PlayableFunction(functionTree), addNext);
+      return true;
+    },
     addTrack: async (
       trackId: string | Music.DB.TableType<"Track">,
       addNext = false
     ) => {
-      const wasBlank = this._trackQueue.isBlank();
-      if (wasBlank) {
-        this.beginLoadingNewTrack();
-      }
       if (typeof trackId !== "string") {
         trackId = trackId.id;
       }
-
-      if (!addNext || !this._currentFunctionState) {
-        this._trackQueue = this._trackQueue.addTrack(trackId);
-      } else {
-        this._trackQueue = this._trackQueue.insertTrackAfter(
-          this._currentFunctionState.currentActionId,
-          trackId
-        );
-      }
-      this.callEvent("updateQueue");
-      if (wasBlank) {
-        this.callEvent("playNewQueue");
-        await this.setupTrack();
-      }
+      this.queueFunction(playableFunctionFromTracks(trackId), addNext);
       return true;
     },
     /**
@@ -664,10 +679,6 @@ export class AudioPlayer implements HookKeys {
       trackList: string | Music.HelperDB.ThinTrackList,
       addNext = false
     ) => {
-      const wasBlank = this._trackQueue.isBlank();
-      if (wasBlank) {
-        this.beginLoadingNewTrack();
-      }
       let loadedTrackList: Music.HelperDB.ThinTrackList;
       if (typeof trackList === "string") {
         const nullableTrackList = await MusicLibrary.db.trackList.get({
@@ -686,22 +697,34 @@ export class AudioPlayer implements HookKeys {
           return trackConn.trackId;
         }
       );
-      if (!addNext || !this._currentFunctionState) {
-        this._trackQueue = this._trackQueue.addTrack(...trackIds);
-      } else {
-        this._trackQueue = this._trackQueue.insertTrackAfter(
-          this._currentFunctionState.currentActionId,
-          ...trackIds
-        );
-      }
-      this.callEvent("updateQueue");
-      if (wasBlank) {
-        this.callEvent("playNewQueue");
-        await this.setupTrack();
-      }
+      this.queueFunction(playableFunctionFromTracks(...trackIds), addNext);
       return true;
     },
   };
+
+  private async queueFunction(
+    newFunction: PlayableFunction,
+    addNext = false
+  ): Promise<void> {
+    const wasBlank = this._trackQueue.isBlank();
+    if (wasBlank) {
+      this.beginLoadingNewTrack();
+    }
+    if (!addNext || !this._currentFunctionState) {
+      this._trackQueue = this._trackQueue.addStatements(
+        newFunction.functionTree
+      );
+    } else {
+      this._trackQueue = this._trackQueue.insertAfter(
+        this._currentFunctionState.currentActionId,
+        newFunction.functionTree
+      );
+    }
+    this.callEvent("updateQueue");
+    if (wasBlank) {
+      this.playFunction(this._trackQueue);
+    }
+  }
 
   private async playFunction(newFunction: PlayableFunction): Promise<void> {
     this._trackQueue = newFunction;

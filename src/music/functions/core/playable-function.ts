@@ -1,4 +1,3 @@
-import { createEmpty } from "@/src/music/functions/utils/create-empty";
 import { findActionDeep } from "@/src/music/functions/utils/find-action-deep";
 import { findParentActionDeep } from "@/src/music/functions/utils/find-parent-action-deep";
 import { validateFunction } from "@/src/music/functions/validation/validate-function";
@@ -28,20 +27,18 @@ export class PlayableFunction {
     };
   }
 
-  public addTrack(...trackId: string[]): PlayableFunction {
+  public addStatements(statements: Functions.FunctionTree): PlayableFunction {
     const clonedTree: Functions.FunctionTree = JSON.parse(
       JSON.stringify(this.functionTree)
     );
-    clonedTree.push(
-      ...trackId.map((id) => PlayableFunction.createNewTrackAction(id))
-    );
+    clonedTree.push(...statements);
 
     return new PlayableFunction(clonedTree);
   }
 
-  public insertTrackAfter(
+  public insertAfter(
     previousActionId: string,
-    ...trackId: string[]
+    statements: Functions.FunctionTree
   ): PlayableFunction {
     const clonedTree: Functions.FunctionTree = JSON.parse(
       JSON.stringify(this.functionTree)
@@ -63,11 +60,7 @@ export class PlayableFunction {
       throw new Error("Previous action couldn't be found in function tree!");
     }
 
-    parentList.splice(
-      previousActionIndex,
-      0,
-      ...trackId.map((id) => PlayableFunction.createNewTrackAction(id))
-    );
+    parentList.splice(previousActionIndex + 1, 0, ...statements);
 
     return new PlayableFunction(clonedTree);
   }
@@ -122,20 +115,6 @@ export class PlayableFunction {
       currentState = this.evaluateState(currentState);
     }
     return currentState;
-  }
-
-  public static createNewTrackAction(trackId: string): Functions.ActionState {
-    return {
-      ...createEmpty.play(),
-      trackExpressions: [
-        {
-          ...createEmpty.trackliteral(),
-          data: {
-            trackId,
-          },
-        } as Functions.TrackLiteral,
-      ],
-    };
   }
 
   private stateError() {
