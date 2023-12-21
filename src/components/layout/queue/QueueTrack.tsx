@@ -58,7 +58,7 @@ export default function QueueTrack(props: QueueTrackProps) {
           (props.playing ? (
             <img
               src={bouncingLines}
-              className="absolute top-0 left-0 w-full h-full text-white dark:invert z-10"
+              className="absolute top-0 left-0 w-full h-full text-white invert dark:invert-0 z-10"
             />
           ) : (
             <svg

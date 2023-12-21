@@ -520,6 +520,9 @@ export class AudioPlayer implements HookKeys {
     const [nextState, didEnd] = this._trackQueue.getNextTrack(
       this._currentFunctionState ?? undefined
     );
+    if (didEnd) {
+      this._trackStateHistory = [];
+    }
     this._currentFunctionState = nextState;
     this.callEvent("nextTrack");
     await this.setupTrack(!didEnd || this.repeatMode !== "none");

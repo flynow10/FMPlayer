@@ -77,7 +77,8 @@ export class PlayableFunction {
     while (trackId === null) {
       nextState = this.evaluateState(nextState);
       trackId = nextState.currentTrackId;
-      if (nextState.isEnd) {
+      // trackId === null because we want to catch the end when switching to the next track
+      if (nextState.isEnd && trackId === null) {
         didEnd = true;
       }
     }
