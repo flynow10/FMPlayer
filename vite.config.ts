@@ -1,11 +1,10 @@
-import { defineConfig, loadEnv } from "vite";
-
+/* eslint-disable import/no-default-export */
 import react from "@vitejs/plugin-react";
-import path from "path";
-
-import type { PluginOption } from "vite";
-import { apiServer } from "vite-api-server";
 import bodyParser from "body-parser";
+import path from "path";
+import type { PluginOption } from "vite";
+import { defineConfig, loadEnv } from "vite";
+import { apiServer } from "vite-api-server";
 
 export default ({ mode }) => {
   if (process.env.VERCEL_ENV === undefined) {
