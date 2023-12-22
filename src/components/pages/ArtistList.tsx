@@ -1,16 +1,19 @@
-import { FullCover } from "@/src/components/utils/loading/FullCover";
-import { DataState, useDatabase } from "@/src/hooks/use-database";
-import { MusicLibrary } from "@/src/music/library/music-library";
-import { Music } from "@/src/types/music";
-import { Pages } from "@/src/types/pages";
-import classNames from "classnames";
-import { LucideIcon, Mic2, Play, User2 /*Users*/ } from "lucide-react";
 import { useState } from "react";
-import OrderedTrackList from "@/src/components/media-displays/OrderedTrackList";
+
 import MediaCard from "@/src/components/media-displays/MediaCard";
+import OrderedTrackList from "@/src/components/media-displays/OrderedTrackList";
+import FullCover from "@/src/components/utils/loading/FullCover";
+
 import { usePageContext } from "@/src/contexts/PageContext";
 import { useAudioPlayer } from "@/src/hooks/use-audio-player";
+import { DataState, useDatabase } from "@/src/hooks/use-database";
+import { MusicLibrary } from "@/src/music/library/music-library";
 import { AudioPlayer } from "@/src/music/player/audio-player";
+import { Music } from "@/src/types/music";
+import { Pages } from "@/src/types/pages";
+
+import classNames from "classnames";
+import { LucideIcon, Mic2, Play, User2 /*Users*/ } from "lucide-react";
 
 export default function ArtistList() {
   const pages = usePageContext();
@@ -192,7 +195,14 @@ function createArtistMusicList(
             },
           ]
             .filter((obj) => obj.count > 0)
-            .map((obj) => `${obj.count} ${obj.name}`)
+            .map(
+              (obj) =>
+                `${obj.count} ${
+                  obj.count === 1
+                    ? obj.name.slice(0, obj.name.length - 1)
+                    : obj.name
+                }`
+            )
             .join(", ")}
         </span>
       </div>
@@ -216,7 +226,7 @@ function createArtistMusicList(
                         data: album.id,
                       });
                     }}
-                    className="font-extrabold text-lg text-accent dark:invert"
+                    className="cursor-pointer font-extrabold w-fit text-lg text-accent dark:invert"
                   >
                     {album.title}
                   </a>

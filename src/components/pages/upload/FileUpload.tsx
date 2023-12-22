@@ -1,18 +1,21 @@
-import { fetchFile, getPreUploadFileFromData } from "@/src/utils/file-utils";
-import { useAsyncLoad } from "@/src/hooks/use-async-load";
 import { useCallback, useState } from "react";
-import { FullCover } from "@/src/components/utils/loading/FullCover";
-import { Pages } from "@/src/types/pages";
-import { getFileNameFromUrl } from "@/src/utils/url-utils";
-import MetadataEditor from "@/src/components/utils/MetadataEditor";
+
 import FileList from "@/src/components/pages/upload/FileList";
+import FullCover from "@/src/components/utils/loading/FullCover";
+import MetadataEditor from "@/src/components/utils/MetadataEditor";
+import VerticalSplit from "@/src/components/utils/VerticalSplit";
+
 import { FileContext } from "@/src/contexts/FileContext";
+import { usePageContext } from "@/src/contexts/PageContext";
+import { useAsyncLoad } from "@/src/hooks/use-async-load";
+import { MusicLibrary } from "@/src/music/library/music-library";
 import { Music } from "@/src/types/music";
+import { Pages } from "@/src/types/pages";
+import { fetchFile, getPreUploadFileFromData } from "@/src/utils/file-utils";
+import { getFileNameFromUrl } from "@/src/utils/url-utils";
+
 import { Loader2 } from "lucide-react";
 import { toast } from "react-toastify";
-import VerticalSplit from "@/src/components/utils/VerticalSplit";
-import { MusicLibrary } from "@/src/music/library/music-library";
-import { usePageContext } from "@/src/contexts/PageContext";
 
 export default function FileUpload() {
   const pages = usePageContext();

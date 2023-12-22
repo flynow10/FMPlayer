@@ -1,4 +1,5 @@
 import { FileType } from "@/src/types/file-type";
+
 import { EndOfStreamError } from "./end-of-stream-error";
 
 export abstract class AbstractTokenizer implements FileType.ITokenizer {

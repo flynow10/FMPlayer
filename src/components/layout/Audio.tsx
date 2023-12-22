@@ -1,26 +1,29 @@
 import { useEffect, useRef, useState } from "react";
+
+import LinkedArtistList from "@/src/components/media-displays/LinkedArtistList";
+
+import { getApplicationDebugConfig } from "@/config/app";
+import { useAudioPlayer } from "@/src/hooks/use-audio-player";
+import { DataState, useDatabase } from "@/src/hooks/use-database";
+import { MusicLibrary } from "@/src/music/library/music-library";
+import { Music } from "@/src/types/music";
+
 import {
+  ChevronLeft,
+  ChevronRight,
   Loader2,
+  Menu,
   PauseCircle,
   PlayCircle,
   Repeat,
   Repeat1,
-  ChevronLeft,
-  ChevronRight,
-  Menu,
 } from "lucide-react";
-import { MusicLibrary } from "@/src/music/library/music-library";
-import { Music } from "@/src/types/music";
-import { DataState, useDatabase } from "@/src/hooks/use-database";
-import { useAudioPlayer } from "@/src/hooks/use-audio-player";
-import { getApplicationDebugConfig } from "@/config/app";
-import LinkedArtistList from "@/src/components/media-displays/LinkedArtistList";
 
 type AudioProps = {
   onClickArtist: (artistId: string) => void;
   onClickQueue?: () => void;
 };
-export function Audio(props: AudioProps) {
+export default function Audio(props: AudioProps) {
   const debugConfig = getApplicationDebugConfig();
   const audioPlayer = useAudioPlayer();
   const trackId = audioPlayer.useCurrentTrackId();

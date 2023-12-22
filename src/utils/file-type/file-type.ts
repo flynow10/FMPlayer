@@ -1,3 +1,8 @@
+import { FileType } from "@/src/types/file-type";
+
+import { extensions, mimeTypes } from "./supported";
+import { fromBuffer } from "./Tokenizer";
+import { EndOfStreamError } from "./Tokenizer/end-of-stream-error";
 import * as Token from "./Tokens";
 import {
   bufferIndexOf,
@@ -9,10 +14,6 @@ import {
   tarHeaderChecksumMatches,
   uint32SyncSafeToken,
 } from "./utils";
-import { extensions, mimeTypes } from "./supported";
-import { fromBuffer } from "./Tokenizer";
-import { EndOfStreamError } from "./Tokenizer/end-of-stream-error";
-import { FileType } from "@/src/types/file-type";
 
 const minimumBytes = 4100; // A fair amount of file-types are detectable within this range.
 

@@ -1,5 +1,6 @@
-import { UUID } from "@/src/components/utils/UUID";
 import ToastTest from "@/src/components/utils/ToastTest";
+import UUID from "@/src/components/utils/UUID";
+
 import { Pages } from "@/src/types/pages";
 
 type DebugToolbarProps = {
@@ -20,10 +21,12 @@ export default function DebugToolbar(props: DebugToolbarProps) {
         <button
           className="px-2 border-2 rounded-md"
           onClick={() =>
-            props.onNavigate(props.location, "new", { type: "testing page" })
+            props.onNavigate(props.location, "new", {
+              type: "testing page",
+            })
           }
         >
-          Go To Testing Page
+          Go To Test Page
         </button>
       </div>
     </div>

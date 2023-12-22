@@ -1,9 +1,11 @@
 import Artwork from "@/src/components/media-displays/Artwork";
+import LoadingSpinner from "@/src/components/utils/loading/LoadingSpinner";
+
 import { DataState, useDatabase } from "@/src/hooks/use-database";
 import { MusicLibrary } from "@/src/music/library/music-library";
+
 import classNames from "classnames";
 import bouncingLines from "/bouncing-lines.svg";
-import LoadingSpinner from "@/src/components/utils/loading/LoadingSpinner";
 
 type QueueTrackProps = {
   trackId: string;
@@ -44,7 +46,7 @@ export default function QueueTrack(props: QueueTrackProps) {
       <div className="w-10 shrink-0 my-auto relative overflow-hidden rounded-md">
         <Artwork
           id={track.artwork?.id ?? null}
-          className={classNames("dark:invert", {
+          className={classNames({
             "blur-sm": props.activeTrack,
           })}
           imgClassName={classNames({
@@ -56,7 +58,7 @@ export default function QueueTrack(props: QueueTrackProps) {
           (props.playing ? (
             <img
               src={bouncingLines}
-              className="absolute top-0 left-0 w-full h-full text-white z-10"
+              className="absolute top-0 left-0 w-full h-full text-white invert dark:invert-0 z-10"
             />
           ) : (
             <svg
@@ -68,7 +70,7 @@ export default function QueueTrack(props: QueueTrackProps) {
               fill="none"
               strokeWidth={3}
               strokeLinecap="round"
-              className="absolute top-0 left-0 w-full h-full text-white z-10"
+              className="absolute top-0 left-0 w-full h-full text-white dark:invert z-10"
             >
               <path id="p1" d="M6,12v0" />
               <path d="M12,12v0" />

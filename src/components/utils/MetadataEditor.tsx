@@ -1,13 +1,15 @@
-import { getApplicationDebugConfig } from "@/config/app";
+import { useContext, useState } from "react";
+
 import BaseSuggestionInput from "@/src/components/utils/input-extensions/BaseSuggestionInput";
 import MultiSuggestionInput from "@/src/components/utils/input-extensions/MultiSuggestionInput";
+
+import { getApplicationDebugConfig } from "@/config/app";
 import { FileContext } from "@/src/contexts/FileContext";
 import { DataState, useDatabase } from "@/src/hooks/use-database";
 import { MusicLibrary } from "@/src/music/library/music-library";
 import { Music } from "@/src/types/music";
 import { Pages } from "@/src/types/pages";
 import { pickSuggestions } from "@/src/utils/string-utils";
-import { useContext, useState } from "react";
 
 type MetadataEditorProps = {
   setFileMetadata: Pages.Upload.SetFileMetadataFunction;

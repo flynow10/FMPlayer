@@ -1,12 +1,15 @@
 import { MutableRefObject, ReactNode, useEffect, useState } from "react";
+
 import Page from "@/src/components/layout/Page";
-import { ChevronLeft } from "lucide-react";
-import classNames from "classnames";
-import { Pages } from "@/src/types/pages";
+import QueuePanel from "@/src/components/layout/queue/QueuePanel";
 import AblyStatusSymbol from "@/src/components/utils/AblyStatusSymbol";
 import DebugToolbar from "@/src/components/utils/DebugToolbar";
+
 import { getApplicationDebugConfig } from "@/config/app";
-import QueuePanel from "@/src/components/layout/queue/QueuePanel";
+import { Pages } from "@/src/types/pages";
+
+import classNames from "classnames";
+import { ChevronLeft } from "lucide-react";
 
 type MainProps = {
   location: Pages.Location;
@@ -22,7 +25,7 @@ const DEFAULT_PAGES: Record<Pages.Location, Pages.PageStore> = {
   Genres: { type: "genre list" },
   "Import Media": { type: "file search" },
   Artists: { type: "artist list" },
-  Functions: { type: "album display" }, // no page created yet
+  Functions: { type: "function list" },
   Settings: { type: "album display" }, // no page created yet
   "Recently Added": { type: "recent list" },
 };

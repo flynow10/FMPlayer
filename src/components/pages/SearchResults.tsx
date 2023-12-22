@@ -1,11 +1,11 @@
-import MediaCard, {
-  DisplayableMediaType,
-} from "@/src/components/media-displays/MediaCard";
-import { MediaCarousel } from "@/src/components/media-displays/MediaCarousel";
-import { FullCover } from "@/src/components/utils/loading/FullCover";
+import MediaCard from "@/src/components/media-displays/MediaCard";
+import MediaCarousel from "@/src/components/media-displays/MediaCarousel";
+import FullCover from "@/src/components/utils/loading/FullCover";
+
 import { usePageContext } from "@/src/contexts/PageContext";
 import { useAsyncLoad } from "@/src/hooks/use-async-load";
 import { MusicLibrary } from "@/src/music/library/music-library";
+import { Pages } from "@/src/types/pages";
 
 export default function SearchResults() {
   const pages = usePageContext();
@@ -19,7 +19,9 @@ export default function SearchResults() {
   if (!isLoaded || searchResults === null) {
     return <FullCover />;
   }
-  const createMediaDisplay = (type: "albums" | "tracks" | "artists") => {
+  const createMediaDisplay = (
+    type: "albums" | "tracks" | "artists" | "functions"
+  ) => {
     return (
       <div className="flex flex-col p-4">
         <span className="text-xl pb-4">
@@ -31,7 +33,9 @@ export default function SearchResults() {
               <MediaCard
                 key={media.id}
                 data={media}
-                type={type.slice(0, -1) as "track" | "album" | "artist"}
+                type={
+                  type.slice(0, -1) as "track" | "album" | "artist" | "function"
+                }
                 style="cover-card"
               />
             );
@@ -47,7 +51,9 @@ export default function SearchResults() {
       <div className="flex flex-row gap-4">
         {searchResults.results
           .filter((result) =>
-            ["track", "album", "artist", "playlist"].includes(result.type)
+            ["track", "album", "artist", "playlist", "function"].includes(
+              result.type
+            )
           )
           .slice(0, 3)
           .map((result) => {
@@ -57,6 +63,7 @@ export default function SearchResults() {
                 | "albums"
                 | "artists"
                 | "playlists"
+                | "functions"
             ].find((media) => result.id === media.id);
             if (data === undefined) {
               throw new Error(
@@ -67,7 +74,7 @@ export default function SearchResults() {
               <MediaCard
                 key={result.id}
                 style="tab-card"
-                type={result.type as DisplayableMediaType}
+                type={result.type as Pages.MediaDisplay.DisplayableMediaType}
                 data={data}
                 shouldDisplayType={true}
               />
@@ -90,6 +97,7 @@ export default function SearchResults() {
       {searchResults.albums.length > 0 && createMediaDisplay("albums")}
       {searchResults.tracks.length > 0 && createMediaDisplay("tracks")}
       {searchResults.artists.length > 0 && createMediaDisplay("artists")}
+      {searchResults.functions.length > 0 && createMediaDisplay("functions")}
       {/* <pre>{JSON.stringify(searchResults, null, 2)}</pre> */}
       <span className="px-4 pb-8 pt-2">
         Can&apos;t find what you&apos;re looking for?{" "}

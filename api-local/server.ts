@@ -1,9 +1,9 @@
-import type { Handler, Request } from "vite-api-server";
-import verceljson from "../vercel.local.json";
 import { VercelApiHandler, VercelRequest, VercelResponse } from "@vercel/node";
 import { readdirSync } from "fs";
-import path from "path";
 import https from "https";
+import path from "path";
+import type { Handler, Request } from "vite-api-server";
+import verceljson from "../vercel.local.json";
 
 const APIHandlersPath = path.resolve(process.cwd(), "./api/");
 

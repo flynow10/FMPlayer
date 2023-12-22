@@ -1,6 +1,11 @@
+import { useState } from "react";
+
 import SuggestionSearch from "@/src/components/utils/input-extensions/SuggestionSearch";
+import Logo from "@/src/components/utils/Logo";
+
 import { MusicLibrary } from "@/src/music/library/music-library";
 import { Pages } from "@/src/types/pages";
+
 import classNames from "classnames";
 import {
   Clock3,
@@ -16,7 +21,6 @@ import {
   Settings,
 } from "lucide-react";
 import { Suggestion } from "minisearch";
-import { useState } from "react";
 
 type SidebarProps = {
   location: Pages.Location;
@@ -37,7 +41,7 @@ const libraryButtons: Pages.Location[] = [
 
 const managementButtons: Pages.Location[] = ["Import Media", "Settings"];
 
-const disabled: Pages.Location[] = ["Functions", "Settings"];
+const disabled: Pages.Location[] = ["Settings"];
 
 const iconMap: { location: Pages.Location; icon: LucideIcon }[] = [
   { location: "Recently Added", icon: Clock3 },
@@ -95,10 +99,7 @@ export default function Sidebar(props: SidebarProps) {
   return (
     <div className="sidebar flex flex-col border-r-2">
       <h3 className="text-4xl font-medium p-3 whitespace-nowrap overflow-clip">
-        <img
-          src="./colorIcon.svg"
-          className="dark:invert-0 inline mr-1 h-full"
-        />
+        <Logo className="inline mr-1 h-full" />
         FM Player
       </h3>
       <SuggestionSearch

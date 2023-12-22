@@ -1,7 +1,9 @@
 import { usePageContext } from "@/src/contexts/PageContext";
-import { ShowContextMenuParams, useContextMenu } from "react-contexify";
+import { Utils } from "@/src/types/utils";
 
-export type ContextMenuTypes = "playlist" | "album" | "track";
+import { ShowContextMenuParams, useContextMenu } from "react-contexify-props";
+
+export type ContextMenuTypes = "playlist" | "album" | "track" | "function";
 
 export type ContextMenuPropType<T extends ContextMenuTypes> = {
   playlist: {
@@ -13,14 +15,10 @@ export type ContextMenuPropType<T extends ContextMenuTypes> = {
   track: {
     trackId: string;
   };
+  function: {
+    functionId: string;
+  };
 }[T];
-
-type MakeOptional<Type, Key extends keyof Type> = Omit<Type, Key> &
-  Partial<Pick<Type, Key>>;
-
-type MakeRequired<Type, Key extends keyof Type> = Type & {
-  [P in Key]-?: Type[P];
-};
 
 export function useMediaContext<T extends ContextMenuTypes>(type: T) {
   const pages = usePageContext();
@@ -28,8 +26,11 @@ export function useMediaContext<T extends ContextMenuTypes>(type: T) {
     id: `${type}-${pages.pageSlug}`,
   }) as {
     show: (
-      params: MakeOptional<
-        MakeRequired<ShowContextMenuParams<ContextMenuPropType<T>>, "props">,
+      params: Utils.MakeOptional<
+        Utils.MakeRequired<
+          ShowContextMenuParams<ContextMenuPropType<T>>,
+          "props"
+        >,
         "id"
       >
     ) => void;

@@ -1,10 +1,12 @@
-import { PlaySongAction } from "@/src/music/actions/play-song-action";
+import { useEffect, useState } from "react";
+
+import { playableFunctionFromTracks } from "@/src/music/functions/core/function-helper";
+import { PlayableFunction } from "@/src/music/functions/core/playable-function";
+import { validateFunction } from "@/src/music/functions/validation/validate-function";
 import { MusicLibrary } from "@/src/music/library/music-library";
 import { AudioTag } from "@/src/music/player/audio-tag";
-import { Playlist } from "@/src/music/playlists/playlist";
-import { PlaylistHelper } from "@/src/music/utils/playlist-helper";
+import { Functions } from "@/src/types/functions";
 import { Music } from "@/src/types/music";
-import { useEffect, useState } from "react";
 
 type AudioPlayerEventType =
   | AudioTagEvents
@@ -32,13 +34,14 @@ type KeyMap = {
   duration: number | null;
   isPlaying: boolean;
   currentTrackId: string | null;
-  currentTrackIndex: number;
+  currentFunctionState: Functions.RuntimeState | null;
   hasPlayedOnce: boolean;
   repeatMode: Music.RepeatMode;
   percentLoaded: number;
   audioLoaded: boolean;
   loadingNewTrack: boolean;
-  trackQueue: Playlist;
+  trackQueue: PlayableFunction;
+  trackStateHistory: Functions.RuntimeState[];
 };
 
 type HookKeys = {
@@ -71,11 +74,10 @@ const createHook = <Key extends keyof KeyMap>(
     return state;
   };
 };
-
 export class AudioPlayer implements HookKeys {
   public readonly PREVIOUS_TRACK_RESTART_DELAY = 3;
 
-  private eventListeners: {
+  private _eventListeners: {
     [Key in AudioPlayerEventType]: AudioPlayerEventListener[];
   } = {
     canplaythrough: [],
@@ -96,22 +98,23 @@ export class AudioPlayer implements HookKeys {
     updateQueue: [],
   };
 
-  private _currentTrackIndex = 0;
-  private _trackQueue: Playlist = new Playlist();
+  private _trackQueue: PlayableFunction = new PlayableFunction([]);
   private _repeatMode: Music.RepeatMode = "none";
-  private wasPlayingBeforeSeek: boolean | null = null;
-  private seeking = false;
+  private _wasPlayingBeforeSeek: boolean | null = null;
+  private _seeking = false;
 
-  private currentAudioTag: AudioTag | null = null;
-  private nextAudioTag: AudioTag | null = null;
-  private isAudioLoaded = false;
+  private _currentAudioTag: AudioTag | null = null;
+  private _currentFunctionState: Functions.RuntimeState | null = null;
+  private _trackStateHistory: Functions.RuntimeState[] = [];
+  private _nextAudioTag: AudioTag | null = null;
+  private _isAudioLoaded = false;
   private _percentLoaded = 0;
-  private isLoadingNewTrack = false;
+  private _isLoadingNewTrack = false;
 
-  private audioContext: AudioContext | null = null;
+  private _audioContext: AudioContext | null = null;
 
   public get audioLoaded() {
-    return this.isAudioLoaded;
+    return this._isAudioLoaded;
   }
 
   public get percentLoaded() {
@@ -119,7 +122,7 @@ export class AudioPlayer implements HookKeys {
   }
 
   public get loadingNewTrack() {
-    return this.isLoadingNewTrack;
+    return this._isLoadingNewTrack;
   }
 
   public get repeatMode() {
@@ -127,35 +130,39 @@ export class AudioPlayer implements HookKeys {
   }
 
   public get hasPlayedOnce() {
-    return this.audioContext !== null;
+    return this._audioContext !== null;
   }
 
   public get isPlaying() {
-    if (this.currentAudioTag === null) return false;
-    return !this.currentAudioTag.paused;
+    if (this._currentAudioTag === null) return false;
+    return !this._currentAudioTag.paused;
   }
 
   public get currentTime() {
-    if (this.currentAudioTag === null) return null;
-    return this.currentAudioTag.currentTime;
+    if (this._currentAudioTag === null) return null;
+    return this._currentAudioTag.currentTime;
   }
 
   public get duration() {
-    if (this.currentAudioTag === null) return null;
-    return this.currentAudioTag.duration;
-  }
-
-  public get currentTrackIndex() {
-    return this._currentTrackIndex;
+    if (this._currentAudioTag === null) return null;
+    return this._currentAudioTag.duration;
   }
 
   public get currentTrackId() {
-    if (this.currentAudioTag === null) return null;
-    return this.currentAudioTag.trackId;
+    if (this._currentAudioTag === null) return null;
+    return this._currentAudioTag.trackId;
   }
 
   public get trackQueue() {
     return this._trackQueue;
+  }
+
+  public get currentFunctionState() {
+    return this._currentFunctionState;
+  }
+
+  public get trackStateHistory() {
+    return this._trackStateHistory;
   }
 
   public constructor() {
@@ -181,11 +188,6 @@ export class AudioPlayer implements HookKeys {
   public useCurrentTrackId = createHook(
     this,
     "currentTrackId",
-    "setupNewTrack"
-  );
-  public useCurrentTrackIndex = createHook(
-    this,
-    "currentTrackIndex",
     "setupNewTrack"
   );
   public useHasPlayedOnce = createHook(
@@ -216,6 +218,24 @@ export class AudioPlayer implements HookKeys {
     "updateQueue",
   ]);
 
+  public useCurrentFunctionState = createHook(this, "currentFunctionState", [
+    "loadNewTrack",
+    "setupNewTrack",
+    "nextTrack",
+    "previousTrack",
+    "moveToTrack",
+    "playNewQueue",
+    "updateQueue",
+  ]);
+
+  public useTrackStateHistory = createHook(this, "trackStateHistory", [
+    "nextTrack",
+    "previousTrack",
+    "moveToTrack",
+    "playNewQueue",
+    "updateQueue",
+  ]);
+
   public setRepeatMode(mode: Music.RepeatMode) {
     this._repeatMode = mode;
     this.callEvent("changeRepeatMode");
@@ -237,10 +257,10 @@ export class AudioPlayer implements HookKeys {
         this.previousTrack();
       });
       const seekCallback = (e: MediaSessionActionDetails) => {
-        if (this.currentAudioTag !== null) {
+        if (this._currentAudioTag !== null) {
           const skipTime = e.seekOffset || 10;
           this.seekToTime(
-            this.currentAudioTag.currentTime +
+            this._currentAudioTag.currentTime +
               (e.action === "seekforward" ? 1 : -1) * skipTime,
             true
           );
@@ -261,9 +281,9 @@ export class AudioPlayer implements HookKeys {
       });
       this.addEventListener("timeupdate", () => {
         mediaSession.setPositionState({
-          duration: this.currentAudioTag?.duration,
-          playbackRate: this.currentAudioTag?.playbackRate,
-          position: this.currentAudioTag?.currentTime,
+          duration: this._currentAudioTag?.duration,
+          playbackRate: this._currentAudioTag?.playbackRate,
+          position: this._currentAudioTag?.currentTime,
         });
       });
     }
@@ -273,7 +293,7 @@ export class AudioPlayer implements HookKeys {
   }
 
   private onAudioEnded() {
-    if (this.seeking) {
+    if (this._seeking) {
       return;
     }
     if (this.repeatMode === "one") {
@@ -284,67 +304,72 @@ export class AudioPlayer implements HookKeys {
   }
 
   private onAudioLoaded() {
-    if (this.currentAudioTag !== null) {
-      this._percentLoaded = this.getPercentLoaded(this.currentAudioTag);
+    if (this._currentAudioTag !== null) {
+      this._percentLoaded = this.getPercentLoaded(this._currentAudioTag);
     }
-    this.isAudioLoaded = true;
+    this._isAudioLoaded = true;
   }
 
   private onAudioLoadProgress() {
-    if (this.currentAudioTag !== null) {
-      this._percentLoaded = this.getPercentLoaded(this.currentAudioTag);
+    if (this._currentAudioTag !== null) {
+      this._percentLoaded = this.getPercentLoaded(this._currentAudioTag);
     }
     if (this.percentLoaded === 1) {
-      this.nextAudioTag?.startLoad();
+      this._nextAudioTag?.startLoad();
     }
   }
 
   private async setupTrack(shouldPlay = true) {
-    this.isLoadingNewTrack = false;
+    this._isLoadingNewTrack = false;
     const trackId = this.getTrackId();
     if (trackId === null) {
       throw new Error("Couldn't find next track to play!");
     }
 
-    if (this.audioContext === null) {
-      this.audioContext = new AudioContext();
+    if (this._audioContext === null) {
+      this._audioContext = new AudioContext();
       this.callEvent("createAudioContext");
     }
 
     if (
-      this.currentAudioTag !== null &&
-      this.currentAudioTag.trackId === trackId
+      this._currentAudioTag !== null &&
+      this._currentAudioTag.trackId === trackId
     ) {
-      this.currentAudioTag.currentTime = 0;
+      this._currentAudioTag.currentTime = 0;
     } else {
-      if (this.currentAudioTag !== null) {
-        this.clearAudioTag(this.currentAudioTag);
+      if (this._currentAudioTag !== null) {
+        this.clearAudioTag(this._currentAudioTag);
       }
-      if (this.nextAudioTag !== null && this.nextAudioTag.trackId === trackId) {
-        this.currentAudioTag = this.nextAudioTag;
+      if (
+        this._nextAudioTag !== null &&
+        this._nextAudioTag.trackId === trackId
+      ) {
+        this._currentAudioTag = this._nextAudioTag;
       } else {
-        this.currentAudioTag = new AudioTag(trackId, this.audioContext);
+        this._currentAudioTag = new AudioTag(trackId, this._audioContext);
       }
 
-      this.connectEventListenersToAudioTag(this.currentAudioTag);
+      this.connectEventListenersToAudioTag(this._currentAudioTag);
     }
 
-    this.isAudioLoaded = this.currentAudioTag.readyState === 4;
-    this._percentLoaded = this.getPercentLoaded(this.currentAudioTag);
+    this._isAudioLoaded = this._currentAudioTag.readyState === 4;
+    this._percentLoaded = this.getPercentLoaded(this._currentAudioTag);
 
     const nextTrackId = this.getNextId();
     if (nextTrackId !== null) {
-      this.nextAudioTag = new AudioTag(nextTrackId, this.audioContext);
+      this._nextAudioTag = new AudioTag(nextTrackId, this._audioContext);
     } else {
-      this.nextAudioTag = null;
+      this._nextAudioTag = null;
     }
 
-    this.currentAudioTag.mediaSourceNode.connect(this.audioContext.destination);
+    this._currentAudioTag.mediaSourceNode.connect(
+      this._audioContext.destination
+    );
 
     if (shouldPlay) {
-      await this.currentAudioTag.play();
+      await this._currentAudioTag.play();
     } else {
-      await this.currentAudioTag.startLoad();
+      await this._currentAudioTag.startLoad();
     }
     this.callEvent("setupNewTrack");
   }
@@ -385,30 +410,34 @@ export class AudioPlayer implements HookKeys {
     if (this._trackQueue.isBlank()) {
       return null;
     } else {
-      return this._trackQueue.trackList[this._currentTrackIndex].songId;
+      return this._currentFunctionState?.currentTrackId ?? null;
     }
   }
 
+  /**
+   * This only returns a possible id!
+   *
+   * Non-deterministic actions, may return different results when when actually running
+   */
   private getNextId(): string | null {
     if (this._trackQueue.isBlank()) {
       return null;
     } else {
-      if (this._currentTrackIndex + 1 === this._trackQueue.trackList.length) {
-        if (this.repeatMode === "none") {
-          return null;
-        }
+      if (this._currentFunctionState?.isEnd && this._repeatMode === "none") {
+        return null;
       }
-      return this._trackQueue.trackList[
-        (this._currentTrackIndex + 1) % this._trackQueue.trackList.length
-      ].songId;
+      const [nextState] = this._trackQueue.getNextTrack(
+        this._currentFunctionState ?? undefined
+      );
+      return nextState.currentTrackId;
     }
   }
 
   public toggleAudio() {
-    if (this.currentAudioTag === null) {
+    if (this._currentAudioTag === null) {
       return null;
     }
-    const isPaused = this.currentAudioTag.paused;
+    const isPaused = this._currentAudioTag.paused;
     if (isPaused) {
       return this.unpauseAudio();
     } else {
@@ -417,32 +446,32 @@ export class AudioPlayer implements HookKeys {
   }
 
   public unpauseAudio(): boolean {
-    if (this.currentAudioTag === null) {
+    if (this._currentAudioTag === null) {
       return false;
     }
-    const isPaused = this.currentAudioTag.paused;
+    const isPaused = this._currentAudioTag.paused;
     if (isPaused) {
-      this.currentAudioTag.play();
+      this._currentAudioTag.play();
     }
     return isPaused;
   }
 
   public pauseAudio(): boolean {
-    if (this.currentAudioTag === null) {
+    if (this._currentAudioTag === null) {
       return false;
     }
-    const isPlaying = !this.currentAudioTag.paused;
+    const isPlaying = !this._currentAudioTag.paused;
     if (isPlaying) {
-      this.currentAudioTag.pause();
+      this._currentAudioTag.pause();
     }
     return isPlaying;
   }
 
   public restartAudio() {
-    if (this.currentAudioTag === null) {
+    if (this._currentAudioTag === null) {
       return false;
     }
-    this.currentAudioTag.currentTime = 0;
+    this._currentAudioTag.currentTime = 0;
     this.callEvent("restartedTrack");
     return true;
   }
@@ -451,89 +480,110 @@ export class AudioPlayer implements HookKeys {
     if (
       this.repeatMode === "one" ||
       (useRestartDelay &&
-        this.currentAudioTag &&
-        this.currentAudioTag.currentTime > this.PREVIOUS_TRACK_RESTART_DELAY)
+        this._currentAudioTag &&
+        this._currentAudioTag.currentTime > this.PREVIOUS_TRACK_RESTART_DELAY)
     ) {
       this.restartAudio();
       return;
     }
-    this.isLoadingNewTrack = true;
+    this._isLoadingNewTrack = true;
+    let lastTrackState = this._trackStateHistory.pop();
 
-    if (this._currentTrackIndex > 0) {
-      this._currentTrackIndex--;
-    } else if (this.repeatMode === "all") {
-      this._currentTrackIndex = this._trackQueue.trackList.length - 1;
+    if (lastTrackState === undefined) {
+      if (this._repeatMode === "all") {
+        const { lastState, trackStates } = this._trackQueue.getLastTrack();
+        lastTrackState = lastState;
+        this._trackStateHistory = trackStates;
+      }
+    } else {
+      // For update of react state
+      this._trackStateHistory = [...this._trackStateHistory];
     }
+
+    if (lastTrackState) {
+      this._currentFunctionState = lastTrackState;
+    }
+
     this.callEvent("previousTrack");
     await this.setupTrack();
   }
 
   public async nextTrack() {
-    this.isLoadingNewTrack = true;
-    if (this._currentTrackIndex < this._trackQueue.trackList.length - 1) {
-      this._currentTrackIndex++;
-      this.callEvent("nextTrack");
-      await this.setupTrack();
-    } else {
-      this._currentTrackIndex = 0;
-      this.callEvent("nextTrack");
-      await this.setupTrack(this.repeatMode !== "none");
+    this._isLoadingNewTrack = true;
+    if (this._currentFunctionState) {
+      // Don't use push because it doesn't trigger a react state update
+      this._trackStateHistory = [
+        ...this._trackStateHistory,
+        this._currentFunctionState,
+      ];
     }
+    const [nextState, didEnd] = this._trackQueue.getNextTrack(
+      this._currentFunctionState ?? undefined
+    );
+    if (didEnd) {
+      this._trackStateHistory = [];
+    }
+    this._currentFunctionState = nextState;
+    this.callEvent("nextTrack");
+    await this.setupTrack(!didEnd || this.repeatMode !== "none");
   }
 
-  public async moveToTrack(trackIndex: number) {
-    if (trackIndex >= 0 && trackIndex < this._trackQueue.trackList.length) {
-      this.isLoadingNewTrack = true;
-      this._currentTrackIndex = trackIndex;
-      this.callEvent("moveToTrack");
-      await this.setupTrack();
-    } else {
-      throw new Error("This track index could not be played!");
-    }
+  public async moveToTrack() {
+    throw new Error("This has not been implemented yet!");
+    // if (trackIndex >= 0 && trackIndex < this._trackQueue.trackList.length) {
+    //   this.isLoadingNewTrack = true;
+    //   this._currentTrackIndex = trackIndex;
+    //   this.callEvent("moveToTrack");
+    //   await this.setupTrack();
+    // } else {
+    //   throw new Error("This track index could not be played!");
+    // }
   }
 
   public seekToTime(time: number, end = false) {
-    this.seeking = true;
-    if (this.currentAudioTag === null) {
+    this._seeking = true;
+    if (this._currentAudioTag === null) {
       return false;
     }
-    if (this.wasPlayingBeforeSeek === null) {
-      this.wasPlayingBeforeSeek = !this.currentAudioTag.paused;
+    if (this._wasPlayingBeforeSeek === null) {
+      this._wasPlayingBeforeSeek = !this._currentAudioTag.paused;
     }
 
-    if (!this.currentAudioTag.paused && !end) {
-      this.currentAudioTag.pause();
+    if (!this._currentAudioTag.paused && !end) {
+      this._currentAudioTag.pause();
     }
 
-    this.currentAudioTag.currentTime = time;
+    this._currentAudioTag.currentTime = time;
 
     if (end) {
-      if (this.wasPlayingBeforeSeek) {
-        if (this.currentAudioTag.currentTime >= this.currentAudioTag.duration) {
+      if (this._wasPlayingBeforeSeek) {
+        if (
+          this._currentAudioTag.currentTime >= this._currentAudioTag.duration
+        ) {
           this.nextTrack();
         } else {
-          this.currentAudioTag.play();
+          this._currentAudioTag.play();
         }
       }
-      this.wasPlayingBeforeSeek = null;
-      this.seeking = false;
+      this._wasPlayingBeforeSeek = null;
+      this._seeking = false;
     }
   }
 
   private beginLoadingNewTrack() {
-    this.currentAudioTag?.pause();
-    this.isLoadingNewTrack = true;
+    this._currentAudioTag?.pause();
+    this._isLoadingNewTrack = true;
     this.callEvent("loadNewTrack");
   }
 
   public play = {
-    track: (trackId: string) => {
+    track: async (trackId: string) => {
       this.beginLoadingNewTrack();
-      const playlist = new Playlist().addAction(new PlaySongAction(trackId));
-      return this.playPlaylist(playlist);
+      return this.playFunction(playableFunctionFromTracks(trackId));
     },
     trackList: async (
       trackList: string | Music.HelperDB.ThinTrackList,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       trackNumber = 0
     ) => {
       this.beginLoadingNewTrack();
@@ -549,17 +599,19 @@ export class AudioPlayer implements HookKeys {
       } else {
         loadedTrackList = trackList;
       }
-      const index = loadedTrackList.trackConnections
-        .sort((a, b) => a.trackNumber - b.trackNumber)
-        .findIndex((connection) => connection.trackNumber === trackNumber);
-      const playlist = PlaylistHelper.getPlaylistFromTrackList(loadedTrackList);
-      return this.playPlaylist(playlist, index === -1 ? 0 : index);
+      // const index = loadedTrackList.trackConnections
+      //   .sort((a, b) => a.trackNumber - b.trackNumber)
+      //   .findIndex((connection) => connection.trackNumber === trackNumber);
+      return this.playFunction(
+        playableFunctionFromTracks(
+          ...loadedTrackList.trackConnections.map(({ trackId }) => trackId)
+        )
+      );
     },
     album: async (
       album: string | Music.DB.TableType<"Album">,
       trackNumber = 0
     ) => {
-      this.beginLoadingNewTrack();
       let loadedAlbum: Music.DB.TableType<"Album">;
       if (typeof album === "string") {
         const nullableAlbum = await MusicLibrary.db.album.get({
@@ -575,35 +627,72 @@ export class AudioPlayer implements HookKeys {
 
       return this.play.trackList(loadedAlbum.trackList, trackNumber);
     },
+    func: async (func: string | Music.DB.TableType<"Function">) => {
+      let loadedFunction: Music.DB.TableType<"Function">;
+      if (typeof func === "string") {
+        const nullableFunction = await MusicLibrary.db.function.get({
+          id: func,
+        });
+        if (nullableFunction === null) {
+          return false;
+        }
+        loadedFunction = nullableFunction;
+      } else {
+        loadedFunction = func;
+      }
+      if (!validateFunction(loadedFunction.functionData)) {
+        throw new Error("Invalid function data! Cannot play");
+      }
+      return this.playFunction(
+        new PlayableFunction(loadedFunction.functionData)
+      );
+    },
   };
 
   public queue = {
+    addFunction: async (
+      data:
+        | string
+        | Music.DB.TableType<"Function">
+        | Functions.FunctionTree
+        | PlayableFunction,
+      addNext = false
+    ) => {
+      let functionTree: Functions.FunctionTree;
+      if (data instanceof PlayableFunction) {
+        functionTree = data.functionTree;
+      } else if (Array.isArray(data)) {
+        if (!validateFunction(data)) {
+          return false;
+        }
+        functionTree = data;
+      } else if (typeof data === "string" || typeof data === "object") {
+        if (typeof data === "string") {
+          const result = await MusicLibrary.db.function.get({ id: data });
+          if (!result) {
+            return false;
+          }
+          data = result;
+        }
+        if (!validateFunction(data.functionData)) {
+          return false;
+        }
+        functionTree = data.functionData;
+      } else {
+        return false;
+      }
+
+      await this.queueFunction(new PlayableFunction(functionTree), addNext);
+      return true;
+    },
     addTrack: async (
       trackId: string | Music.DB.TableType<"Track">,
       addNext = false
     ) => {
-      const wasBlank = this._trackQueue.isBlank();
-      if (wasBlank) {
-        this.beginLoadingNewTrack();
-      }
       if (typeof trackId !== "string") {
         trackId = trackId.id;
       }
-
-      const action: PlaySongAction = new PlaySongAction(trackId);
-      if (!addNext) {
-        this._trackQueue = this._trackQueue.addAction(action);
-      } else {
-        this._trackQueue = this._trackQueue.insertAction(
-          this.currentTrackIndex + 1,
-          action
-        );
-      }
-      this.callEvent("updateQueue");
-      if (wasBlank) {
-        this.callEvent("playNewQueue");
-        await this.setupTrack();
-      }
+      await this.queueFunction(playableFunctionFromTracks(trackId), addNext);
       return true;
     },
     /**
@@ -613,10 +702,6 @@ export class AudioPlayer implements HookKeys {
       trackList: string | Music.HelperDB.ThinTrackList,
       addNext = false
     ) => {
-      const wasBlank = this._trackQueue.isBlank();
-      if (wasBlank) {
-        this.beginLoadingNewTrack();
-      }
       let loadedTrackList: Music.HelperDB.ThinTrackList;
       if (typeof trackList === "string") {
         const nullableTrackList = await MusicLibrary.db.trackList.get({
@@ -630,60 +715,73 @@ export class AudioPlayer implements HookKeys {
         loadedTrackList = trackList;
       }
 
-      const actions: PlaySongAction[] = loadedTrackList.trackConnections.map(
+      const trackIds: string[] = loadedTrackList.trackConnections.map(
         (trackConn) => {
-          return new PlaySongAction(trackConn.trackId);
+          return trackConn.trackId;
         }
       );
-      if (!addNext) {
-        this._trackQueue = this._trackQueue.addAction(...actions);
-      } else {
-        this._trackQueue = this._trackQueue.insertAction(
-          this.currentTrackIndex + 1,
-          ...actions
-        );
-      }
-      this.callEvent("updateQueue");
-      if (wasBlank) {
-        this.callEvent("playNewQueue");
-        await this.setupTrack();
-      }
+      await this.queueFunction(
+        playableFunctionFromTracks(...trackIds),
+        addNext
+      );
       return true;
     },
   };
 
-  private async playPlaylist(
-    playlist: Playlist,
-    startIndex = 0
-  ): Promise<boolean> {
-    if (playlist.trackList.length <= startIndex) {
-      return false;
+  private async queueFunction(
+    newFunction: PlayableFunction,
+    addNext = false
+  ): Promise<void> {
+    const wasBlank = this._trackQueue.isBlank();
+    if (wasBlank) {
+      this.beginLoadingNewTrack();
+      await this.playFunction(newFunction);
+      return;
     }
-    this._trackQueue = playlist;
-    this._currentTrackIndex = startIndex;
+    if (!addNext || !this._currentFunctionState) {
+      this._trackQueue = this._trackQueue.addStatements(
+        newFunction.functionTree
+      );
+    } else {
+      this._trackQueue = this._trackQueue.insertAfter(
+        this._currentFunctionState.currentActionId,
+        newFunction.functionTree
+      );
+    }
+    // Rewrite this function state
+    this._currentFunctionState = this._trackQueue.getNextTrack(
+      this._trackStateHistory[this._trackStateHistory.length - 1]
+    )[0];
+    this.callEvent("updateQueue");
+  }
+
+  private async playFunction(newFunction: PlayableFunction): Promise<void> {
+    this._trackQueue = newFunction;
+    this._trackStateHistory = [];
+    this._currentFunctionState = this._trackQueue.getNextTrack()[0];
     this.callEvent("playNewQueue");
     await this.setupTrack();
-    return true;
+    return;
   }
 
   public addEventListener(
     event: AudioPlayerEventType,
     listener: AudioPlayerEventListener
   ) {
-    this.eventListeners[event].push(listener);
+    this._eventListeners[event].push(listener);
   }
 
   public removeEventListener(
     event: AudioPlayerEventType,
     listener: AudioPlayerEventListener
   ) {
-    this.eventListeners[event] = this.eventListeners[event].filter(
+    this._eventListeners[event] = this._eventListeners[event].filter(
       (value) => value !== listener
     );
   }
 
   private callEvent(event: AudioPlayerEventType) {
-    this.eventListeners[event].forEach((listener) => {
+    this._eventListeners[event].forEach((listener) => {
       listener(this);
     });
   }

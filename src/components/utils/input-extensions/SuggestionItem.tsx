@@ -1,5 +1,6 @@
-import { InputExtensions } from "@/src/types/input-extensions";
 import { LiHTMLAttributes, MouseEvent } from "react";
+
+import { InputExtensions } from "@/src/types/input-extensions";
 
 type ItemProps<S> = {
   suggestion: S;

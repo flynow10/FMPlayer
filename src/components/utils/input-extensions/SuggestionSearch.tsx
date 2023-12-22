@@ -1,9 +1,12 @@
+import { ButtonHTMLAttributes, HTMLAttributes, useRef, useState } from "react";
+
 import BaseSuggestionInput from "@/src/components/utils/input-extensions/BaseSuggestionInput";
+
 import { InputExtensions } from "@/src/types/input-extensions";
 import { boldPartialSearchCompletion } from "@/src/utils/string-utils";
+
 import classNames from "classnames";
 import { Search } from "lucide-react";
-import { ButtonHTMLAttributes, HTMLAttributes, useRef, useState } from "react";
 
 type SuggestionSearchProps<S> = {
   completions: S[];

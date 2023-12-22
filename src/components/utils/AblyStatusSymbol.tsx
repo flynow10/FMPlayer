@@ -1,7 +1,9 @@
+import { useEffect, useState } from "react";
+
 import { RealtimeStatus } from "@/src/api/ably-client";
+
 import { Types } from "ably";
 import { Server, ServerCog, ServerOff } from "lucide-react";
-import { useEffect, useState } from "react";
 
 type StatusSymbol = "server" | "server-off" | "server-cog";
 

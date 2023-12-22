@@ -1,76 +1,34 @@
-import { getApplicationDebugConfig } from "@/config/app";
+import { ReactNode } from "react";
+
 import Artwork from "@/src/components/media-displays/Artwork";
 import LinkedArtistList from "@/src/components/media-displays/LinkedArtistList";
+
+import { getApplicationDebugConfig } from "@/config/app";
 import { usePageContext } from "@/src/contexts/PageContext";
 import { useAudioPlayer } from "@/src/hooks/use-audio-player";
 import { useMediaContext } from "@/src/hooks/use-media-context";
 import { Music } from "@/src/types/music";
 import { Pages } from "@/src/types/pages";
+
 import classNames from "classnames";
 import { Play } from "lucide-react";
-import { MouseEvent, ReactNode } from "react";
 
-export type DisplayableMediaType = "album" | "track" | "playlist" | "artist";
-type CardStyle = "cover-card" | "tab-card";
-
-type LimitedTableType = {
-  album: Music.DB.TableType<
-    "Album",
-    {
-      artists: {
-        include: {
-          artist: true;
-        };
-      };
-      artwork: true;
-    }
-  >;
-  track: Music.DB.TableType<
-    "Track",
-    {
-      artists: {
-        include: {
-          artist: true;
-        };
-      };
-      artwork: true;
-    }
-  >;
-  playlist: Music.DB.TableType<
-    "Playlist",
-    {
-      artwork: true;
-    }
-  >;
-  artist: Music.DB.TableType<"Artist", object>;
-};
-
-export type MediaCardProps<T extends DisplayableMediaType> = {
-  type: T;
-  data: LimitedTableType[T];
-  style: CardStyle;
-  hideLinks?: boolean;
-  shouldDisplayType?: boolean;
-  onClickPhoto?: (event: MouseEvent) => void | null;
-  onClickTitle?: (event: MouseEvent) => void;
-  onClickSubText?: (event: MouseEvent) => void;
-};
-
-export default function MediaCard<T extends DisplayableMediaType>(
-  props: MediaCardProps<T>
-) {
+export default function MediaCard<
+  T extends Pages.MediaDisplay.DisplayableMediaType
+>(props: Pages.MediaDisplay.MediaCardProps<T>) {
   const debugConfig = getApplicationDebugConfig();
   const pages = usePageContext();
   const audioPlayer = useAudioPlayer();
   const { show: showPlaylistMenu } = useMediaContext("playlist");
   const { show: showAlbumMenu } = useMediaContext("album");
   const { show: showTrackMenu } = useMediaContext("track");
+  const { show: showFunctionMenu } = useMediaContext("function");
   let artworkId: string | null = null;
   let titleText = "";
   let subText: string | ReactNode = "";
   switch (props.type) {
     case "album": {
-      const album = props.data as Music.DB.TableType<"Album">;
+      const album = props.data as Pages.MediaDisplay.LimitedTableType["album"];
       artworkId = album.artwork?.id ?? null;
       titleText = album.title;
       if (album.artists.length > 0) {
@@ -86,21 +44,23 @@ export default function MediaCard<T extends DisplayableMediaType>(
       break;
     }
     case "artist": {
-      const artist = props.data as Music.DB.TableType<"Artist">;
+      const artist =
+        props.data as Pages.MediaDisplay.LimitedTableType["artist"];
       artworkId = null;
       titleText = artist.name;
       subText = "";
       break;
     }
     case "playlist": {
-      const playlist = props.data as Music.DB.TableType<"Playlist">;
+      const playlist =
+        props.data as Pages.MediaDisplay.LimitedTableType["playlist"];
       artworkId = playlist.artwork?.id ?? null;
       titleText = playlist.title;
       subText = "";
       break;
     }
     case "track": {
-      const track = props.data as Music.DB.TableType<"Track">;
+      const track = props.data as Pages.MediaDisplay.LimitedTableType["track"];
       artworkId = track.artwork?.id ?? null;
       titleText = track.title;
       if (track.artists.length > 0) {
@@ -114,6 +74,13 @@ export default function MediaCard<T extends DisplayableMediaType>(
         );
       }
       break;
+    }
+    case "function": {
+      const functionData =
+        props.data as Pages.MediaDisplay.LimitedTableType["function"];
+      artworkId = functionData.artwork?.id ?? null;
+      titleText = functionData.title;
+      subText = "";
     }
   }
 
@@ -136,6 +103,10 @@ export default function MediaCard<T extends DisplayableMediaType>(
         audioPlayer.play.trackList(playlist.trackListId);
         break;
       }
+      case "function": {
+        audioPlayer.play.func(props.data.id);
+        break;
+      }
       default: {
         alert("Unable to play this type of media!");
         break;
@@ -143,7 +114,9 @@ export default function MediaCard<T extends DisplayableMediaType>(
     }
   };
 
-  const visitable = ["album", "artist", "playlist"].includes(props.type);
+  const visitable = ["album", "artist", "playlist", "function"].includes(
+    props.type
+  );
   const gotoMediaPage = () => {
     let pageType: Pages.PageType | null = null;
     switch (props.type) {
@@ -159,6 +132,9 @@ export default function MediaCard<T extends DisplayableMediaType>(
         pageType = "playlist display";
         break;
       }
+      case "function": {
+        pageType = "function display";
+      }
     }
     if (pageType === null) {
       throw new Error("Cannot navigate to unvisitable page");
@@ -169,7 +145,9 @@ export default function MediaCard<T extends DisplayableMediaType>(
     });
     return;
   };
-  const playable = ["album", "track", "playlist"].includes(props.type);
+  const playable = ["album", "track", "playlist", "function"].includes(
+    props.type
+  );
   const clickablePhoto = props.onClickPhoto !== null;
 
   const ArtworkWrapper = clickablePhoto ? "button" : "div";
@@ -282,6 +260,15 @@ export default function MediaCard<T extends DisplayableMediaType>(
               event,
               props: {
                 trackId: props.data.id,
+              },
+            });
+            break;
+          }
+          case "function": {
+            showFunctionMenu({
+              event,
+              props: {
+                functionId: props.data.id,
               },
             });
             break;

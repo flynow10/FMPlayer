@@ -1,10 +1,12 @@
-import { Loader2, Lock, Music4 } from "lucide-react";
 import { FormEvent, useState } from "react";
-import { toast } from "react-toastify";
-import { VercelAPI } from "@/src/api/vercel-API";
-import { useNavigate } from "react-router-dom";
 
-export function Login() {
+import { VercelAPI } from "@/src/api/vercel-API";
+
+import { Loader2, Lock, Music4 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+
+export default function Login() {
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();

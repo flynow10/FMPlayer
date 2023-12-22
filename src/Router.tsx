@@ -1,9 +1,14 @@
-import { VercelAPI } from "@/src/api/vercel-API";
-import App from "@/src/components/App";
-import { Login } from "@/src/components/auth/Login";
-import { FullCover } from "@/src/components/utils/loading/FullCover";
-import { getApplicationDebugConfig } from "@/config/app";
 import { Suspense } from "react";
+
+import App from "@/src/components/App";
+import Login from "@/src/components/auth/Login";
+import FullCover from "@/src/components/utils/loading/FullCover";
+
+import { getApplicationDebugConfig } from "@/config/app";
+import { RealtimeStatus } from "@/src/api/ably-client";
+import { VercelAPI } from "@/src/api/vercel-API";
+import { YoutubeAPI } from "@/src/api/youtube-API";
+
 import {
   Await,
   createBrowserRouter,
@@ -11,8 +16,6 @@ import {
   RouterProvider,
   useLoaderData,
 } from "react-router-dom";
-import { YoutubeAPI } from "@/src/api/youtube-API";
-import { RealtimeStatus } from "@/src/api/ably-client";
 
 const router = createBrowserRouter([
   {
@@ -43,7 +46,7 @@ const router = createBrowserRouter([
   },
 ]);
 
-export default function Router() {
+export function Router() {
   return <RouterProvider router={router} />;
 }
 

@@ -46,6 +46,9 @@ export function pickSuggestions(
       })
     );
   }
+  if (search.length === 0) {
+    return [];
+  }
 
   return searchSpace
     .map((str) => ({ str, spaced: str.split(" ") }))
@@ -65,7 +68,7 @@ export function pickSuggestions(
 
 export function shortenNumberString(
   number: number | string,
-  maxTrailingDecimal?: number,
+  maxTrailingDecimal: number = 2,
   requiredTrailingDecimals?: number
 ) {
   number = Number(number);

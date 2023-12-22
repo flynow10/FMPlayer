@@ -1,8 +1,10 @@
+import { HTMLAttributes, useRef, useState } from "react";
+
 import BaseSuggestionInput from "@/src/components/utils/input-extensions/BaseSuggestionInput";
 import MultiSelectPill from "@/src/components/utils/input-extensions/MultiSelectPill";
+
 import { InputExtensions } from "@/src/types/input-extensions";
 import { isNodeOrChildOfNode } from "@/src/utils/component-utils";
-import { HTMLAttributes, useRef, useState } from "react";
 
 type MultiSuggestionInputProps<S> = {
   suggestions: S[];

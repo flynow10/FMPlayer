@@ -1,8 +1,8 @@
 import { LambdaClient } from "@aws-sdk/client-lambda";
-import { getEnvVar, getVercelEnvironment } from "./constants.js";
 import { S3Client } from "@aws-sdk/client-s3";
 import { PrismaClient } from "@prisma/client";
 import Ably from "ably";
+import { getEnvVar, getVercelEnvironment } from "./constants.js";
 
 const IS_LOCAL = getVercelEnvironment() === "development";
 export const prismaClient = new PrismaClient({

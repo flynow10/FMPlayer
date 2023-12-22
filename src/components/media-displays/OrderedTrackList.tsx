@@ -1,7 +1,8 @@
 import { useAudioPlayer } from "@/src/hooks/use-audio-player";
 import { useMediaContext } from "@/src/hooks/use-media-context";
 import { Music } from "@/src/types/music";
-import { Play } from "lucide-react";
+
+import { CircleEllipsis, Play } from "lucide-react";
 
 type OrderedTrackListProps = {
   list: Music.HelperDB.ThinTrackList;
@@ -15,7 +16,7 @@ export default function OrderedTrackList(props: OrderedTrackListProps) {
       {props.list.trackConnections.map((connection, index) => (
         <div
           key={index}
-          className="flex border-t-2 last:border-b-2 p-2 gap-4 group"
+          className="flex border-t last:border-b p-4 gap-4 group"
           onContextMenu={(event) => {
             showTrackMenu({
               event,
@@ -34,7 +35,19 @@ export default function OrderedTrackList(props: OrderedTrackListProps) {
             <Play className="group-hover:block hidden m-0 p-0" />
             <span className="group-hover:hidden">{connection.trackNumber}</span>
           </button>
-          <div>{connection.track.title}</div>
+          <span className="grow">{connection.track.title}</span>
+          <button
+            onClick={(event) => {
+              showTrackMenu({
+                event,
+                props: {
+                  trackId: connection.trackId,
+                },
+              });
+            }}
+          >
+            <CircleEllipsis />
+          </button>
         </div>
       ))}
     </div>

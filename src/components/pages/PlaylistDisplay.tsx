@@ -1,14 +1,17 @@
-import { FullCover } from "@/src/components/utils/loading/FullCover";
-import { useDatabase, DataState } from "@/src/hooks/use-database";
-import { MusicLibrary } from "@/src/music/library/music-library";
-import { CircleEllipsis, Play } from "lucide-react";
-import { Blur } from "@/src/components/utils/loading/Blur";
-import OrderedTrackList from "@/src/components/media-displays/OrderedTrackList";
+import { useEffect } from "react";
+
 import Artwork from "@/src/components/media-displays/Artwork";
+import OrderedTrackList from "@/src/components/media-displays/OrderedTrackList";
+import Blur from "@/src/components/utils/loading/Blur";
+import FullCover from "@/src/components/utils/loading/FullCover";
+
 import { usePageContext } from "@/src/contexts/PageContext";
 import { useAudioPlayer } from "@/src/hooks/use-audio-player";
+import { DataState, useDatabase } from "@/src/hooks/use-database";
 import { useMediaContext } from "@/src/hooks/use-media-context";
-import { useEffect } from "react";
+import { MusicLibrary } from "@/src/music/library/music-library";
+
+import { CircleEllipsis, Play } from "lucide-react";
 import { toast } from "react-toastify";
 
 export default function PlaylistDisplay() {

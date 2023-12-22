@@ -1,15 +1,16 @@
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
-import {
-  DisplayableMediaType,
-  MediaCardProps,
-} from "@/src/components/media-displays/MediaCard";
+
+import { Pages } from "@/src/types/pages";
+
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 type MediaCarouselProps = {
-  children: ReactElement<MediaCardProps<DisplayableMediaType>>[];
+  children: ReactElement<
+    Pages.MediaDisplay.MediaCardProps<Pages.MediaDisplay.DisplayableMediaType>
+  >[];
 };
 
-export function MediaCarousel(props: MediaCarouselProps) {
+export default function MediaCarousel(props: MediaCarouselProps) {
   const carouselRef = useRef<HTMLDivElement>(null);
 
   const getCurrentlySnappedElement = () => {

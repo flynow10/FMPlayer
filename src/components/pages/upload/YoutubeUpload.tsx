@@ -1,20 +1,23 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Pages } from "@/src/types/pages";
+
 import MetadataEditor from "@/src/components/utils/MetadataEditor";
-import { FileContext } from "@/src/contexts/FileContext";
-import { Music } from "@/src/types/music";
-import { API } from "@/src/types/api";
-import { v4 as uuid } from "uuid";
-import Youtube from "react-youtube";
-import { YoutubeAPI } from "@/src/api/youtube-API";
-import { Loader2, Play } from "lucide-react";
 import VerticalSplit from "@/src/components/utils/VerticalSplit";
-import { splitOutUrls } from "@/src/utils/url-utils";
 import ChannelDisplay from "@/src/components/utils/youtube/ChannelDisplay";
-import { MusicLibrary } from "@/src/music/library/music-library";
-import { toast } from "react-toastify";
+
+import { YoutubeAPI } from "@/src/api/youtube-API";
+import { FileContext } from "@/src/contexts/FileContext";
 import { usePageContext } from "@/src/contexts/PageContext";
 import { useAudioPlayer } from "@/src/hooks/use-audio-player";
+import { MusicLibrary } from "@/src/music/library/music-library";
+import { API } from "@/src/types/api";
+import { Music } from "@/src/types/music";
+import { Pages } from "@/src/types/pages";
+import { splitOutUrls } from "@/src/utils/url-utils";
+
+import { Loader2, Play } from "lucide-react";
+import { toast } from "react-toastify";
+import Youtube from "react-youtube";
+import { v4 as uuid } from "uuid";
 
 export default function YoutubeUpload() {
   const pages = usePageContext();

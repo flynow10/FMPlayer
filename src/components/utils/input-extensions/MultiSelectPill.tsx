@@ -1,6 +1,8 @@
-import { InputExtensions } from "@/src/types/input-extensions";
-import { X } from "lucide-react";
 import { MouseEvent } from "react";
+
+import { InputExtensions } from "@/src/types/input-extensions";
+
+import { X } from "lucide-react";
 
 type MultiSelectPillProps = {
   item: string;

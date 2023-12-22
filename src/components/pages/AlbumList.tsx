@@ -1,7 +1,8 @@
-import { MusicLibrary } from "@/src/music/library/music-library";
-import { FullCover } from "@/src/components/utils/loading/FullCover";
 import MediaCard from "@/src/components/media-displays/MediaCard";
+import FullCover from "@/src/components/utils/loading/FullCover";
+
 import { DataState, useDatabase } from "@/src/hooks/use-database";
+import { MusicLibrary } from "@/src/music/library/music-library";
 
 export default function AlbumList() {
   const [albumList, loadedState] = useDatabase(

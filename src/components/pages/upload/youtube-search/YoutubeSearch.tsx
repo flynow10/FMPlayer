@@ -1,10 +1,12 @@
-import { YoutubeAPI } from "@/src/api/youtube-API";
-import { isYoutubeUrl } from "@/src/utils/url-utils";
 import { useState } from "react";
-import { API } from "@/src/types/api";
-import { YoutubeSearchResult } from "@/src/components/pages/upload/youtube-search/YoutubeSearchResult";
-import { FullCover } from "@/src/components/utils/loading/FullCover";
+
+import YoutubeSearchResult from "@/src/components/pages/upload/youtube-search/YoutubeSearchResult";
 import SuggestionSearch from "@/src/components/utils/input-extensions/SuggestionSearch";
+import FullCover from "@/src/components/utils/loading/FullCover";
+
+import { YoutubeAPI } from "@/src/api/youtube-API";
+import { API } from "@/src/types/api";
+import { isYoutubeUrl } from "@/src/utils/url-utils";
 
 type YoutubeSearchProps = {
   onClickDownload: (video: API.Youtube.Video) => void;

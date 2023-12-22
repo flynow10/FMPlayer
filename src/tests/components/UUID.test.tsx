@@ -1,6 +1,7 @@
-import { UUID } from "@/src/components/utils/UUID";
+import UUID from "@/src/components/utils/UUID";
+
 import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { userEvent } from "@testing-library/user-event";
 
 describe("<UUID/>", () => {
   test("uuid box is created with a valid uuid", async () => {

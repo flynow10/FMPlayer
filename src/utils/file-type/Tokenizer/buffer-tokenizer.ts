@@ -1,4 +1,5 @@
 import { FileType } from "@/src/types/file-type";
+
 import { AbstractTokenizer } from "./abstract-tokenizer";
 import { EndOfStreamError } from "./end-of-stream-error";
 

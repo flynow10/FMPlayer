@@ -1,4 +1,5 @@
 import { getApplicationDebugConfig } from "@/config/app";
+
 import objectHash from "object-hash";
 
 const REFRESH_TOKEN_ID = "refresh-token";

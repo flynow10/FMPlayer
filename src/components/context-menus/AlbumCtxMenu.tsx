@@ -1,7 +1,15 @@
 import { useAudioPlayer } from "@/src/hooks/use-audio-player";
+import { useDatabase } from "@/src/hooks/use-database";
 import { ContextMenuPropType } from "@/src/hooks/use-media-context";
 import { MusicLibrary } from "@/src/music/library/music-library";
-import { Item, ItemParams, Menu, Separator } from "react-contexify";
+
+import {
+  HandlerParams,
+  Item,
+  ItemParams,
+  Menu,
+  Separator,
+} from "react-contexify-props";
 import { toast } from "react-toastify";
 
 type AlbumCtxMenuProps = {
@@ -74,6 +82,8 @@ export default function AlbumCtxMenu(props: AlbumCtxMenuProps) {
 
   return (
     <Menu id={"album-" + props.pageSlug} theme="dark" className="dark:invert">
+      <Item disabled>{(args) => <AlbumTitle {...args} />}</Item>
+      <Separator />
       <Item
         onClick={(event) => {
           addToQueue(event, false);
@@ -104,4 +114,25 @@ export default function AlbumCtxMenu(props: AlbumCtxMenuProps) {
       </Item>
     </Menu>
   );
+}
+
+// eslint-disable-next-line react/no-multi-comp
+function AlbumTitle(args: HandlerParams<ContextMenuPropType<"album">>) {
+  const albumId = args.props?.albumId;
+  if (typeof albumId !== "string") {
+    alert("This context menu was not set up correctly!");
+    throw new Error("Unable to add album to queue; missing album id!");
+  }
+  const [album] = useDatabase(
+    () => {
+      return MusicLibrary.db.album.get({ id: albumId });
+    },
+    null,
+    "Album",
+    [albumId]
+  );
+  if (!album) {
+    return null;
+  }
+  return album.title;
 }

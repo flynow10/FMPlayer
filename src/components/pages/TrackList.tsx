@@ -1,12 +1,15 @@
-import { MusicLibrary } from "@/src/music/library/music-library";
-import { ChevronDown, ChevronUp, Play } from "lucide-react";
-import { Blur } from "@/src/components/utils/loading/Blur";
-import { FullCover } from "@/src/components/utils/loading/FullCover";
 import { useState } from "react";
-import { Music } from "@/src/types/music";
-import { DataState, useDatabase } from "@/src/hooks/use-database";
+
+import Blur from "@/src/components/utils/loading/Blur";
+import FullCover from "@/src/components/utils/loading/FullCover";
+
 import { useAudioPlayer } from "@/src/hooks/use-audio-player";
+import { DataState, useDatabase } from "@/src/hooks/use-database";
 import { useMediaContext } from "@/src/hooks/use-media-context";
+import { MusicLibrary } from "@/src/music/library/music-library";
+import { Music } from "@/src/types/music";
+
+import { ChevronDown, ChevronUp, Play } from "lucide-react";
 
 type Column = {
   name: string;
@@ -117,6 +120,7 @@ export default function TrackList() {
             {sortedTrackList.map((track) => (
               <tr
                 key={track.id}
+                className="odd:bg-gray-300 p-2"
                 onContextMenu={(event) => {
                   showTrackMenu({
                     event,
