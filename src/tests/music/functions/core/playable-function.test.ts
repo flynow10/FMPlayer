@@ -126,7 +126,7 @@ describe("Playable Function", () => {
     expect(previousTrackStates.length).toBe(8);
   });
 
-  it("fails on loops with invalid counts", () => {
+  it("fails on loops with invalid loop counts", () => {
     let tree = functionBuilder
       .addLoop({ ...createEmpty.numberliteral(), data: { value: -1 } })
       .addPlayAction(tracksIds[0])
