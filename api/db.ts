@@ -412,6 +412,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     } else {
       return res.status(500).json("Something went terribly wrong!");
     }
+    // https://stackoverflow.com/questions/25245716/remove-all-ansi-colors-styles-from-strings
+    // Dec 23, 2023
+    // Removes coloring from prisma error messages
     return res.status(400).json(
       message.replace(
         // eslint-disable-next-line no-control-regex
