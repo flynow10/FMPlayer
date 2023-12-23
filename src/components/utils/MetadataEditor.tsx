@@ -225,30 +225,6 @@ export default function MetadataEditor(props: MetadataEditorProps) {
           </p>
         </div>
       )}
-      <div>
-        <button
-          onClick={() => {
-            setShowDebugJson(!showDebugJson);
-          }}
-          className="btn text-black bg-gray-300 active:bg-gray-500"
-        >
-          Show Debug
-        </button>
-
-        <p
-          className={
-            "whitespace-pre-wrap " + (showDebugJson ? "block" : "hidden")
-          }
-        >
-          {JSON.stringify(
-            {
-              metadata: file,
-            },
-            null,
-            2
-          )}
-        </p>
-      </div>
     </div>
   );
 }
