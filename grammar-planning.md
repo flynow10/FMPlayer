@@ -38,6 +38,8 @@ When displayed on the screen this would be in a drag and drop block form.
 
 ## Informal Grammar
 
+Loosely based on EBNF grammar syntax
+
 <!-- JS language is used for syntax highlighting -->
 
 Key:
@@ -181,7 +183,7 @@ Else:
 
 ## Other Considerations
 
-Currently this grammar does not include any ability to manipulate, store, compare, or use strings in any way. This means that titles, artists, tags, etc... are not a returnable properties and cannot be conditionally acted apon.
+Currently this grammar does not include the ability to manipulate, store, compare, or use strings in any way. This means that titles, artists, tags, etc... are not a returnable properties and cannot be conditionally acted apon.
 
 To make strings useful, the ability to index, split, substring, compare, and store would need to be added. Doing this would mean a major increase in complexity for the language as well as greater chances for runtime errors. <span style="color: gray;">(no one wants to spend time debugging their music)</span>
 
