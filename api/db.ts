@@ -1,19 +1,11 @@
+import { getIncludes, Include, ModelSymbol } from "@/api-lib/constants.js";
+
 import { Prisma } from "@prisma/client";
 import { Operation } from "@prisma/client/runtime/library.js";
 import { VercelRequest, VercelResponse } from "@vercel/node";
 import { AblyMessage } from "fm-player-shared";
 import { handleRequest, printRequestType } from "../api-lib/api-utils.js";
 import { ablyRest, prismaClient } from "../api-lib/data-clients.js";
-
-type ModelSymbol = Exclude<
-  keyof typeof prismaClient,
-  `$${string}` | symbol | "session"
->;
-
-type Include<S extends ModelSymbol> = Prisma.Args<
-  (typeof prismaClient)[S],
-  "findUnique"
->["include"];
 
 type PrismaArgs<S extends ModelSymbol, O extends Operation> = Prisma.Args<
   (typeof prismaClient)[S],
@@ -36,294 +28,6 @@ enum Methods {
   UPDATE,
   DELETE,
   LIST,
-}
-function getIncludes<S extends ModelSymbol>(modelName: S): Include<S> | null {
-  return (
-    {
-      album: {
-        artists: {
-          include: {
-            artist: true,
-          },
-        },
-        artwork: true,
-        genre: true,
-        tags: true,
-        trackList: {
-          include: {
-            trackConnections: {
-              orderBy: {
-                trackNumber: "asc",
-              },
-              include: {
-                track: true,
-              },
-            },
-          },
-        },
-      },
-      albumArtist: {
-        album: true,
-        artist: true,
-      },
-      artist: {
-        albums: {
-          include: {
-            album: true,
-          },
-        },
-        tracks: {
-          include: {
-            track: true,
-          },
-        },
-      },
-      artwork: {
-        albums: true,
-        functions: true,
-        playlists: true,
-        tracks: true,
-      },
-      audioSource: {
-        track: true,
-      },
-      function: {
-        artwork: true,
-        tags: true,
-      },
-      genre: {
-        albums: {
-          include: {
-            artists: {
-              include: {
-                artist: true,
-              },
-            },
-            artwork: true,
-          },
-        },
-        tracks: {
-          include: {
-            artists: {
-              include: {
-                artist: true,
-              },
-            },
-            artwork: true,
-          },
-        },
-      },
-      playlist: {
-        artwork: true,
-        tags: true,
-        trackList: {
-          include: {
-            trackConnections: {
-              orderBy: {
-                trackNumber: "asc",
-              },
-              include: {
-                track: true,
-              },
-            },
-          },
-        },
-      },
-      tag: {
-        albums: true,
-        functions: true,
-        playlists: true,
-        tagType: true,
-        tracks: true,
-      },
-      tagType: {
-        tags: true,
-      },
-      track: {
-        artists: {
-          include: {
-            artist: true,
-          },
-        },
-        artwork: true,
-        audioSource: true,
-        genre: true,
-        listConnections: {
-          include: {
-            trackList: {
-              include: {
-                album: true,
-                playlist: true,
-              },
-            },
-          },
-        },
-        tags: true,
-      },
-      trackArtist: {
-        artist: true,
-        track: true,
-      },
-      trackInList: {
-        track: true,
-        trackList: true,
-      },
-      trackList: {
-        album: true,
-        playlist: true,
-        trackConnections: {
-          orderBy: {
-            trackNumber: "asc",
-          },
-          include: {
-            track: true,
-          },
-        },
-      },
-    } as { [Key in ModelSymbol]: Include<Key> }
-  )?.[modelName];
-}
-
-async function modelSwitch(
-  methodName: Methods,
-  modelName: ModelSymbol,
-  args: unknown
-) {
-  let method;
-  switch (methodName) {
-    case Methods.CREATE: {
-      method = create;
-      break;
-    }
-    case Methods.GET: {
-      method = get;
-      break;
-    }
-    case Methods.UPDATE: {
-      method = update;
-      break;
-    }
-    case Methods.DELETE: {
-      method = deleteMethod;
-      break;
-    }
-    case Methods.LIST: {
-      method = list;
-      break;
-    }
-  }
-  switch (modelName) {
-    case "album": {
-      return method("album", args);
-    }
-    case "albumArtist": {
-      return method("albumArtist", args);
-    }
-    case "artist": {
-      return method("artist", args);
-    }
-    case "artwork": {
-      return method("artwork", args);
-    }
-    case "audioSource": {
-      return method("audioSource", args);
-    }
-    case "function": {
-      return method("function", args);
-    }
-    case "genre": {
-      return method("genre", args);
-    }
-    case "playlist": {
-      return method("playlist", args);
-    }
-    case "tag": {
-      return method("tag", args);
-    }
-    case "tagType": {
-      return method("tagType", args);
-    }
-    case "track": {
-      return method("track", args);
-    }
-    case "trackArtist": {
-      return method("trackArtist", args);
-    }
-    case "trackInList": {
-      return method("trackInList", args);
-    }
-    case "trackList": {
-      return method("trackList", args);
-    }
-  }
-}
-
-async function create<S extends ModelSymbol>(modelName: S, data: unknown) {
-  return await (
-    prismaClient[modelName].create as (
-      args: object & { data: CreateArgs<S>["data"]; include: Include<S> }
-    ) => object
-  )({
-    data: data as CreateArgs<S>["data"],
-    include: getIncludes(modelName),
-  });
-}
-
-async function get<S extends ModelSymbol>(modelName: S, whereArgs: unknown) {
-  return await (
-    prismaClient[modelName].findUnique as (
-      args: object & { where: GetArgs<S>["where"]; include: Include<S> }
-    ) => object
-  )({
-    where: whereArgs as GetArgs<S>["where"],
-    include: getIncludes(modelName),
-  });
-}
-
-async function update<S extends ModelSymbol>(modelName: S, body: unknown) {
-  const { where, data } = body as { where: unknown; data: unknown };
-  if (where === undefined) {
-    throw new Error("Missing where clause cannot perform update!");
-  }
-  return await (
-    prismaClient[modelName].update as (
-      args: object & {
-        where: UpdateArgs<S>["where"];
-        data: UpdateArgs<S>["data"];
-        include: Include<S>;
-      }
-    ) => object
-  )({
-    where: where as UpdateArgs<S>["where"],
-    data: data as UpdateArgs<S>["data"],
-    include: getIncludes(modelName),
-  });
-}
-
-async function deleteMethod<S extends ModelSymbol>(
-  modelName: S,
-  whereArgs: unknown
-) {
-  return await (
-    prismaClient[modelName].delete as (
-      args: object & { where: DeleteArgs<S>["where"]; include: Include<S> }
-    ) => object
-  )({
-    where: whereArgs as DeleteArgs<S>["where"],
-    include: getIncludes(modelName),
-  });
-}
-
-async function list<S extends ModelSymbol>(modelName: S, body: unknown) {
-  const { where, include } = body as { where: unknown; include: unknown };
-  return await (
-    prismaClient[modelName].findMany as (
-      args: object & { where: ListArgs<S>["where"]; include: Include<S> }
-    ) => object
-  )({
-    where: where as ListArgs<S>["where"],
-    include: (include as Include<S> | undefined) ?? getIncludes(modelName),
-  });
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -423,4 +127,103 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       )
     );
   }
+}
+
+async function modelSwitch(
+  methodName: Methods,
+  modelName: ModelSymbol,
+  args: unknown
+) {
+  let method;
+  switch (methodName) {
+    case Methods.CREATE: {
+      method = create;
+      break;
+    }
+    case Methods.GET: {
+      method = get;
+      break;
+    }
+    case Methods.UPDATE: {
+      method = update;
+      break;
+    }
+    case Methods.DELETE: {
+      method = deleteMethod;
+      break;
+    }
+    case Methods.LIST: {
+      method = list;
+      break;
+    }
+  }
+  return method(modelName, args);
+}
+
+async function create<S extends ModelSymbol>(modelName: S, data: unknown) {
+  return await (
+    prismaClient[modelName].create as (
+      args: object & { data: CreateArgs<S>["data"]; include: Include<S> }
+    ) => object
+  )({
+    data: data as CreateArgs<S>["data"],
+    include: getIncludes(modelName),
+  });
+}
+
+async function get<S extends ModelSymbol>(modelName: S, whereArgs: unknown) {
+  return await (
+    prismaClient[modelName].findUnique as (
+      args: object & { where: GetArgs<S>["where"]; include: Include<S> }
+    ) => object
+  )({
+    where: whereArgs as GetArgs<S>["where"],
+    include: getIncludes(modelName),
+  });
+}
+
+async function update<S extends ModelSymbol>(modelName: S, body: unknown) {
+  const { where, data } = body as { where: unknown; data: unknown };
+  if (where === undefined) {
+    throw new Error("Missing where clause cannot perform update!");
+  }
+  return await (
+    prismaClient[modelName].update as (
+      args: object & {
+        where: UpdateArgs<S>["where"];
+        data: UpdateArgs<S>["data"];
+        include: Include<S>;
+      }
+    ) => object
+  )({
+    where: where as UpdateArgs<S>["where"],
+    data: data as UpdateArgs<S>["data"],
+    include: getIncludes(modelName),
+  });
+}
+
+async function deleteMethod<S extends ModelSymbol>(
+  modelName: S,
+  whereArgs: unknown
+) {
+  return await (
+    prismaClient[modelName].delete as (
+      args: object & { where: DeleteArgs<S>["where"]; include: Include<S> }
+    ) => object
+  )({
+    where: whereArgs as DeleteArgs<S>["where"],
+    include: getIncludes(modelName),
+  });
+}
+
+async function list<S extends ModelSymbol>(modelName: S, body: unknown) {
+  const { where, include } = body as { where: unknown; include: unknown };
+  return await (
+    prismaClient[modelName].findMany as (
+      args: object & { where: ListArgs<S>["where"]; include: Include<S> }
+    ) => object
+  )({
+    where: where as ListArgs<S>["where"],
+    include: (include as Include<S> | undefined) ?? getIncludes(modelName),
+  });
 }
