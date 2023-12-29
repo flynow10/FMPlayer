@@ -5,9 +5,9 @@ import { Functions } from "@/src/types/functions";
 
 export class PlayableFunction {
   /*
-    Because playable functions are to be used in react
+    Because Playable Functions are to be used in react
     state hooks and react state hooks are immutable,
-    the Playable Function class is also immutable.
+    the Playable Function class should also be immutable.
 
     Any methods that update the function tree will return
     a new Playable Function object.
@@ -37,9 +37,9 @@ export class PlayableFunction {
   }
 
   public addStatements(statements: Functions.FunctionTree): PlayableFunction {
-    // Simple deep copy of the function tree
-    // Only works because there aren't any non-stringifiable types in a function tree
-    // Looking into using the structuredClone method
+    // Simple deep copy of the function tree.
+    // Only works because there aren't any non-stringifiable types in a function tree..
+    // Looking into using the structuredClone method.
     const clonedTree: Functions.FunctionTree = JSON.parse(
       JSON.stringify(this.functionTree)
     );
@@ -59,7 +59,7 @@ export class PlayableFunction {
     const parentNode = findParentActionDeep(clonedTree, previousActionId);
 
     // This makes sure that the new statements are added to the same
-    // block (loop, condition, etc...) as the previous action
+    // block (loop, condition, etc...) as the previous action.
 
     let parentList: Functions.FunctionTree;
     let previousActionIndex: number;
@@ -90,12 +90,13 @@ export class PlayableFunction {
     }
     let trackId: string | null = null;
     let nextState = currentState;
-    // If the currentState was the last state, capture it when returning the next state
+    // If the currentState was the last state, capture it when returning the next state.
     let didEnd = currentState.isEnd;
     while (trackId === null) {
       nextState = this.evaluateState(nextState);
       trackId = nextState.currentTrackId;
-      // trackId === null because we want to catch the end when switching to the next track
+      // trackId === null because we want to catch the end
+      // when switching to the next track.
       if (nextState.isEnd && trackId === null) {
         didEnd = true;
       }
@@ -145,6 +146,7 @@ export class PlayableFunction {
       "There is something wrong with the current state! Unable to find next song"
     );
   }
+
   private unexpectedActionError() {
     return new Error("Unexpected action type!");
   }
@@ -167,7 +169,7 @@ export class PlayableFunction {
     }
   }
 
-  // Entry to the AST walker
+  // Entry to the AST walker.
   // Contains the logic to return the next state
   // based on the current state.
   private evaluateState(
@@ -191,7 +193,7 @@ export class PlayableFunction {
       throw this.stateError();
     }
 
-    // Handle each type of statement (block level action)
+    // Handle each type of statement (block level action).
     switch (currentAction.type) {
       case "play": {
         nextState.currentTrackId = this.evaluatePlayAction(
@@ -279,7 +281,7 @@ export class PlayableFunction {
     return "next";
   }
 
-  // Walks the AST node for a number expression
+  // Walks the AST node for a number expression.
   private evaluateNumberExpression(
     expression: Functions.ActionState,
     state: Functions.RuntimeState
@@ -297,7 +299,7 @@ export class PlayableFunction {
     }
   }
 
-  // Walks the AST node for a binary arithmetic expression
+  // Walks the AST node for a binary arithmetic expression.
   private evaluateBinaryArith(
     expression: Functions.ActionState,
     state: Functions.RuntimeState
@@ -327,7 +329,7 @@ export class PlayableFunction {
     }
   }
 
-  // Walks the AST node for a number literal
+  // Walks the AST node for a number literal.
   private evaluateNumberLiteral(expression: Functions.ActionState): number {
     return (expression as Functions.NumberLiteral).data.value;
   }
@@ -343,8 +345,8 @@ export class PlayableFunction {
     );
   }
 
-  // Walks the AST node for a track expression
-  // Set up to include multiple types of track expressions in the future
+  // Walks the AST node for a track expression.
+  // Set up to include multiple types of track expressions in the future.
   private evaluateTrackExpression(
     expression: Functions.ActionState,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -356,7 +358,7 @@ export class PlayableFunction {
     throw this.unexpectedActionError();
   }
 
-  // Walks the AST node for a track literal
+  // Walks the AST node for a track literal.
   private evaluateTrackLiteral(expression: Functions.ActionState): string {
     return (expression as Functions.TrackLiteral).data.trackId;
   }
