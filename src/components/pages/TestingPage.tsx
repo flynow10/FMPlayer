@@ -32,19 +32,18 @@ export default function TestingPage() {
     Functions.RuntimeState | undefined
   >();
   const [currentTrack, setCurrentTrack] = useState("");
+  const [didEnd, setDidEnd] = useState(false);
+
   const nextTrack = () => {
-    const [newCurrentState] = playableFunction.getNextTrack(currentState);
+    const [newCurrentState, didEnd] =
+      playableFunction.getNextTrack(currentState);
+    setDidEnd(didEnd);
     setState(newCurrentState);
-  };
-  const sendNextState = () => {
-    // const newCurrentState = playableFunction.evaluateState(
-    //   currentState ?? playableFunction.createInitialState()
-    // );
-    // setState(newCurrentState);
   };
   const setLastTrack = () => {
     const { lastState } = playableFunction.getLastTrack();
     setState(lastState);
+    setDidEnd(false);
   };
 
   const setState = (state: Functions.RuntimeState) => {
@@ -79,14 +78,16 @@ export default function TestingPage() {
         <button className="border rounded-md p-2" onClick={setLastTrack}>
           Last Track
         </button>
-        <button className="border rounded-md p-2" onClick={sendNextState}>
-          Next State
-        </button>
         <span>Current Track ID: {currentTrack}</span>
         <hr />
         <div>
           <span>Current State:</span>
           <pre>{JSON.stringify(currentState, null, 2)}</pre>
+        </div>
+        <hr />
+        <div>
+          <span>Did End?</span>
+          <pre>{JSON.stringify(didEnd, null, 2)}</pre>
         </div>
       </div>
     </div>

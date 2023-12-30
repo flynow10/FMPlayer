@@ -1,7 +1,7 @@
-import { getApiDebugConfig } from "./config/api";
-import { getJwtSecretKey, USER_TOKEN } from "./api-lib/constants";
 import cookie from "cookie";
 import { jwtVerify } from "jose";
+import { getJwtSecretKey, USER_TOKEN } from "./api-lib/constants";
+import { getApiDebugConfig } from "./config/api";
 
 // Run middleware on all paths following /api/* except for the /api/tryAuth
 export const config = {
@@ -20,6 +20,7 @@ async function checkAccessToken(accessToken: string) {
   }
 }
 
+// eslint-disable-next-line import/no-default-export
 export default async function middleware(req: Request) {
   const debug = getApiDebugConfig();
   if (debug && !debug.useLogin) {
