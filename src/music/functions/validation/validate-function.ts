@@ -5,7 +5,7 @@ import { Functions } from "@/src/types/functions";
 export function validateFunction(
   functionTree: unknown
 ): functionTree is Functions.FunctionTree {
-  // Pre check
+  // Pre check (syntax analysis)
   if (!Array.isArray(functionTree)) {
     return false;
   }
@@ -14,8 +14,7 @@ export function validateFunction(
     return false;
   }
 
-  // Check for completeness
-
+  // Semantic analysis
   for (const action of functionTree) {
     if (!validateStatement(action, "actions")) {
       return false;
