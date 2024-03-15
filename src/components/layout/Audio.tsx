@@ -47,13 +47,16 @@ export default function Audio(props: AudioProps) {
       if (track.artists.length !== 0) {
         artists = track.artists;
       } else {
-        const album = await MusicLibrary.db.album.get({
-          id: track.listConnections.find(
-            (connection) => connection.trackList.album !== null
-          )?.trackList.album?.id,
-        });
-        if (album) {
-          artists = album.artists;
+        const albumId = track.listConnections.find(
+          (connection) => connection.trackList.album !== null
+        )?.trackList.album?.id;
+        if (albumId) {
+          const album = await MusicLibrary.db.album.get({
+            id: albumId,
+          });
+          if (album) {
+            artists = album.artists;
+          }
         }
       }
       if (window?.navigator?.mediaSession) {
