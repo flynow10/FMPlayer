@@ -14,6 +14,7 @@ type AudioPlayerEventType =
   | "previousTrack"
   | "restartedTrack"
   | "moveToTrack"
+  | "preSetupNewTrack"
   | "setupNewTrack"
   | "createAudioContext"
   | "changeRepeatMode"
@@ -91,6 +92,7 @@ export class AudioPlayer implements HookKeys {
     timeupdate: [],
     ended: [],
     setupNewTrack: [],
+    preSetupNewTrack: [],
     createAudioContext: [],
     changeRepeatMode: [],
     loadNewTrack: [],
@@ -279,6 +281,9 @@ export class AudioPlayer implements HookKeys {
       this.addEventListener("pause", () => {
         mediaSession.playbackState = "paused";
       });
+      this.addEventListener("preSetupNewTrack", () => {
+        mediaSession.playbackState = "none";
+      });
       this.addEventListener("timeupdate", () => {
         mediaSession.setPositionState({
           duration: this._currentAudioTag?.duration,
@@ -326,6 +331,8 @@ export class AudioPlayer implements HookKeys {
       throw new Error("Couldn't find next track to play!");
     }
 
+    this.callEvent("preSetupNewTrack");
+
     if (this._audioContext === null) {
       this._audioContext = new AudioContext();
       this.callEvent("createAudioContext");
@@ -345,8 +352,10 @@ export class AudioPlayer implements HookKeys {
         this._nextAudioTag.trackId === trackId
       ) {
         this._currentAudioTag = this._nextAudioTag;
+        this._currentAudioTag.isNext = false;
       } else {
-        this._currentAudioTag = new AudioTag(trackId, this._audioContext);
+        const newTag = new AudioTag(trackId, this._audioContext);
+        this._currentAudioTag = newTag;
       }
 
       this.connectEventListenersToAudioTag(this._currentAudioTag);
@@ -357,7 +366,9 @@ export class AudioPlayer implements HookKeys {
 
     const nextTrackId = this.getNextId();
     if (nextTrackId !== null) {
-      this._nextAudioTag = new AudioTag(nextTrackId, this._audioContext);
+      const newTag = new AudioTag(nextTrackId, this._audioContext);
+      newTag.isNext = true;
+      this._nextAudioTag = newTag;
     } else {
       this._nextAudioTag = null;
     }
@@ -391,10 +402,8 @@ export class AudioPlayer implements HookKeys {
   }
 
   private clearAudioTag(tag: AudioTag) {
-    tag.pause();
-    tag.removeAllEventListeners();
+    tag.kill();
     tag.mediaSourceNode.disconnect();
-    tag.remove();
   }
 
   private getPercentLoaded(tag: AudioTag) {
@@ -445,21 +454,30 @@ export class AudioPlayer implements HookKeys {
     }
   }
 
+  /**
+   * @returns Whether tag.play() was called or not
+   */
   public unpauseAudio(): boolean {
     if (this._currentAudioTag === null) {
       return false;
     }
+
     const isPaused = this._currentAudioTag.paused;
     if (isPaused) {
       this._currentAudioTag.play();
     }
+
     return isPaused;
   }
 
+  /**
+   * @returns Whether tag.pause() was called or not
+   */
   public pauseAudio(): boolean {
     if (this._currentAudioTag === null) {
       return false;
     }
+
     const isPlaying = !this._currentAudioTag.paused;
     if (isPlaying) {
       this._currentAudioTag.pause();

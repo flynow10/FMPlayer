@@ -10,6 +10,8 @@ export class AudioTag extends Audio {
   public trackId: string;
   public listeners: AudioTagListenerPair<keyof HTMLMediaElementEventMap>[] = [];
   public mediaSourceNode: MediaElementAudioSourceNode;
+  public isNext = false;
+  public isDead = false;
 
   public constructor(trackId: string, audioContext: AudioContext) {
     super();
@@ -22,7 +24,9 @@ export class AudioTag extends Audio {
 
   public async play(): Promise<void> {
     await this.setFileSrc();
-    await super.play();
+    if (!this.isDead) {
+      await super.play();
+    }
   }
 
   public async startLoad(): Promise<void> {
@@ -47,10 +51,16 @@ export class AudioTag extends Audio {
     listener: (this: HTMLAudioElement, ev: HTMLMediaElementEventMap[K]) => any,
     options?: boolean | AddEventListenerOptions | undefined
   ): void {
-    super.addEventListener(type, listener, options);
+    const wrappedListener: (ev: HTMLMediaElementEventMap[K]) => any = (
+      event
+    ) => {
+      // console.log(`${this.trackId}: ${event.type}`);
+      return listener.call(this, event);
+    };
+    super.addEventListener(type, wrappedListener, options);
     this.listeners.push({
       type,
-      listener: listener as (
+      listener: wrappedListener as (
         this: HTMLAudioElement,
         ev: HTMLMediaElementEventMap[keyof HTMLMediaElementEventMap]
       ) => any,
@@ -62,5 +72,13 @@ export class AudioTag extends Audio {
       this.removeEventListener(pair.type, pair.listener);
     });
     this.listeners = [];
+  }
+
+  public kill() {
+    this.removeAllEventListeners();
+    if (!this.paused) {
+      this.pause();
+    }
+    this.isDead = true;
   }
 }
