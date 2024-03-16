@@ -1,66 +1,12 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { RealtimeStatus } from "@/src/api/ably-client";
 import { useAsyncLoad } from "@/src/hooks/use-async-load";
 import { MusicLibrary } from "@/src/music/library/music-library";
 
 import { AblyMessage } from "fm-player-shared";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import { ToastProps } from "react-toastify/dist/types";
-
-export default function ToastManager() {
-  const handledFileIds = useRef<string[]>([]);
-
-  useEffect(() => {
-    const handleUploadStatus = (
-      message: AblyMessage.FileUpload.UploadStatus
-    ) => {
-      if (handledFileIds.current.includes(message.fileId)) {
-        return;
-      }
-
-      handledFileIds.current.push(message.fileId);
-      toast(<UploadToast status={message.status} trackId={message.fileId} />, {
-        toastId: message.fileId,
-        autoClose: false,
-        isLoading: true,
-        data: message.fileId,
-        type: "info",
-      });
-    };
-
-    const ablyUnsubscribe = RealtimeStatus.uploadStatusChannel.subscribe(
-      handleUploadStatus,
-      "status"
-    );
-
-    const toastUnsubscribe = toast.onChange((toast) => {
-      if (handledFileIds.current.includes(toast.data as string)) {
-        handledFileIds.current.splice(
-          handledFileIds.current.indexOf(toast.data as string),
-          1
-        );
-      }
-    });
-
-    return () => {
-      ablyUnsubscribe();
-      toastUnsubscribe();
-    };
-  }, []);
-
-  return (
-    <ToastContainer
-      className="dark:invert"
-      position="bottom-right"
-      closeOnClick
-      draggableDirection="x"
-      limit={10}
-      stacked
-      theme="colored"
-    />
-  );
-}
 
 const FileStatus = AblyMessage.FileUpload.FileStatus;
 
@@ -72,7 +18,7 @@ type UploadToastProps = {
 };
 
 // eslint-disable-next-line react/no-multi-comp
-function UploadToast(props: UploadToastProps) {
+export default function UploadToast(props: UploadToastProps) {
   const [trackName] = useAsyncLoad(
     async () => {
       return (
