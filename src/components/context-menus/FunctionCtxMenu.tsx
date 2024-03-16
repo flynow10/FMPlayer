@@ -1,6 +1,6 @@
 import { usePageContext } from "@/src/contexts/PageContext";
 import { useAudioPlayer } from "@/src/hooks/use-audio-player";
-import { useDatabase } from "@/src/hooks/use-database";
+import { DataState, useDatabase } from "@/src/hooks/use-database";
 import { ContextMenuPropType } from "@/src/hooks/use-media-context";
 import { MusicLibrary } from "@/src/music/library/music-library";
 
@@ -125,7 +125,7 @@ function FunctionTitle(args: HandlerParams<ContextMenuPropType<"function">>) {
     alert("This context menu was not set up correctly!");
     throw new Error("Unable to open function editor; missing function id!");
   }
-  const [functionData] = useDatabase(
+  const [functionData, state] = useDatabase(
     () => {
       return MusicLibrary.db.function.get({ id: functionId });
     },
@@ -133,8 +133,8 @@ function FunctionTitle(args: HandlerParams<ContextMenuPropType<"function">>) {
     "Function",
     [functionId]
   );
-  if (!functionData) {
-    return null;
+  if (!functionData || state === DataState.Stale) {
+    return "Loading...";
   }
   return functionData.title;
 }

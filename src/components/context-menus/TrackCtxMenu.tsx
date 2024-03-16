@@ -1,5 +1,5 @@
 import { useAudioPlayer } from "@/src/hooks/use-audio-player";
-import { useDatabase } from "@/src/hooks/use-database";
+import { DataState, useDatabase } from "@/src/hooks/use-database";
 import { ContextMenuPropType } from "@/src/hooks/use-media-context";
 import { MusicLibrary } from "@/src/music/library/music-library";
 
@@ -81,7 +81,7 @@ function TrackTitle(args: HandlerParams<ContextMenuPropType<"track">>) {
     alert("This context menu was not set up correctly!");
     throw new Error("Unable to add track to queue; missing track id!");
   }
-  const [track] = useDatabase(
+  const [track, state] = useDatabase(
     () => {
       return MusicLibrary.db.track.get({ id: trackId });
     },
@@ -89,8 +89,8 @@ function TrackTitle(args: HandlerParams<ContextMenuPropType<"track">>) {
     "Track",
     [trackId]
   );
-  if (!track) {
-    return null;
+  if (!track || state === DataState.Stale) {
+    return "Loading...";
   }
   return track.title;
 }

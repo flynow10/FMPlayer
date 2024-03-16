@@ -1,6 +1,6 @@
 import { usePageContext } from "@/src/contexts/PageContext";
 import { useAudioPlayer } from "@/src/hooks/use-audio-player";
-import { useDatabase } from "@/src/hooks/use-database";
+import { DataState, useDatabase } from "@/src/hooks/use-database";
 import { ContextMenuPropType } from "@/src/hooks/use-media-context";
 import { MusicLibrary } from "@/src/music/library/music-library";
 
@@ -145,7 +145,7 @@ function PlaylistTitle(args: HandlerParams<ContextMenuPropType<"playlist">>) {
     alert("This context menu was not set up correctly!");
     throw new Error("Unable to add playlist to queue; missing playlist id!");
   }
-  const [playlist] = useDatabase(
+  const [playlist, state] = useDatabase(
     () => {
       return MusicLibrary.db.playlist.get({ id: playlistId });
     },
@@ -153,8 +153,8 @@ function PlaylistTitle(args: HandlerParams<ContextMenuPropType<"playlist">>) {
     "Playlist",
     [playlistId]
   );
-  if (!playlist) {
-    return null;
+  if (!playlist || state === DataState.Stale) {
+    return "Loading...";
   }
   return playlist.title;
 }
