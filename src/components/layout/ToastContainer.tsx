@@ -29,29 +29,34 @@ export default function ToastManager() {
       });
     };
 
-    const unsubscribe = RealtimeStatus.uploadStatusChannel.subscribe(
+    const ablyUnsubscribe = RealtimeStatus.uploadStatusChannel.subscribe(
       handleUploadStatus,
       "status"
     );
 
-    toast.onChange((toast) => {
-      handledFileIds.current.splice(
-        handledFileIds.current.indexOf(toast.data as string),
-        1
-      );
+    const toastUnsubscribe = toast.onChange((toast) => {
+      if (handledFileIds.current.includes(toast.data as string)) {
+        handledFileIds.current.splice(
+          handledFileIds.current.indexOf(toast.data as string),
+          1
+        );
+      }
     });
+
     return () => {
-      unsubscribe();
+      ablyUnsubscribe();
+      toastUnsubscribe();
     };
   }, []);
 
   return (
     <ToastContainer
-      className="dark:invert overflow-hidden"
+      className="dark:invert"
       position="bottom-right"
-      draggable={true}
+      closeOnClick
       draggableDirection="x"
-      limit={5}
+      limit={10}
+      stacked
       theme="colored"
     />
   );
