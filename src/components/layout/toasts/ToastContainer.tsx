@@ -3,12 +3,15 @@ import { useEffect, useRef } from "react";
 import UploadToast from "@/src/components/layout/toasts/UploadToast";
 
 import { RealtimeStatus } from "@/src/api/ably-client";
+import { useAudioPlayer } from "@/src/hooks/use-audio-player";
+import { AudioPlayer } from "@/src/music/player/audio-player";
 
 import { AblyMessage } from "fm-player-shared";
 import { toast, ToastContainer } from "react-toastify";
 
 export default function ToastManager() {
   const handledFileIds = useRef<string[]>([]);
+  const player = useAudioPlayer();
 
   useEffect(() => {
     const handleUploadStatus = (
@@ -42,16 +45,29 @@ export default function ToastManager() {
       }
     });
 
+    const queueListener = (_: AudioPlayer, actionsAdded?: string | number) => {
+      if (typeof actionsAdded !== "number") {
+        return;
+      }
+
+      toast(`Added ${actionsAdded} actions to the queue!`, {
+        type: "success",
+      });
+    };
+
+    player.addEventListener("updateQueue", queueListener);
+
     return () => {
       ablyUnsubscribe();
       toastUnsubscribe();
+      player.removeEventListener("updateQueue", queueListener);
     };
-  }, []);
+  }, [player]);
 
   return (
     <ToastContainer
       className="dark:invert"
-      position="bottom-right"
+      position="top-right"
       closeOnClick
       draggableDirection="x"
       limit={10}

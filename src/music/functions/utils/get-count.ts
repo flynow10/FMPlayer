@@ -23,3 +23,13 @@ export function countChildren(action: Functions.ActionState) {
   }
   return count;
 }
+
+export function countActions(tree: Functions.FunctionTree) {
+  let count = 0;
+
+  for (const action of tree) {
+    count += countChildren(action) + 1;
+  }
+
+  return count;
+}

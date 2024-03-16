@@ -17,7 +17,6 @@ type UploadToastProps = {
   status: AblyMessage.FileUpload.FileStatus;
 };
 
-// eslint-disable-next-line react/no-multi-comp
 export default function UploadToast(props: UploadToastProps) {
   const [trackName] = useAsyncLoad(
     async () => {
