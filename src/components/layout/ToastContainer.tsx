@@ -24,6 +24,7 @@ export default function ToastManager() {
         toastId: message.fileId,
         autoClose: false,
         isLoading: true,
+        data: message.fileId,
         type: "info",
       });
     };
@@ -32,6 +33,13 @@ export default function ToastManager() {
       handleUploadStatus,
       "status"
     );
+
+    toast.onChange((toast) => {
+      handledFileIds.current.splice(
+        handledFileIds.current.indexOf(toast.data as string),
+        1
+      );
+    });
     return () => {
       unsubscribe();
     };
