@@ -5,7 +5,7 @@ import SortableAction from "@/src/components/functions/SortableAction";
 import { FunctionEditor } from "@/src/contexts/FunctionEditor";
 import { fadeOutAnimationConfig } from "@/src/music/functions/core/fade-out-animation";
 import { findActionDeep } from "@/src/music/functions/utils/find-action-deep";
-import { getChildCount } from "@/src/music/functions/utils/get-child-count";
+import { getChildCount } from "@/src/music/functions/utils/get-count";
 import { Functions } from "@/src/types/functions";
 
 import { DragOverlay } from "@dnd-kit/core";

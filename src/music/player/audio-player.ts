@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 import { playableFunctionFromTracks } from "@/src/music/functions/core/function-helper";
 import { PlayableFunction } from "@/src/music/functions/core/playable-function";
+import { countActions } from "@/src/music/functions/utils/get-count";
 import { validateFunction } from "@/src/music/functions/validation/validate-function";
 import { MusicLibrary } from "@/src/music/library/music-library";
 import { AudioTag } from "@/src/music/player/audio-tag";
@@ -28,7 +29,13 @@ type AudioTagEvents =
   | "canplaythrough"
   | "progress"
   | "ended";
-type AudioPlayerEventListener = (audioPlayer: AudioPlayer) => void;
+
+type AudioEventData = string | number;
+
+type AudioPlayerEventListener = (
+  audioPlayer: AudioPlayer,
+  data?: AudioEventData
+) => void;
 
 type KeyMap = {
   currentTime: number | null;
@@ -75,6 +82,7 @@ const createHook = <Key extends keyof KeyMap>(
     return state;
   };
 };
+
 export class AudioPlayer implements HookKeys {
   public readonly PREVIOUS_TRACK_RESTART_DELAY = 3;
 
@@ -168,6 +176,7 @@ export class AudioPlayer implements HookKeys {
   }
 
   public constructor() {
+    this.setupMediaSessionHooks();
     this.setupInternalListeners();
   }
 
@@ -243,7 +252,7 @@ export class AudioPlayer implements HookKeys {
     this.callEvent("changeRepeatMode");
   }
 
-  private setupInternalListeners() {
+  private setupMediaSessionHooks() {
     const mediaSession = window?.navigator?.mediaSession;
     if (mediaSession) {
       mediaSession.setActionHandler("play", () => {
@@ -292,6 +301,9 @@ export class AudioPlayer implements HookKeys {
         });
       });
     }
+  }
+
+  private setupInternalListeners() {
     this.addEventListener("ended", this.onAudioEnded.bind(this));
     this.addEventListener("canplaythrough", this.onAudioLoaded.bind(this));
     this.addEventListener("progress", this.onAudioLoadProgress.bind(this));
@@ -770,7 +782,7 @@ export class AudioPlayer implements HookKeys {
     this._currentFunctionState = this._trackQueue.getNextTrack(
       this._trackStateHistory[this._trackStateHistory.length - 1]
     )[0];
-    this.callEvent("updateQueue");
+    this.callEvent("updateQueue", countActions(newFunction.functionTree));
   }
 
   private async playFunction(newFunction: PlayableFunction): Promise<void> {
@@ -798,9 +810,9 @@ export class AudioPlayer implements HookKeys {
     );
   }
 
-  private callEvent(event: AudioPlayerEventType) {
+  private callEvent(event: AudioPlayerEventType, data?: AudioEventData) {
     this._eventListeners[event].forEach((listener) => {
-      listener(this);
+      listener(this, data);
     });
   }
 }

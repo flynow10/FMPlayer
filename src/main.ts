@@ -1,6 +1,6 @@
 import React, { createElement } from "react";
 
-import ToastManager from "@/src/components/layout/ToastContainer";
+import ToastManager from "@/src/components/layout/toasts/ToastContainer";
 
 import { Router } from "@/src/Router";
 

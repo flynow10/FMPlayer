@@ -1,53 +1,12 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { RealtimeStatus } from "@/src/api/ably-client";
 import { useAsyncLoad } from "@/src/hooks/use-async-load";
 import { MusicLibrary } from "@/src/music/library/music-library";
 
 import { AblyMessage } from "fm-player-shared";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import { ToastProps } from "react-toastify/dist/types";
-
-export default function ToastManager() {
-  const handledFileIds = useRef<string[]>([]);
-
-  useEffect(() => {
-    const handleUploadStatus = (
-      message: AblyMessage.FileUpload.UploadStatus
-    ) => {
-      if (handledFileIds.current.includes(message.fileId)) {
-        return;
-      }
-
-      handledFileIds.current.push(message.fileId);
-      toast(<UploadToast status={message.status} trackId={message.fileId} />, {
-        toastId: message.fileId,
-        autoClose: false,
-        isLoading: true,
-        type: "info",
-      });
-    };
-
-    const unsubscribe = RealtimeStatus.uploadStatusChannel.subscribe(
-      handleUploadStatus,
-      "status"
-    );
-    return () => {
-      unsubscribe();
-    };
-  }, []);
-
-  return (
-    <ToastContainer
-      className="dark:invert overflow-hidden"
-      position="bottom-right"
-      draggable={true}
-      draggableDirection="x"
-      limit={5}
-      theme="colored"
-    />
-  );
-}
 
 const FileStatus = AblyMessage.FileUpload.FileStatus;
 
@@ -58,8 +17,7 @@ type UploadToastProps = {
   status: AblyMessage.FileUpload.FileStatus;
 };
 
-// eslint-disable-next-line react/no-multi-comp
-function UploadToast(props: UploadToastProps) {
+export default function UploadToast(props: UploadToastProps) {
   const [trackName] = useAsyncLoad(
     async () => {
       return (
